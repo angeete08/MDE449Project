@@ -1,6 +1,6 @@
 # Stride — Personalized Fitness Trainer
 
-EECS 449 · Group 10 · Team CHARS. Team members: Beini Lan (Riva), Clarissa Man, Han Sun, Atharva Geete, and Sawda Mim.
+EECS 449 · Group 10 · Team CHARS. Team members: Riva Lan, Clarissa Man, Han Sun, Atharva Geete, and Sawda Mim.
 
 The five-feature MVP is a full-stack **Jac** web app. The UI, server planning rules, RPC functions, and tests are authored in Jac. Jac generates the browser JavaScript and transport code; CSS supplies the visual styling. No handwritten JavaScript application or separate Node server is required.
 
@@ -34,7 +34,7 @@ jac install
 jac run
 ```
 
-Open **http://localhost:8000**. Bare `jac run` reads the web-app entry point from `jac.toml`, compiles the client and server, and starts both with live reload. The API runs on port 8001. The first launch also provisions Jac's embedded PostgreSQL runtime; allow it to finish. Stop everything with **Ctrl+C**. No second terminal or separate frontend command is needed. If a port is occupied, stop the other app or use `jac run --port 8100` (API on 8101).
+Open **http://localhost:8000**. `jac run` reads the web-app entry point from `jac.toml`, compiles the client and server, and starts both with live reload. The API runs on port 8001. The first launch also provisions Jac's embedded PostgreSQL runtime; allow it to finish. Stop everything with **Ctrl+C**. No second terminal or separate frontend command is needed. If a port is occupied, stop the other app or use `jac run --port 8100` (API on 8101).
 
 `jac install` installs the declared project dependencies into `.jac/` and the generated client dependency tree. Generated files and dependency folders are ignored by Git. Run commands from the repository root, not its parent directory.
 
@@ -70,4 +70,4 @@ Validation on October 5: fresh-directory `jac install`, bare `jac run`, compiler
 
 Planning uses deterministic rules and curated meal examples, with Codex-assisted development. There is no live LLM, wearable/health integration, camera analysis, location search, account workflow, or cross-device synchronization. The app sends its saved planning state to the local Jac server for validation and feedback; it does not write fitness profiles into the server database. Jac's framework initializes its own runtime database.
 
-Next: teammate PR review and a short usability session, then agree on a grounded model feature and oversight rules. The earlier `chatgpt.site` demo is the previous JavaScript prototype; this Jac version is run from the repository. It requires a Jac server and cannot be replaced by uploading static files to that host.
+Next: teammate PR review and a short usability session, then agree on a grounded model feature and oversight rules. This Jac prototype can be run from the repository. It requires a Jac server and cannot be replaced by uploading static files to that host.
