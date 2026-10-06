@@ -1,2 +1,2 @@
 # MDE449Project
-## Team members: Beini Lan (Riva), Clarissa Man, Han Sun, [add your names here pls]
+## Team members: Riva Lan, Clarissa Man, Han Sun, Atharva Geete, and Sawda Mim
