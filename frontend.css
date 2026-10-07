@@ -1,9 +1,9 @@
-.exercise-name {
+.exercise-name, .meal-name {
   color: inherit;
   text-decoration-color: #b6c1b5;
   text-underline-offset: 3px;
 }
 
-.exercise-name:hover {
+.exercise-name:hover, .meal-name:hover {
   text-decoration-color: currentColor;
 }

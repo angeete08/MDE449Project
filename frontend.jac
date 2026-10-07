@@ -115,7 +115,7 @@ def:pub FitnessApp -> JsxElement {
                         }}
                     </div>
                     <section className="nutrition"><div className="section-label">03 / FUEL YOUR ROUTINE</div><h2>Simple meals. More possibilities.</h2><p>{"Approximate calories per serving. These ideas do not add up to your daily target." if len(state) > 0 else "Meal ideas will follow your diet preference."}</p><div className="meals">{if state { for (i, meal) in enumerate(state["meals"]) {
-                        <article key={meal["name"]} className="meal"><span className="meal-number">{"IDEA 0" + str(i + 1)}</span><h3>{meal["name"]}</h3><p>{meal["detail"]}</p><strong>{"≈ " + str(meal["calories"]) + " kcal"}</strong></article>
+                        <article key={meal["name"]} className="meal"><span className="meal-number">{"IDEA 0" + str(i + 1)}</span><h3><a className="meal-name" href={"https://www.youtube.com/results?search_query=" + encodeURIComponent(meal["name"] + " recipe video")} target="_blank" rel="noreferrer">{meal["name"]}</a></h3><p>{meal["detail"]}</p><strong>{"≈ " + str(meal["calories"]) + " kcal"}</strong></article>
                     } }}</div></section>
                 </section>
             </div>
