@@ -8,6 +8,7 @@ jac-version = "==0.37.21"
 
 [dependencies]
 [dependencies.npm]
+jspdf = "4.2.1"
 react = "^19.2.0"
 react-dom = "^19.2.0"
 react-router-dom = "^6.22.0"

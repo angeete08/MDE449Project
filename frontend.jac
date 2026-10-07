@@ -1,5 +1,6 @@
 """Jac components and browser interactions; no handwritten JavaScript."""
 import from planner { create_plan, submit_feedback, restore_plan }
+import from .pdf_export { download_plan_pdf }
 
 def:pub FitnessApp -> JsxElement {
     has goal: str = "active", experience: str = "beginner", days: str = "3",
@@ -56,6 +57,14 @@ def:pub FitnessApp -> JsxElement {
         finally { busy = False; }
     }
 
+    def downloadPdf -> None {
+        if busy or not state { return; }
+        try {
+            download_plan_pdf(state);
+            status = "Your PDF download has started.";
+        } except Exception { status = "Could not create the PDF. Please try again."; }
+    }
+
     def clearSaved -> None {
         if not window.confirm("Clear your saved profile, plan and workout feedback?") { return; }
         try { localStorage.removeItem("stride-jac-v1"); }
@@ -81,7 +90,7 @@ def:pub FitnessApp -> JsxElement {
                         <button type="submit" className="primary" disabled={busy}>{"Building your week…" if busy else "Create my week"}<span>↗</span></button><p className="hint">Creating a plan starts a fresh week and clears workout feedback.</p>
                     </form>
                 </aside>
-                <section className="workspace"><div className="section-label">02 / THE PLAN</div><div className="section-top"><h2>A week you can work with</h2>{if state { <a className="quiet" href={"data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, None, 2))} download="stride-jac-week.json">Download plan ↓</a> } else { <button className="quiet" disabled={True}>Download plan ↓</button> }}</div>
+                <section className="workspace"><div className="section-label">02 / THE PLAN</div><div className="section-top"><h2>A week you can work with</h2><button className="quiet" onClick={downloadPdf} disabled={busy or not bool(state)}>Download PDF ↓</button></div>
                     <div className="summary">
                         {if state {
                             <span><strong>{state["profile"]["days"]}</strong>{" workout days"}</span>
