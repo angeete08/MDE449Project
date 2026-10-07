@@ -7,3 +7,15 @@
 .exercise-name:hover, .meal-name:hover {
   text-decoration-color: currentColor;
 }
+
+.meal-video {
+  display: block;
+  margin: 1rem 0;
+}
+
+.meal-video img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}

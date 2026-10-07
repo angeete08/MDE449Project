@@ -58,6 +58,27 @@ def meal_ideas(diet: str) -> list[dict[str, any]] {
     return [{"name": name, "calories": calories, "detail": detail} for (name, calories, detail) in menus[diet]];
 }
 
+def:pub meal_video(meal: str, detail: str) -> dict[str, any] {
+    videos = {
+        "Greek yogurt oat bowl": ("qvOmDXgfyio", "Greek Yogurt Bowls! 3 Delicious Greek Yogurt Bowl Recipe Ideas!", "72,529 views"),
+        "Chickpea quinoa salad": ("uQ-G9Hb-H8s", "Quinoa and Chickpea salad Recipe | High Protein Vegetarian and Vegan Meal Ideas", "54,190 views"),
+        "Tofu vegetable stir-fry": ("Cr4kg0jzdG4", "Sweet and sour Tofu recipe | Chilly Tofu recipe | Tofu With Stir Fry vegetable | Tofu recipe", "3,514,820 views"),
+        "Spinach and egg skillet": ("BWmNcg8npqQ", "Spinach and Mushroom Egg Skillet | Quick & Easy ONE-PAN Recipe", "26,796 views"),
+        "Chicken avocado salad": ("rzlqkJf0Wus", "Perfect CHICKEN MANGO and AVOCADO SALAD + Easy Dressing", "3,356,394 views"),
+        "Salmon with broccoli": ("PdqgZz5qnJc", "How to Make One-Pan Roasted Salmon with Broccoli and Red Potatoes", "72,353 views"),
+        "Cottage cheese berry bowl": ("ta9lWW1BOiA", "My VIRAL Cottage Cheese Bowl That Blew Up The Internet", "1,150,315 views"),
+        "Chicken rice bowl": ("f9ekckWZJ6k", "Mediterranean Chicken & Rice Bowl Recipe by Food Fusion", "405,910 views"),
+        "Turkey lentil chili": ("z5Z2SYbMQ7E", "Turkey Lentil Chili in the Slow Cooker | Fall Recipe", "6,493 views"),
+        "Peanut butter overnight oats": ("YIS9Y1xqGdQ", "Peanut Butter Overnight Oats | Minimalist Baker Recipes", "354,355 views"),
+        "Chicken grain bowl": ("yiqjzJA_VKo", "Southwest Chicken Grain Bowl", "33,356 views"),
+        "Bean and vegetable tacos": ("JlrVEPbLc_A", "Vegetarian Crunchy Black Bean Tacos", "109,551 views")
+    };
+    video = videos.get(meal);
+    if not video { return {"url": "https://www.youtube.com/results?search_query=" + meal, "thumbnail": "", "fallback": "", "title": meal, "views": ""}; }
+    video_id = video[0];
+    return {"url": "https://www.youtube.com/watch?v=" + video_id, "thumbnail": "https://i.ytimg.com/vi/" + video_id + "/maxresdefault.jpg", "fallback": "https://i.ytimg.com/vi/" + video_id + "/hqdefault.jpg", "title": video[1], "views": video[2]};
+}
+
 def make_state(p: dict[str, any]) -> dict[str, any] {
     clean = validate_profile(p);
     return {"profile": clean, "offset": 0, "feedback": {}, "plan": generate_week(clean), "meals": meal_ideas(clean["diet"])};
