@@ -100,7 +100,7 @@ def:pub FitnessApp -> JsxElement {
                                     {if not day["rest"] {
                                         <p>Start with 5 minutes of gentle movement.</p>
                                         for exercise in day["exercises"] {
-                                            <div key={exercise["name"]} className="exercise"><span>{exercise["name"]}</span><span>{str(exercise["duration"]) + " min" if exercise["duration"] else str(exercise["sets"]) + " × " + str(exercise["reps"])}</span></div>
+                                            <div key={exercise["name"]} className="exercise"><a className="exercise-name" href={"https://www.youtube.com/results?search_query=" + encodeURIComponent(exercise["name"] + " exercise tutorial")} target="_blank" rel="noreferrer">{exercise["name"]}</a><span>{str(exercise["duration"]) + " min" if exercise["duration"] else str(exercise["sets"]) + " × " + str(exercise["reps"])}</span></div>
                                         }
                                     }}
                                     <p>{day["note"]}</p>
