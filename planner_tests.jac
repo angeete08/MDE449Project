@@ -1,5 +1,5 @@
 import copy;
-import from planner { make_state, generate_week, create_plan, update_feedback, restore_plan }
+import from planner { make_state, generate_week, create_plan, update_feedback, restore_plan, meal_ideas }
 
 def profile(goal: str = "muscle", days: int = 3, equipment: str = "bodyweight", diet: str = "vegetarian", experience: str = "beginner") -> dict[str, any] {
     return {"goal": goal, "days": days, "equipment": equipment, "diet": diet, "experience": experience, "calories": 2000};
@@ -80,4 +80,16 @@ test "saved plan round trip" {
     restored = restore_plan(state);
     assert restored["ok"];
     assert restored["state"] == state;
+}
+
+test "meal ideas adapt to calories and randomize" {
+    lighter = meal_ideas("protein", 1200);
+    higher = meal_ideas("protein", 3000);
+    assert len(lighter) == 3;
+    assert len(higher) == 3;
+    assert max([meal["calories"] for meal in lighter]) <= 470;
+    assert min([meal["calories"] for meal in higher]) >= 480;
+    first = meal_ideas("vegetarian", 2000);
+    second = meal_ideas("vegetarian", 2000);
+    assert first != second;
 }
