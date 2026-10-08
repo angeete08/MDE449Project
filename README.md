@@ -38,6 +38,30 @@ Open **http://localhost:8000**. `jac run` reads the web-app entry point from `ja
 
 `jac install` installs the declared project dependencies into `.jac/` and the generated client dependency tree. Generated files and dependency folders are ignored by Git. Run commands from the repository root, not its parent directory.
 
+### Troubleshooting
+
+If `jac install` reports `ensurepip is not available`, or `jac run` reports `missing frontend packages` such as `vite` or `jspdf`, install the frontend dependencies manually.
+
+These steps require Node.js and npm. Stop the running app with Ctrl+C, then run the following from the project root:
+
+```sh
+cp .jac/client/configs/package.json .jac/client/package.json
+npm install --prefix .jac/client --include=dev
+npm install --prefix .jac/client jspdf@4.2.1 --save --include=dev
+```
+
+Confirm that both packages are installed:
+
+```sh
+npm ls --prefix .jac/client jspdf vite
+```
+
+If both appear, start the app again:
+
+```sh
+jac run
+```
+
 ## Features
 
 | Feature                  | MVP behavior                                                                                                                                                                                                                                |
