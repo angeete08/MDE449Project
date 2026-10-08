@@ -1,0 +1,8 @@
+.jac/
+node_modules/
+.vscode/
+.idea/
+dist/
+.openai/
+*.log
+.DS_Store

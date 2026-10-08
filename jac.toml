@@ -1,0 +1,34 @@
+[project]
+name = "stride-fitness"
+version = "0.2.0"
+description = "Group 10 fitness prototype written in Jac"
+entry-point = "main"
+kind = "web-app"
+jac-version = "==0.37.21"
+
+[dependencies]
+[dependencies.npm]
+jspdf = "4.2.1"
+react = "^19.2.0"
+react-dom = "^19.2.0"
+react-router-dom = "^6.22.0"
+react-error-boundary = "^5.0.0"
+"@tanstack/react-form" = "^1.33.0"
+zod = "^4.3.6"
+
+[dependencies.npm.dev]
+vite = "^6.4.1"
+"@vitejs/plugin-react" = "^4.7.0"
+typescript = "^5.3.3"
+"@types/react" = "^19.2.0"
+"@types/react-dom" = "^19.2.0"
+
+[client]
+
+[serve]
+host = "127.0.0.1"
+port = 8000
+
+[test]
+directory = "."
+filter = "planner_tests.jac"
