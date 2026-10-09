@@ -1,13 +1,16 @@
 """Jac components and browser interactions; no handwritten JavaScript."""
 import from planner { create_plan, submit_feedback, restore_plan }
 import from .pdf_export { download_plan_pdf }
+import from .onboarding { DataSetup, clean_data_prefs, describe_data_prefs }
 
 def:pub FitnessApp -> JsxElement {
     has goal: str = "active", experience: str = "beginner", days: str = "3",
         equipment: str = "bodyweight", diet: str = "none", calories: str = "2000",
-        state: dict[str, any] = {}, status: str = "", busy: bool = False;
+        state: dict[str, any] = {}, status: str = "", busy: bool = False,
+        dataPrefs: dict[str, any] = {}, setupOpen: bool = False;
 
     def remember(value: dict[str, any]) -> None {
+        if not dataPrefs or not dataPrefs["store"] { return; }
         try { localStorage.setItem("stride-jac-v1", JSON.stringify(value)); }
         except Exception { status = "Plan is ready, but this browser could not save it. Download a copy to keep it."; }
     }
@@ -31,7 +34,26 @@ def:pub FitnessApp -> JsxElement {
             }
         } except Exception { status = "Saved plan could not be loaded. Create a new week, or try again after the server is available."; }
     }
-    can with entry { loadSaved(); }
+    def openSetup -> None {
+        try { dataPrefs = clean_data_prefs(JSON.parse(localStorage.getItem("stride-data-prefs-v1") or "null")); }
+        except Exception { dataPrefs = {}; }
+        if dataPrefs and dataPrefs["store"] { loadSaved(); } else { setupOpen = True; }
+    }
+    can with entry { openSetup(); }
+
+    def finishSetup(prefs: dict[str, any]) -> None {
+        dataPrefs = prefs;
+        setupOpen = False;
+        try {
+            if prefs["store"] {
+                localStorage.setItem("stride-data-prefs-v1", JSON.stringify(prefs));
+                if state { remember(state); } else { loadSaved(); }
+            } else {
+                localStorage.removeItem("stride-data-prefs-v1");
+                localStorage.removeItem("stride-jac-v1");
+            }
+        } except Exception { status = "This browser could not update saved data."; }
+    }
 
     async def generate(e: FormEvent) -> None {
         e.preventDefault();
@@ -41,7 +63,11 @@ def:pub FitnessApp -> JsxElement {
             profile = {"goal": goal, "experience": experience, "days": Number(days), "equipment": equipment, "diet": diet, "calories": Number(calories)};
             result = await create_plan(profile);
             status = result["message"];
-            if result["ok"] { state = result["state"]; remember(result["state"]); }
+            if result["ok"] {
+                state = result["state"];
+                remember(result["state"]);
+                if not dataPrefs["store"] { status = status + " It is not stored, so it will be gone after a refresh."; }
+            }
         } except Exception { status = "Could not reach the Jac server. Your current plan is unchanged; please try again."; }
         finally { busy = False; }
     }
@@ -66,20 +92,24 @@ def:pub FitnessApp -> JsxElement {
     }
 
     def clearSaved -> None {
-        if not window.confirm("Clear your saved profile, plan and workout feedback?") { return; }
-        try { localStorage.removeItem("stride-jac-v1"); }
+        if not window.confirm("Clear your saved profile, plan, workout feedback and data choices?") { return; }
+        try { localStorage.removeItem("stride-jac-v1"); localStorage.removeItem("stride-data-prefs-v1"); }
         except Exception { status = "This browser could not clear saved data."; return; }
         state = {};
+        dataPrefs = {};
         status = "Saved data cleared. Create a fresh week when you are ready.";
+        setupOpen = True;
     }
 
 
     <div>
-        <header><a className="brand" href="#">◈ <strong>stride</strong></a><span>GROUP 10 <b> / </b> JAC PROTOTYPE</span><button className="quiet" onClick={clearSaved} disabled={busy}>Clear saved data</button></header>
+        <header><a className="brand" href="#">◈ <strong>stride</strong></a><span>GROUP 10 <b> / </b> JAC PROTOTYPE</span><div className="header-actions"><button className="quiet" onClick={lambda { setupOpen = True; }} disabled={busy}>Data settings</button><button className="quiet" onClick={clearSaved} disabled={busy}>Clear saved data</button></div></header>
+        {setupOpen and <DataSetup initial={dataPrefs} onFinish={finishSetup}/>}
         <main>
             <section className="intro"><div><p className="eyebrow">A LITTLE STRUCTURE. A LOT OF MOMENTUM.</p><h1>Your week.<br/>Your pace.</h1><p className="lead">Build a routine around your goals, your equipment,<br className="desktop"/> and the life you actually have.</p></div><div className="hero-art" aria-hidden="true"><div className="orbit"/><div className="orb"/><span>MAKE ROOM<br/>FOR MOVEMENT ↗</span></div></section>
             <div className="layout">
                 <aside className="panel"><div className="section-label">01 / YOUR STARTING POINT</div><h2>Make it yours</h2>
+                    {bool(dataPrefs) and <p className="data-source">{describe_data_prefs(dataPrefs)}</p>}
                     <form onSubmit={generate}>
                         <label>Fitness goal<select value={goal} onChange={lambda (e: ChangeEvent) { goal = e.target.value; }}><option value="active">Stay active</option><option value="muscle">Gain muscle</option><option value="lose">Lose weight</option></select></label>
                         <label>Experience<select value={experience} onChange={lambda (e: ChangeEvent) { experience = e.target.value; }}><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></label>
@@ -128,7 +158,7 @@ def:pub FitnessApp -> JsxElement {
                     } }}</div></section>
                 </section>
             </div>
-            <footer><p>Jac server and UI · Demo planning rules · Saved on this browser</p><p>Workout examples and approximate meal calories are for demonstration. Meal ideas are not a complete daily menu. Pause exercise if it causes pain.</p></footer>
+            <footer><p>Jac server and UI · Demo planning rules · {"Saved on this browser" if bool(dataPrefs) and dataPrefs["store"] else "Not stored"}</p><p>Workout examples and approximate meal calories are for demonstration. Meal ideas are not a complete daily menu. Pause exercise if it causes pain.</p></footer>
         </main>
     </div>
 }

@@ -72,12 +72,15 @@ jac run
 | Meal suggestions         | Three curated diet-matching ideas with example portions and approximate calories. They are not a complete daily menu.                                                                                                                       |
 | Workout feedback         | One rating per workout: too easy, just right, or too hard. Easy/hard changes future unlogged strength repetitions by one or cardio duration by two minutes. Current, past, and already logged workouts stay fixed; adjustments are bounded. |
 
-The browser saves the profile, week and feedback in `localStorage` (`stride-jac-v1`). Refresh restores a server-validated copy. Download exports JSON; Clear saved data removes it. Creating a new week resets feedback. Storage is specific to this browser and origin.
+On first visit, a setup dialog asks how data should be entered (manually or from connected apps) and whether Stride may store data on this browser. If the user chooses connected apps, it then offers Apple Health or Android Health Connect, followed by other apps such as Oura, Fitbit, Garmin Connect, WHOOP and Strava. These connections are a labeled preview: choices are recorded, but no health data is read and the form is still filled in manually. **Data settings** reopens the dialog.
+
+If storage is allowed, the browser saves the profile, week and feedback in `localStorage` (`stride-jac-v1`) and the data choices in `stride-data-prefs-v1`. If it is declined, nothing is saved, any earlier saved plan is removed, and the dialog appears again on the next visit. Refresh restores a server-validated copy. Download exports JSON; Clear saved data removes it. Creating a new week resets feedback. Storage is specific to this browser and origin.
 
 ## Source and validation
 
 - `main.jac`: web-app entry point and imports.
 - `frontend.jac`: reactive form, weekly cards, meals, feedback, saving and download.
+- `onboarding.jac`: first-visit data setup dialog (data source, storage consent, app connection preview).
 - `planner.jac`: validation and deterministic planning; public `create_plan`, `submit_feedback`, and `restore_plan` functions become Jac RPC endpoints.
 - `planner_tests.jac`: five Jac test blocks, including all 648 profile combinations, feedback direction/bounds, completed-workout preservation, invalid input rejection and saved-state restoration.
 - `global.css`: responsive visual styling.
