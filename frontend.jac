@@ -6,7 +6,7 @@ import from .onboarding { DataSetup, clean_data_prefs, describe_data_prefs }
 def:pub FitnessApp -> JsxElement {
     has goal: str = "active", experience: str = "beginner", days: str = "3",
         equipment: str = "bodyweight", diet: str = "none", calories: str = "2000",
-    state: dict[str, any] = {}, mealVideos: dict[str, any] = {}, status: str = "", busy: bool = True,
+    state: dict[str, any] = {}, mealVideos: dict[str, any] = {}, status: str = "", busy: bool = False,
     dataPrefs: dict[str, any] = {}, setupOpen: bool = False,
     historyIndex: int = -1, startDate: str = "", loadFailed: bool = False, saveWarning: str = "";
 
