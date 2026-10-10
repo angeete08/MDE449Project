@@ -62,7 +62,7 @@ test "invalid inputs are rejected" {
 test "feedback bounds and duplicate logs" {
     state = make_state(profile(days=6));
     for i in range(5) { state = update_feedback(state, i, "easy"); }
-    assert state["offset"] == 4;
+    assert state["offsets"]["strength"] == 4;
     rejected = False;
     try { update_feedback(state, 0, "hard"); }
     except ValueError { rejected = True; }
@@ -72,7 +72,7 @@ test "feedback bounds and duplicate logs" {
         assert s["plan"][2]["exercises"][0]["reps"] == {"easy": 11, "right": 10, "hard": 9}[rating];
     }
     s = update_feedback(make_state(profile(goal="active")), 0, "hard");
-    assert s["plan"][2]["exercises"][0]["duration"] == 18;
+    assert s["plan"][2]["exercises"][0]["duration"] == 20;
 }
 
 test "saved plan round trip" {
@@ -92,4 +92,95 @@ test "meal ideas adapt to calories and randomize" {
     first = meal_ideas("vegetarian", 2000);
     second = meal_ideas("vegetarian", 2000);
     assert first != second;
+}
+
+test "new week archives exact history and inherits without replay" {
+    first = create_plan(profile(), start_date="2026-10-07")["state"];
+    assert first["start_date"] == "2026-10-05";
+    first = update_feedback(first, 0, "hard");
+    first = update_feedback(first, 2, "hard");
+    before = copy.deepcopy(first);
+    second = create_plan(profile(), first)["state"];
+    assert first == before;
+    assert second["start_date"] == "2026-10-12";
+    assert second["plan"][6]["date"] == "2026-10-18";
+    assert second["week_id"] != first["week_id"];
+    assert second["offsets"] == {"strength": -2, "cardio": 0};
+    assert second["plan"][0]["exercises"][0]["reps"] == 8;
+    assert second["feedback"] == {};
+    assert second["history"][0]["plan"] == first["plan"];
+    assert second["history"][0]["feedback"] == first["feedback"];
+    assert "history" not in second["history"][0];
+    assert "8 reps" in second["memory_note"];
+    third = create_plan(profile(), second)["state"];
+    assert third["offsets"] == second["offsets"];
+    assert len(third["history"]) == 2;
+    assert restore_plan(third)["state"] == third;
+}
+
+test "strength and cardio feedback are independent" {
+    state = create_plan(profile(goal="active", days=6), start_date="2026-10-05")["state"];
+    state = update_feedback(state, 1, "hard");
+    assert state["offsets"] == {"strength": 0, "cardio": -1};
+    assert state["plan"][2]["exercises"][0]["reps"] == 10;
+    assert state["plan"][4]["exercises"][0]["duration"] == 18;
+    state = update_feedback(state, 2, "easy");
+    assert state["offsets"] == {"strength": 1, "cardio": -1};
+    assert state["plan"][4]["exercises"][0]["duration"] == 18;
+    next_state = create_plan(profile(goal="active", days=6), state)["state"];
+    assert next_state["plan"][0]["exercises"][0]["reps"] == 11;
+    assert next_state["plan"][1]["exercises"][0]["duration"] == 18;
+    assert next_state["plan"][1]["exercises"][1]["duration"] == 5;
+}
+
+test "just right never changes workouts even with out of order logs" {
+    state = create_plan(profile(days=6))["state"];
+    state = update_feedback(state, 4, "hard");
+    old_plan = copy.deepcopy(state["plan"]);
+    state = update_feedback(state, 0, "right");
+    assert state["plan"] == old_plan;
+}
+
+test "last workout feedback carries into next week and archive is immutable" {
+    state = create_plan(profile(days=1), start_date="2026-12-28")["state"];
+    state = update_feedback(state, 0, "hard");
+    assert state["plan"][0]["exercises"][0]["reps"] == 10;
+    next_state = create_plan(profile(days=1), state)["state"];
+    assert next_state["start_date"] == "2027-01-04";
+    assert next_state["plan"][0]["exercises"][0]["reps"] == 9;
+    archive = copy.deepcopy(next_state["history"]);
+    next_state = update_feedback(next_state, 0, "easy");
+    assert next_state["history"] == archive;
+}
+
+test "legacy browser data migrates without losing logged workouts" {
+    p = profile(goal="active");
+    legacy = {"profile": p, "offset": -1, "feedback": {"0": "hard"}, "plan": generate_week(p, -1, -1), "meals": []};
+    legacy["plan"][0]["exercises"][0]["reps"] = 10;
+    result = restore_plan(legacy, "2026-10-07");
+    assert result["ok"];
+    state = result["state"];
+    assert state["legacy_dates"];
+    assert state["start_date"] == "2026-10-05";
+    assert state["feedback"] == legacy["feedback"];
+    assert state["plan"][0]["exercises"][0]["reps"] == 10;
+    assert state["offsets"] == {"strength": -1, "cardio": -1};
+    assert restore_plan(state)["state"] == state;
+}
+
+test "malformed history and dates do not silently overwrite data" {
+    first = create_plan(profile(), start_date="2026-10-05")["state"];
+    second = create_plan(profile(), first)["state"];
+    bad = copy.deepcopy(second);
+    bad["history"].append(copy.deepcopy(bad["history"][0]));
+    assert not restore_plan(bad)["ok"];
+    assert not create_plan(profile(), bad)["ok"];
+    bad = copy.deepcopy(second);
+    bad["offsets"]["strength"] = True;
+    assert not restore_plan(bad)["ok"];
+    assert not create_plan(profile(), start_date="invalid")["ok"];
+    bad = copy.deepcopy(second);
+    bad["history"][0]["plan"][0]["exercises"][0]["reps"] = 999;
+    assert not restore_plan(bad)["ok"];
+    assert second["history"][0]["plan"] == first["plan"];
 }
