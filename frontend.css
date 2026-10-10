@@ -1,0 +1,25 @@
+.exercise-name, .meal-name {
+  color: inherit;
+  text-decoration-color: #b6c1b5;
+  text-underline-offset: 3px;
+}
+
+.exercise-name:hover, .meal-name:hover {
+  text-decoration-color: currentColor;
+}
+
+.meal-video {
+  display: block;
+  margin: 1rem 0;
+  width: 100%;
+  max-width: 220px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.meal-video img {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+}
