@@ -10,7 +10,7 @@ jac install
 jac run
 ```
 
-The calculator uses port 8300. For browser verification, use `jac run --dev --port 8300 --api-port 8301`; these explicit ports fail if occupied. Runtime files live in this folder's `.jac/`. Never use `--takeover` to stop another app, or a broad `pkill` command.
+The calculator uses port 8000. For browser verification, use `jac run --dev --port 8000 --api-port 8001`; these explicit ports fail if occupied. Runtime files live in this folder's `.jac/`. Never use `--takeover` to stop another app, or a broad `pkill` command.
 
 Verify from this folder:
 
