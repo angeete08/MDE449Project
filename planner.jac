@@ -15,7 +15,15 @@ def validate_profile(p: dict[str, any]) -> dict[str, any] {
             raise ValueError("Enter a whole-number " + key + " value between " + str(low) + " and " + str(high) + ".");
         }
     }
-    return {key: p[key] for key in ["goal", "experience", "equipment", "diet", "days", "calories"]};
+    clean = {key: p[key] for key in ["goal", "experience", "equipment", "diet", "days", "calories"]};
+    for (key, low, high) in [("avg_daily_steps", 0, 100000), ("avg_heart_rate", 20, 250), ("avg_sleep_hours", 0, 24), ("avg_workouts_per_week", 0, 50)] {
+        value = p.get(key);
+        if value is not None and (not isinstance(value, (int, float)) or isinstance(value, bool) or value < low or value > high or value != value) {
+            raise ValueError("Enter a valid value for " + key + ".");
+        }
+        clean[key] = value;
+    }
+    return clean;
 }
 
 def generate_week(p: dict[str, any], strength_offset: int = 0, cardio_offset: int = 0) -> list[dict[str, any]] {

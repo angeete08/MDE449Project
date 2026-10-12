@@ -6,6 +6,7 @@ import from .onboarding { DataSetup, clean_data_prefs, describe_data_prefs }
 def:pub FitnessApp -> JsxElement {
     has goal: str = "active", experience: str = "beginner", days: str = "3",
         equipment: str = "bodyweight", diet: str = "none", calories: str = "2000",
+        avgSteps: str = "", avgHeartRate: str = "", avgSleep: str = "", avgWorkouts: str = "",
     state: dict[str, any] = {}, mealVideos: dict[str, any] = {}, status: str = "", busy: bool = False,
     dataPrefs: dict[str, any] = {}, setupOpen: bool = False,
     historyIndex: int = -1, startDate: str = "", loadFailed: bool = False, saveWarning: str = "";
@@ -53,6 +54,10 @@ def:pub FitnessApp -> JsxElement {
                     equipment = restored["profile"]["equipment"];
                     diet = restored["profile"]["diet"];
                     calories = str(restored["profile"]["calories"]);
+                    avgSteps = str(restored["profile"]["avg_daily_steps"]) if restored["profile"]["avg_daily_steps"] is not None else "";
+                    avgHeartRate = str(restored["profile"]["avg_heart_rate"]) if restored["profile"]["avg_heart_rate"] is not None else "";
+                    avgSleep = str(restored["profile"]["avg_sleep_hours"]) if restored["profile"]["avg_sleep_hours"] is not None else "";
+                    avgWorkouts = str(restored["profile"]["avg_workouts_per_week"]) if restored["profile"]["avg_workouts_per_week"] is not None else "";
                     await loadMealVideos(restored["meals"]);
                 } else { loadFailed = True; }
             }
@@ -60,6 +65,7 @@ def:pub FitnessApp -> JsxElement {
         finally { busy = False; }
     }
     def openSetup -> None {
+        startDate = localMonday();
         try { dataPrefs = clean_data_prefs(JSON.parse(localStorage.getItem("stride-data-prefs-v1") or "null")); }
         except Exception { dataPrefs = {}; }
         if dataPrefs and dataPrefs["store"] { loadSaved(); } else { setupOpen = True; }
@@ -69,6 +75,7 @@ def:pub FitnessApp -> JsxElement {
     def finishSetup(prefs: dict[str, any]) -> None {
         dataPrefs = prefs;
         setupOpen = False;
+        if prefs["source"] == "manual" { window.location.hash = "weekly-averages"; }
         try {
             if prefs["store"] {
                 localStorage.setItem("stride-data-prefs-v1", JSON.stringify(prefs));
@@ -86,7 +93,11 @@ def:pub FitnessApp -> JsxElement {
         if state and not window.confirm("Archive the current week and create the following week? Archived workouts remain viewable but cannot be rated again.") { return; }
         busy = True;
         try {
-            profile = {"goal": goal, "experience": experience, "days": Number(days), "equipment": equipment, "diet": diet, "calories": Number(calories)};
+            profile = {"goal": goal, "experience": experience, "days": Number(days), "equipment": equipment, "diet": diet, "calories": Number(calories),
+                "avg_daily_steps": Number(avgSteps) if avgSteps != "" else None,
+                "avg_heart_rate": Number(avgHeartRate) if avgHeartRate != "" else None,
+                "avg_sleep_hours": Number(avgSleep) if avgSleep != "" else None,
+                "avg_workouts_per_week": Number(avgWorkouts) if avgWorkouts != "" else None};
             result = await create_plan(profile, state, startDate);
             status = result["message"];
             if result["ok"] {
@@ -144,6 +155,13 @@ def:pub FitnessApp -> JsxElement {
                 <aside className="panel"><div className="section-label">01 / YOUR STARTING POINT</div><h2>Make it yours</h2>
                     {bool(dataPrefs) and <p className="data-source">{describe_data_prefs(dataPrefs)}</p>}
                     <form onSubmit={generate}>
+                        <h3 id="weekly-averages">Weekly averages <span className="optional">optional</span></h3>
+                        <p className="hint">Enter only the values available from your app.</p>
+                        <label>Average daily steps<input type="number" min="0" max="100000" step="1" required={False} value={avgSteps} onChange={lambda (e: ChangeEvent) { avgSteps = e.target.value; }}/></label>
+                        <label>Average heart rate <span className="optional">bpm</span><input type="number" min="20" max="250" step="0.1" required={False} value={avgHeartRate} onChange={lambda (e: ChangeEvent) { avgHeartRate = e.target.value; }}/></label>
+                        <label>Average sleep per night <span className="optional">hours</span><input type="number" min="0" max="24" step="0.1" required={False} value={avgSleep} onChange={lambda (e: ChangeEvent) { avgSleep = e.target.value; }}/></label>
+                        <label>Average workouts per week<input type="number" min="0" max="50" step="0.1" required={False} value={avgWorkouts} onChange={lambda (e: ChangeEvent) { avgWorkouts = e.target.value; }}/></label>
+                        <h3>Plan preferences</h3>
                         <label>Fitness goal<select value={goal} onChange={lambda (e: ChangeEvent) { goal = e.target.value; }}><option value="active">Stay active</option><option value="muscle">Gain muscle</option><option value="lose">Lose weight</option></select></label>
                         <label>Experience<select value={experience} onChange={lambda (e: ChangeEvent) { experience = e.target.value; }}><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></label>
                         <label>Exercise days per week<select value={days} onChange={lambda (e: ChangeEvent) { days = e.target.value; }}>{for n in range(1, 7) { <option key={n} value={str(n)}>{n}</option> }}</select></label>
