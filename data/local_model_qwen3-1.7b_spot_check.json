@@ -1,0 +1,181 @@
+{
+  "model": "qwen3:1.7b",
+  "description": "Development spot check; dish quantities have no reference calorie labels. Not an independent nutrition accuracy study.",
+  "results": [
+    {
+      "query": "olive oil",
+      "seconds": 4.52,
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "olive oil",
+        "grams": 100.0,
+        "calories": 884.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "raw",
+        "assumptions": "Assumed to be pure olive oil, as the name suggests. No additional preparation details provided. Water weight in cooked dishes is not considered here since the food is already in its raw form.",
+        "food": {
+          "id": "model",
+          "name": "olive oil",
+          "kcal_per_100g": 884,
+          "energy_basis": "Unverified local model estimate"
+        }
+      },
+      "reference": {}
+    },
+    {
+      "query": "granulated sugar",
+      "seconds": 4.18,
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "granulated sugar",
+        "grams": 100.0,
+        "calories": 400.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "raw",
+        "assumptions": "Assumed to be dry sugar, as granulated sugar is typically considered a dry food. Water weight in cooked dishes is not included here, as the estimate is for dry weight.",
+        "food": {
+          "id": "model",
+          "name": "granulated sugar",
+          "kcal_per_100g": 400,
+          "energy_basis": "Unverified local model estimate"
+        }
+      },
+      "reference": {
+        "id": 746784,
+        "name": "Sugars, granulated",
+        "kcal_per_100g": 385,
+        "energy_basis": "Energy"
+      }
+    },
+    {
+      "query": "hummus commercial",
+      "seconds": 5.5,
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "hummus commercial",
+        "grams": 100.0,
+        "calories": 320.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "typical cooked recipe",
+        "assumptions": "Hummus is a mixed dish consisting of ground chickpeas, tahini, lemon juice, and sometimes olive oil. It is typically cooked and blended to achieve a smooth texture. The calorie estimate assumes a typical commercial preparation with standard ingredients and no additional additives.",
+        "food": {
+          "id": "model",
+          "name": "hummus commercial",
+          "kcal_per_100g": 320,
+          "energy_basis": "Unverified local model estimate"
+        }
+      },
+      "reference": {
+        "id": 321358,
+        "name": "Hummus, commercial",
+        "kcal_per_100g": 229,
+        "energy_basis": "Energy"
+      }
+    },
+    {
+      "query": "chicken curry",
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "chicken curry",
+        "grams": 100.0,
+        "calories": 220.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "typical cooked recipe",
+        "assumptions": "Chicken curry is a typical cooked dish with a mix of chicken, vegetables, and spices. The exact recipe is unknown, but it is assumed to be a standard cooked meal with a moderate amount of fat and carbohydrates. Water weight is included in the calculation for cooked dishes.",
+        "food": {
+          "id": "model",
+          "name": "chicken curry",
+          "kcal_per_100g": 220,
+          "energy_basis": "Unverified local model estimate"
+        }
+      }
+    },
+    {
+      "query": "spaghetti bolognese",
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "spaghetti bolognese",
+        "grams": 100.0,
+        "calories": 160.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "typical cooked recipe",
+        "assumptions": "Assumes a typical cooked spaghetti bolognese recipe with a standard ratio of pasta, meat sauce, vegetables, and seasonings. Includes water weight in cooked dishes. Assumes a standard preparation without specific details.",
+        "food": {
+          "id": "model",
+          "name": "spaghetti bolognese",
+          "kcal_per_100g": 160,
+          "energy_basis": "Unverified local model estimate"
+        }
+      }
+    },
+    {
+      "query": "cooked white rice",
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "cooked white rice",
+        "grams": 100.0,
+        "calories": 130.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "cooked",
+        "assumptions": "Assumed to be a typical cooked white rice dish with minimal seasoning and water content. Estimated based on standard nutritional data for cooked rice, considering water weight in cooked dishes.",
+        "food": {
+          "id": "model",
+          "name": "cooked white rice",
+          "kcal_per_100g": 130,
+          "energy_basis": "Unverified local model estimate"
+        }
+      }
+    },
+    {
+      "query": "butter",
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "butter",
+        "grams": 100.0,
+        "calories": 884.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "raw",
+        "assumptions": "Assumed to be pure butter (solid at room temperature), typical composition of a solid fat, and no water content. Estimated based on standard nutritional data for pure butter.",
+        "food": {
+          "id": "model",
+          "name": "butter",
+          "kcal_per_100g": 884,
+          "energy_basis": "Unverified local model estimate"
+        }
+      }
+    },
+    {
+      "query": "raw apple",
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "raw apple",
+        "grams": 100.0,
+        "calories": 89.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "raw",
+        "assumptions": "Assumed to be raw, unprocessed, and uncooked. Water content is negligible, and the food is in its natural state. The estimate is based on typical nutritional data for raw apples.",
+        "food": {
+          "id": "model",
+          "name": "raw apple",
+          "kcal_per_100g": 89,
+          "energy_basis": "Unverified local model estimate"
+        }
+      }
+    },
+    {
+      "query": "zzzznotfood123",
+      "result": {
+        "ok": false,
+        "message": "The local model did not recognize this food. Try its common name and preparation."
+      }
+    }
+  ]
+}

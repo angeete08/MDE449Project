@@ -1,0 +1,111 @@
+{
+  "description": "Development spot check; dish quantities have no reference calorie labels. Not an independent nutrition accuracy study.",
+  "results": [
+    {
+      "query": "olive oil",
+      "seconds": 5.92,
+      "result": {
+        "ok": false,
+        "message": "The local model returned an invalid calorie value. Try a more specific food name."
+      },
+      "reference": {}
+    },
+    {
+      "query": "granulated sugar",
+      "seconds": 3.0,
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "granulated sugar",
+        "grams": 100.0,
+        "calories": 254.0,
+        "local_model": "qwen2.5:1.5b",
+        "preparation": "raw edible granulated sugar",
+        "assumptions": "Typical raw granulated sugar without additives or processing.",
+        "food": {
+          "id": "model",
+          "name": "granulated sugar",
+          "kcal_per_100g": 254,
+          "energy_basis": "Unverified local model estimate"
+        }
+      },
+      "reference": {
+        "id": 746784,
+        "name": "Sugars, granulated",
+        "kcal_per_100g": 385,
+        "energy_basis": "Energy"
+      }
+    },
+    {
+      "query": "hummus commercial",
+      "seconds": 4.48,
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "hummus commercial",
+        "grams": 100.0,
+        "calories": 120.0,
+        "local_model": "qwen2.5:1.5b",
+        "preparation": "commercial",
+        "assumptions": "Commercially prepared hummus, typically containing chickpeas, tahini, lemon juice, garlic, and olive oil. The exact proportions may vary, but this is a common recipe.",
+        "food": {
+          "id": "model",
+          "name": "hummus commercial",
+          "kcal_per_100g": 120,
+          "energy_basis": "Unverified local model estimate"
+        }
+      },
+      "reference": {
+        "id": 321358,
+        "name": "Hummus, commercial",
+        "kcal_per_100g": 229,
+        "energy_basis": "Energy"
+      }
+    },
+    {
+      "query": "chicken curry",
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "chicken curry",
+        "grams": 100.0,
+        "calories": 220.0,
+        "local_model": "qwen2.5:1.5b",
+        "preparation": "cooked edible chicken",
+        "assumptions": "Typical cooked chicken curry without spice mix; seasonings vary.",
+        "food": {
+          "id": "model",
+          "name": "chicken curry",
+          "kcal_per_100g": 220,
+          "energy_basis": "Unverified local model estimate"
+        }
+      }
+    },
+    {
+      "query": "spaghetti bolognese",
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "spaghetti bolognese",
+        "grams": 100.0,
+        "calories": 210.0,
+        "local_model": "qwen2.5:1.5b",
+        "preparation": "cooked",
+        "assumptions": "Typical cooked spaghetti bolognese with meat sauce, no additional seasonings or additives.",
+        "food": {
+          "id": "model",
+          "name": "spaghetti bolognese",
+          "kcal_per_100g": 210,
+          "energy_basis": "Unverified local model estimate"
+        }
+      }
+    },
+    {
+      "query": "zzzznotfood123",
+      "result": {
+        "ok": false,
+        "message": "The local model did not recognize this food. Try its common name and preparation."
+      }
+    }
+  ]
+}
