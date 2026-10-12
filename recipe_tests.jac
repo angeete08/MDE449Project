@@ -1,7 +1,21 @@
 import math;
+import recipe_calories;
+import from unittest.mock { patch }
 import from name_model { rank_names, normalize_name, load_model }
-import from recipe_calories { measured_grams, match_calories, resolve_match, estimate_recipe, suggest_ingredient, recipe_catalog }
+import from recipe_calories { measured_grams, ingredient_weight, estimate_recipe, suggest_ingredient, recipe_catalog }
 import from calorie_data { food_catalog }
+
+def match_calories(query: str, grams: float) -> dict[str, any] {
+    with patch("recipe_calories.google_lookup", return_value={"ok": False, "message": "Offline test"}) {
+        return recipe_calories.match_calories(query, grams);
+    }
+}
+
+def resolve_match(kind: str, match_id: str, grams: float) -> dict[str, any] {
+    with patch("recipe_calories.google_lookup", return_value={"ok": False, "message": "Offline test"}) {
+        return recipe_calories.resolve_match(kind, match_id, grams);
+    }
+}
 
 test "fitted model handles typos word order and singular ingredient names" {
     assert load_model()["recipe_count"] >= 700;
@@ -41,6 +55,22 @@ test "only explicit mass units prefill gram weights" {
     for measure in ["1 cup", "2 eggs", "300ml", "to taste", "1/2", "400g can", ""] {
         assert measured_grams(measure) == "";
     }
+}
+
+test "ingredient defaults follow recipe quantities and identify assumptions" {
+    assert ingredient_weight("Plain Flour", "2 cups")["grams"] == "254.4";
+    assert ingredient_weight("Plain Flour", "1 1/2 cups")["grams"] == "190.8";
+    assert ingredient_weight("Olive Oil", "1/2 tbsp")["grams"] == "6.9";
+    assert ingredient_weight("Eggs", "3")["grams"] == "150.0";
+    assert ingredient_weight("Garlic", "2 cloves")["grams"] == "6.0";
+    assert ingredient_weight("Milk", "300ml")["grams"] == "300.0";
+    assert ingredient_weight("Chicken", "250g")["basis"] == "Converted from recipe weight";
+    assert "Approximate" in ingredient_weight("Eggs", "3")["basis"];
+    for measure in ["to taste", "For frying", "1 can", "", "1/0 cup"] {
+        assert ingredient_weight("Oil", measure)["grams"] == "";
+    }
+    recipe = resolve_match("recipe", "52958", 100);
+    for row in recipe["rows"] { assert row["grams"] and row["weight_basis"]; }
 }
 
 test "recipe totals use validated ingredient weights and servings" {

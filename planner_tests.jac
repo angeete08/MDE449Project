@@ -1,4 +1,5 @@
 import copy;
+import from unittest.mock { patch }
 import from planner { make_state, generate_week, create_plan, update_feedback, restore_plan, meal_ideas }
 
 def profile(goal: str = "muscle", days: int = 3, equipment: str = "bodyweight", diet: str = "vegetarian", experience: str = "beginner") -> dict[str, any] {
@@ -89,7 +90,11 @@ test "meal ideas adapt to calories and randomize" {
     assert len(higher) == 3;
     assert max([meal["calories"] for meal in lighter]) <= 470;
     assert min([meal["calories"] for meal in higher]) >= 480;
-    first = meal_ideas("vegetarian", 2000);
-    second = meal_ideas("vegetarian", 2000);
+    with patch("planner.random.random", return_value=0.0) {
+        first = meal_ideas("vegetarian", 2000);
+    }
+    with patch("planner.random.random", return_value=0.99) {
+        second = meal_ideas("vegetarian", 2000);
+    }
     assert first != second;
 }

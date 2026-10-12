@@ -5,6 +5,9 @@ import re;
 import math;
 import from calorie_data { food_catalog, calculate_food_calories }
 import from name_model { rank_names, normalize_name }
+import from web_nutrition { google_lookup, web_calorie_record }
+import from concurrent.futures { ThreadPoolExecutor }
+import from nutrition_agent { resolve_with_agent }
 
 glob RECIPE_CACHE: dict[str, any] = {};
 
@@ -29,12 +32,64 @@ def measured_grams(measure: str) -> str {
     return str(round(amount * factor, 1));
 }
 
+def ingredient_weight(name: str, measure: str) -> dict[str, str] {
+    exact = measured_grams(measure);
+    if exact { return {"grams": exact, "basis": "Converted from recipe weight"}; }
+    text = measure.lower().strip().replace("½", "1/2").replace("¼", "1/4").replace("¾", "3/4");
+    found = re.match(r"^(\d+\s+\d+/\d+|\d+/\d+|\d+(?:\.\d+)?)\s*(.*)$", text);
+    if not found { return {"grams": "", "basis": "Weight needed: recipe quantity cannot be converted"}; }
+    amount = 0.0;
+    for part in found.group(1).split() {
+        if "/" in part {
+            pieces = part.split("/");
+            if float(pieces[1]) == 0 { return {"grams": "", "basis": "Weight needed: invalid quantity"}; }
+            amount += float(pieces[0]) / float(pieces[1]);
+        } else { amount += float(part); }
+    }
+    unit = found.group(2).strip();
+    normalized = normalize_name(name);
+    # Editable kitchen assumptions, not measured recipe weights.
+    density = 1.0;
+    for (word, value) in [("flour", 0.53), ("sugar", 0.83), ("oil", 0.92), ("butter", 0.96), ("salt", 1.2), ("rice", 0.78), ("oats", 0.34)] {
+        if word in normalized { density = value; break; }
+    }
+    volume = 0.0;
+    if re.match(r"^(cups?|c\b)", unit) { volume = 240.0; }
+    elif re.match(r"^(tablespoons?|tbsp|tbs\b)", unit) { volume = 15.0; }
+    elif re.match(r"^(teaspoons?|tsp)", unit) { volume = 5.0; }
+    elif re.match(r"^(ml|millilitres?|milliliters?)\b", unit) { volume = 1.0; }
+    elif re.match(r"^(litres?|liters?|l)\b", unit) { volume = 1000.0; }
+    if volume {
+        return {"grams": str(round(amount * volume * density, 1)), "basis": "Approximate volume conversion; review density and weight"};
+    }
+    # Only recognizable counts: never guess a tin size or an unbounded frying amount.
+    if unit and not re.match(r"^(cloves?|small|medium|large|whole|sliced|chopped|finely|diced|\(?beaten|eggs?)\b", unit) {
+        return {"grams": "", "basis": "Weight needed: weigh this recipe amount"};
+    }
+    for (word, weight) in [("garlic", 3.0), ("egg", 50.0), ("onion", 150.0), ("tomato", 120.0), ("potato", 170.0), ("carrot", 60.0), ("banana", 120.0), ("apple", 180.0), ("lemon", 60.0), ("lime", 45.0), ("pepper", 150.0), ("chilli", 15.0)] {
+        if word in normalized.split() {
+            size = 0.75 if "small" in unit else (1.25 if "large" in unit else 1.0);
+            return {"grams": str(round(amount * weight * size, 1)), "basis": "Approximate edible weight per item; review size"};
+        }
+    }
+    return {"grams": "", "basis": "Weight needed: weigh this recipe amount"};
+}
+
 def:pub suggest_ingredient(query: str) -> list[dict[str, any]] {
     if not isinstance(query, str) or len(query.strip()) < 2 or len(query) > 120 { return []; }
     available = {food["id"] for food in food_catalog() if "kcal_per_100g" in food};
     candidates = rank_names(query, "food", 20);
     floor = max(0.4, candidates[0]["score"] - 0.18) if candidates else 1.0;
     return [candidate for candidate in candidates if candidate["id"] in available and candidate["score"] >= floor][:5];
+}
+
+def:pub find_ingredient(query: str) -> dict[str, any] {
+    if not isinstance(query, str) or len(query.strip()) < 2 or len(query) > 120 {
+        return {"candidates": [], "calorie_source": {}, "lookup_message": "Enter an ingredient name between 2 and 120 characters."};
+    }
+    candidates = suggest_ingredient(query);
+    lookup = google_lookup(query, "", "calories");
+    return {"candidates": candidates, "calorie_source": lookup if lookup.get("ok") else {}, "lookup_message": lookup.get("message", "")};
 }
 
 def:pub resolve_match(kind: str, match_id: str, grams: float) -> dict[str, any] {
@@ -46,6 +101,16 @@ def:pub resolve_match(kind: str, match_id: str, grams: float) -> dict[str, any] 
             return {"ok": False, "message": "Food match not found."};
         }
         result = calculate_food_calories(int(match_id), grams);
+        for food in food_catalog() {
+            if food["id"] == int(match_id) {
+                    lookup = google_lookup(food["name"], "", "calories");
+                    if lookup["ok"] {
+                        result = {"ok": True, "kind": "food", "name": food["name"], "grams": grams, "calories": round(lookup["value"] * grams / 100, 1), "web_source": lookup,
+                            "food": {**food, "kcal_per_100g": lookup["value"], "energy_basis": "Google search estimate"}};
+                    } elif not result["ok"] { result["message"] = lookup["message"]; }
+                    break;
+            }
+        }
         if result["ok"] { result["kind"] = "food"; result["name"] = result["food"]["name"]; }
         return result;
     }
@@ -54,10 +119,47 @@ def:pub resolve_match(kind: str, match_id: str, grams: float) -> dict[str, any] 
     }
     recipe = recipe_catalog()[match_id];
     rows: list[dict[str, any]] = [];
-    for ingredient in recipe["ingredients"] {
+    agent_attempts = 0;
+    # Search each ingredient concurrently; exact recipe mass needs no lookup.
+    lookup_results: dict[str, any] = {};
+    with ThreadPoolExecutor(max_workers=6) as executor {
+        jobs: list[any] = [];
+        for (i, ingredient) in enumerate(recipe["ingredients"][:15]) {
+            jobs.append((str(i) + ":calories", executor.submit(google_lookup, ingredient["name"], "", "calories")));
+            measure = ingredient["measure"].strip();
+            if not measured_grams(measure) and re.match(r"^\d", measure) {
+                jobs.append((str(i) + ":weight", executor.submit(google_lookup, ingredient["name"], measure, "weight")));
+            }
+        }
+        for (key, job) in jobs { lookup_results[key] = job.result(); }
+    }
+    for (i, ingredient) in enumerate(recipe["ingredients"]) {
         candidates = suggest_ingredient(ingredient["name"]);
-        rows.append({"name": ingredient["name"], "measure": ingredient["measure"], "grams": measured_grams(ingredient["measure"]),
-            "food_id": str(candidates[0]["id"]) if candidates else "", "candidates": candidates, "manual_kcal": ""});
+        weight = ingredient_weight(ingredient["name"], ingredient["measure"]);
+        weight_source: dict[str, any] = {}; calorie_source: dict[str, any] = {}; lookup_message = "";
+        if str(i) + ":weight" in lookup_results {
+            lookup = lookup_results[str(i) + ":weight"];
+            if lookup["ok"] {
+                weight["grams"] = str(lookup["value"]); weight["basis"] = "Online weight estimate for the recipe quantity"; weight_source = lookup;
+            } elif not weight["grams"] { lookup_message = lookup["message"]; }
+        }
+        if str(i) + ":calories" in lookup_results {
+            lookup = lookup_results[str(i) + ":calories"];
+            if lookup["ok"] { calorie_source = lookup; }
+            elif not candidates { lookup_message = lookup["message"]; }
+        }
+        if (not weight["grams"] or (not calorie_source and not candidates)) and agent_attempts < 4 {
+            agent_attempts += 1;
+            agent_result = resolve_with_agent(ingredient["name"], ingredient["measure"], measured_grams(ingredient["measure"]));
+            if agent_result["ok"] {
+                calorie_source = agent_result;
+                weight["grams"] = str(agent_result["grams"]);
+                weight["basis"] = "Recipe mass preserved" if measured_grams(ingredient["measure"]) else "Agent weight assumption: " + agent_result["weight_assumption"];
+                weight_source = agent_result; lookup_message = agent_result["explanation"];
+            } elif not weight["grams"] or not candidates { lookup_message = agent_result["message"]; }
+        }
+        rows.append({"name": ingredient["name"], "measure": ingredient["measure"], "grams": weight["grams"], "weight_basis": weight["basis"],
+            "food_id": str(candidates[0]["id"]) if candidates and not calorie_source else "", "candidates": candidates, "manual_kcal": "", "weight_source": weight_source, "calorie_source": calorie_source, "lookup_message": lookup_message});
     }
     result = {"ok": True, "kind": "recipe", "name": recipe["name"], "id": match_id, "rows": rows,
         "url": "https://www.themealdb.com/meal/" + match_id, "proxy": {}};
@@ -69,6 +171,8 @@ def:pub resolve_match(kind: str, match_id: str, grams: float) -> dict[str, any] 
             break;
         }
     }
+    values = [{"food_id": int(row["food_id"] or "0"), "grams": float(row["grams"]) if row["grams"] else None, "manual_kcal": None, "web_lookup_id": row["calorie_source"].get("lookup_id", "")} for row in rows];
+    result["estimate"] = estimate_recipe(match_id, values, 1);
     return result;
 }
 
@@ -76,9 +180,22 @@ def:pub match_calories(query: str, grams: float) -> dict[str, any] {
     if not isinstance(query, str) or len(query.strip()) < 2 or len(query) > 120 {
         return {"ok": False, "message": "Enter a food or recipe name between 2 and 120 characters."};
     }
+    if isinstance(grams, bool) or not isinstance(grams, (int, float)) or not math.isfinite(grams) or grams <= 0 or grams > 10000 {
+        return {"ok": False, "message": "Enter a portion greater than 0 and no more than 10,000 grams."};
+    }
     matches = rank_names(query, limit=4);
     if not matches or matches[0]["score"] < 0.40 {
-        return {"ok": False, "message": "No close match in the local dataset. Try a more specific food or recipe name."};
+        lookup = google_lookup(query.strip(), "", "calories");
+        if lookup["ok"] {
+            return {"ok": True, "kind": "food", "name": query.strip(), "grams": grams, "calories": round(lookup["value"] * grams / 100, 1), "web_source": lookup,
+                "food": {"id": "web", "name": query.strip(), "kcal_per_100g": lookup["value"], "energy_basis": "Google search estimate"}};
+        }
+        agent_result = resolve_with_agent(query.strip(), str(grams) + " g", str(grams));
+        if agent_result["ok"] {
+            return {"ok": True, "kind": "food", "name": query.strip(), "grams": grams, "calories": round(agent_result["value"] * grams / 100, 1), "web_source": agent_result,
+                "food": {"id": "agent", "name": agent_result["title"], "kcal_per_100g": agent_result["value"], "energy_basis": "Agent-selected USDA record"}};
+        }
+        return {"ok": False, "message": "No local match. " + lookup["message"]};
     }
     best = matches[0];
     result = resolve_match(best["kind"], str(best["id"]), grams);
@@ -98,6 +215,7 @@ def:pub estimate_recipe(recipe_id: str, rows: list[dict[str, any]], servings: in
     catalog = {food["id"]: food for food in food_catalog()};
     total = 0.0;
     manual_count = 0;
+    web_count = 0;
     breakdown: list[dict[str, any]] = [];
     for (i, row) in enumerate(rows) {
         name = recipes[recipe_id]["ingredients"][i]["name"];
@@ -107,12 +225,19 @@ def:pub estimate_recipe(recipe_id: str, rows: list[dict[str, any]], servings: in
             return {"ok": False, "message": "Enter a weight greater than 0 and no more than 10,000 g for " + name + "."};
         }
         manual = row.get("manual_kcal");
+        web = web_calorie_record(str(row.get("web_lookup_id", "")), name) if manual is None else {};
+        if row.get("web_lookup_id") and not web and manual is None {
+            return {"ok": False, "message": "Online value expired or changed. Reload the recipe or enter label calories for " + name + "."};
+        }
         if manual is not None {
             if isinstance(manual, bool) or not isinstance(manual, (int, float)) or not math.isfinite(manual) or manual < 0 or manual > 1000 {
                 return {"ok": False, "message": "Enter a calorie value from 0 to 1,000 kcal per 100 g for " + name + "."};
             }
             food = {"name": name + " (user-entered label)", "kcal_per_100g": manual};
             food_id = None; manual_count += 1;
+        } elif web {
+            food = {"name": name + " (online estimate)", "kcal_per_100g": web["value"]};
+            food_id = None; web_count += 1;
         } else {
             if isinstance(food_id, bool) or not isinstance(food_id, int) or food_id not in catalog or "kcal_per_100g" not in catalog[food_id] {
                 return {"ok": False, "message": "Choose a USDA food or enter label calories for " + name + "."};
@@ -121,7 +246,7 @@ def:pub estimate_recipe(recipe_id: str, rows: list[dict[str, any]], servings: in
         }
         kcal = food["kcal_per_100g"] * weight / 100;
         total += kcal;
-        breakdown.append({"ingredient": name, "food": food["name"], "grams": weight, "calories": round(kcal, 1), "fdc_id": food_id});
+        breakdown.append({"ingredient": name, "food": food["name"], "grams": weight, "calories": round(kcal, 1), "fdc_id": food_id, "web_source": web});
     }
-    return {"ok": True, "total": round(total, 1), "per_serving": round(total / servings, 1), "servings": servings, "breakdown": breakdown, "manual_count": manual_count};
+    return {"ok": True, "total": round(total, 1), "per_serving": round(total / servings, 1), "servings": servings, "breakdown": breakdown, "manual_count": manual_count, "web_count": web_count};
 }
