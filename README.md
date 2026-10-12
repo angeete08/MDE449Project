@@ -5,7 +5,7 @@ This folder is the isolated Stride calorie calculator app, including its source,
 Use Jac **0.37.21**, as pinned in `jac.toml`. From this folder:
 
 ```sh
-cd /Users/zeta/Documents/MDE449Project/feature-calorie-calculator
+cd /local-path
 jac install
 jac run
 ```
