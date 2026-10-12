@@ -2,7 +2,7 @@
 name = "stride-calorie-calculator"
 version = "0.2.0"
 description = "Group 10 fitness prototype written in Jac"
-entry-point = "main.jac"
+entry-point = "main"
 kind = "web-app"
 jac-version = "==0.37.21"
 
