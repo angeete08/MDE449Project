@@ -2,6 +2,7 @@
 import from planner { create_plan, submit_feedback, restore_plan, meal_video }
 import from .pdf_export { download_plan_pdf }
 import from .onboarding { DataSetup, clean_data_prefs, describe_data_prefs }
+import from .health_panel { AppleHealthSync }
 
 def:pub FitnessApp -> JsxElement {
     has goal: str = "active", experience: str = "beginner", days: str = "3",
@@ -123,6 +124,16 @@ def:pub FitnessApp -> JsxElement {
         finally { busy = False; }
     }
 
+    def useHealthSummary(summary: dict[str, any]) -> None {
+        filled: list[str] = [];
+        if summary["avg_daily_steps"] is not None { avgSteps = str(summary["avg_daily_steps"]); filled.append("steps"); }
+        if summary["avg_heart_rate"] is not None { avgHeartRate = str(summary["avg_heart_rate"]); filled.append("heart rate"); }
+        if summary["avg_sleep_hours"] is not None { avgSleep = str(summary["avg_sleep_hours"]); filled.append("sleep"); }
+        if summary["avg_workouts_per_week"] is not None { avgWorkouts = str(summary["avg_workouts_per_week"]); filled.append("workouts"); }
+        status = ("Filled from Apple Health: " + ", ".join(filled) + ".") if len(filled) > 0 else "Apple Health returned no steps, heart rate, sleep or workouts for the last 28 days. Enter any averages manually.";
+        window.location.hash = "weekly-averages";
+    }
+
     def downloadPdf -> None {
         if busy or not state { return; }
         try {
@@ -157,6 +168,7 @@ def:pub FitnessApp -> JsxElement {
                     <form onSubmit={generate}>
                         <h3 id="weekly-averages">Weekly averages <span className="optional">optional</span></h3>
                         <p className="hint">Enter only the values available from your app.</p>
+                        {if bool(dataPrefs) and dataPrefs["hub"] == "apple" { <AppleHealthSync onSynced={useHealthSummary}/> }}
                         <label>Average daily steps<input type="number" min="0" max="100000" step="1" required={False} value={avgSteps} onChange={lambda (e: ChangeEvent) { avgSteps = e.target.value; }}/></label>
                         <label>Average heart rate <span className="optional">bpm</span><input type="number" min="20" max="250" step="0.1" required={False} value={avgHeartRate} onChange={lambda (e: ChangeEvent) { avgHeartRate = e.target.value; }}/></label>
                         <label>Average sleep per night <span className="optional">hours</span><input type="number" min="0" max="24" step="0.1" required={False} value={avgSleep} onChange={lambda (e: ChangeEvent) { avgSleep = e.target.value; }}/></label>

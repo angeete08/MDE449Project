@@ -541,3 +541,48 @@ footer p {
   aspect-ratio: 16 / 9;
   object-fit: cover;
 }
+.health-sync {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f8faf3;
+  padding: 13px;
+  margin: 12px 0 18px;
+}
+.health-sync-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+.health-sync .hint {
+  margin: 8px 0 12px;
+}
+.health-request {
+  display: grid;
+  gap: 10px;
+}
+.health-request img {
+  display: block;
+  width: 176px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  background: #fff;
+}
+.health-request ol {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.health-request a.quiet {
+  text-align: center;
+  text-decoration: none;
+}
+.health-status {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #456149;
+  margin: 10px 0 0;
+}

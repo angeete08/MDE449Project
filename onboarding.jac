@@ -39,9 +39,11 @@ def:pub describe_data_prefs(prefs: dict[str, any]) -> str {
     saving = "saved on this browser" if prefs["store"] else "not stored";
     if prefs["source"] == "manual" { return "Manual entry · " + saving; }
     names = [label_for(APPS, key) for key in prefs["apps"]];
-    if prefs["hub"] != "none" { names = [label_for(HUBS, prefs["hub"])] + names; }
+    if prefs["hub"] == "android" { names = [label_for(HUBS, prefs["hub"])] + names; }
+    apple = "Apple Health via the Stride Health iPhone app · " if prefs["hub"] == "apple" else "";
+    if len(names) == 0 and apple { return apple + saving; }
     requested = ", ".join(names) if len(names) > 0 else "no apps chosen";
-    return "App connections requested (" + requested + ") · not live yet, enter details below · " + saving;
+    return apple + "App connections requested (" + requested + ") · not live yet, enter details below · " + saving;
 }
 
 def:pub DataSetup(initial: dict[str, any], onFinish: Callable[[dict[str, any]], None]) -> JsxElement {
@@ -85,7 +87,7 @@ def:pub DataSetup(initial: dict[str, any], onFinish: Callable[[dict[str, any]], 
                 <div className="choices">{for (key, name, detail) in HUBS {
                     <button key={key} className="choice" aria-pressed={hub == key} onClick={lambda { hub = key; }}><strong>{name}</strong><span>{detail}</span></button>
                 }}</div>
-                <p className="preview-note">Preview: this web prototype cannot read health data yet. Apple Health and Health Connect need a native phone app. Stride records your choice; enter your details manually for now.</p>
+                <p className="preview-note">Apple Health works through the Stride Health iPhone app: after setup, send a sync request from the planning form. Health Connect is still a preview; Stride records that choice and you enter details manually.</p>
             } else {
                 <h2 id="setup-title">Connect other apps</h2>
                 <p className="modal-lead">Choose any other apps that track your steps, heart rate, sleep or workouts.</p>

@@ -1,0 +1,51 @@
+name: StrideHealth
+options:
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+packages:
+  OpenWearablesHealthSDK:
+    url: https://github.com/the-momentum/open_wearables_ios_sdk
+    exactVersion: 0.15.0
+targets:
+  StrideHealth:
+    type: application
+    platform: iOS
+    sources:
+      - StrideHealth
+    dependencies:
+      - package: OpenWearablesHealthSDK
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: edu.eecs449.group10.stridehealth
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_STYLE: Automatic
+    entitlements:
+      path: StrideHealth/StrideHealth.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
+    info:
+      path: StrideHealth/Info.plist
+      properties:
+        CFBundleDisplayName: Stride Health
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        CFBundleURLTypes:
+          - CFBundleURLName: edu.eecs449.group10.stridehealth.sync
+            CFBundleURLSchemes:
+              - stridehealth
+        NSHealthShareUsageDescription: Stride Health sends your steps, heart rate, sleep and workouts to the Stride server you approve, which turns them into weekly averages for your plan.
+        NSLocalNetworkUsageDescription: Stride Health sends Apple Health data to the Stride server running on a computer on your Wi-Fi.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        UIBackgroundModes:
+          - fetch
+          - processing
+        BGTaskSchedulerPermittedIdentifiers:
+          - com.openwearables.healthsdk.task.refresh
+          - com.openwearables.healthsdk.task.process

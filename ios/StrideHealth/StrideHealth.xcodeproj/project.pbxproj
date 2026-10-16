@@ -1,0 +1,345 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0D2FC620E8F98F934280EDED /* OpenWearablesHealthSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 63722AF57193B8A9EA049F2B /* OpenWearablesHealthSDK */; };
+		6D52D7E30FF61F3249796A07 /* SyncModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8119A995A59CA4189601306 /* SyncModel.swift */; };
+		886252810FCCA35C97335809 /* StrideHealthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB6A9B4ADCEEA476A452C15 /* StrideHealthApp.swift */; };
+		9D30BF58AEBB6CC0B562F211 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6874C0918A596DD24696554A /* ContentView.swift */; };
+		FB2876C6BBF49357658E5986 /* SyncRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EA8C19B49BDFF4E2727F5D /* SyncRequest.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		01EA8C19B49BDFF4E2727F5D /* SyncRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncRequest.swift; sourceTree = "<group>"; };
+		0B9390980CF866D65940BFD3 /* StrideHealth.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = StrideHealth.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3033EDC6BFF1E56525216B73 /* StrideHealth.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StrideHealth.entitlements; sourceTree = "<group>"; };
+		327C0B018E3FFA7247D291BF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		6874C0918A596DD24696554A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		8BB6A9B4ADCEEA476A452C15 /* StrideHealthApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrideHealthApp.swift; sourceTree = "<group>"; };
+		A8119A995A59CA4189601306 /* SyncModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncModel.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6399C6C278888312D65AF85E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0D2FC620E8F98F934280EDED /* OpenWearablesHealthSDK in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		10CCD402CB5C5EBB8C9A7E3A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0B9390980CF866D65940BFD3 /* StrideHealth.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		23555C5D5B75B3DA7BDDDE52 /* StrideHealth */ = {
+			isa = PBXGroup;
+			children = (
+				6874C0918A596DD24696554A /* ContentView.swift */,
+				327C0B018E3FFA7247D291BF /* Info.plist */,
+				3033EDC6BFF1E56525216B73 /* StrideHealth.entitlements */,
+				8BB6A9B4ADCEEA476A452C15 /* StrideHealthApp.swift */,
+				A8119A995A59CA4189601306 /* SyncModel.swift */,
+				01EA8C19B49BDFF4E2727F5D /* SyncRequest.swift */,
+			);
+			path = StrideHealth;
+			sourceTree = "<group>";
+		};
+		DA3E16FE987BDD7DC7B36F49 = {
+			isa = PBXGroup;
+			children = (
+				23555C5D5B75B3DA7BDDDE52 /* StrideHealth */,
+				10CCD402CB5C5EBB8C9A7E3A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CB832073B81B773C1880C239 /* StrideHealth */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2570A84D8D451BDB97C075D1 /* Build configuration list for PBXNativeTarget "StrideHealth" */;
+			buildPhases = (
+				5475DB6CD7EF1E44602BEC94 /* Sources */,
+				6399C6C278888312D65AF85E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = StrideHealth;
+			packageProductDependencies = (
+				63722AF57193B8A9EA049F2B /* OpenWearablesHealthSDK */,
+			);
+			productName = StrideHealth;
+			productReference = 0B9390980CF866D65940BFD3 /* StrideHealth.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5B180969E7A3D35F47C5C47E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					CB832073B81B773C1880C239 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 92194FC61F33632DD544A88C /* Build configuration list for PBXProject "StrideHealth" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = DA3E16FE987BDD7DC7B36F49;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				7901EDA63A54CDAD332D0968 /* XCRemoteSwiftPackageReference "open_wearables_ios_sdk" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 10CCD402CB5C5EBB8C9A7E3A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CB832073B81B773C1880C239 /* StrideHealth */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5475DB6CD7EF1E44602BEC94 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9D30BF58AEBB6CC0B562F211 /* ContentView.swift in Sources */,
+				886252810FCCA35C97335809 /* StrideHealthApp.swift in Sources */,
+				6D52D7E30FF61F3249796A07 /* SyncModel.swift in Sources */,
+				FB2876C6BBF49357658E5986 /* SyncRequest.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		30E202B5F9E8430660E8DAFB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		6D22432247E3DF9C69F5FF64 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = StrideHealth/StrideHealth.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = StrideHealth/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.eecs449.group10.stridehealth;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		BD5DFA73DA1E7F0A156765AB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = StrideHealth/StrideHealth.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = StrideHealth/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.eecs449.group10.stridehealth;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		EF406B88AA1ADEB0E45551B0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2570A84D8D451BDB97C075D1 /* Build configuration list for PBXNativeTarget "StrideHealth" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD5DFA73DA1E7F0A156765AB /* Debug */,
+				6D22432247E3DF9C69F5FF64 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		92194FC61F33632DD544A88C /* Build configuration list for PBXProject "StrideHealth" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				30E202B5F9E8430660E8DAFB /* Debug */,
+				EF406B88AA1ADEB0E45551B0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		7901EDA63A54CDAD332D0968 /* XCRemoteSwiftPackageReference "open_wearables_ios_sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/the-momentum/open_wearables_ios_sdk";
+			requirement = {
+				kind = exactVersion;
+				version = 0.15.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		63722AF57193B8A9EA049F2B /* OpenWearablesHealthSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7901EDA63A54CDAD332D0968 /* XCRemoteSwiftPackageReference "open_wearables_ios_sdk" */;
+			productName = OpenWearablesHealthSDK;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 5B180969E7A3D35F47C5C47E /* Project object */;
+}

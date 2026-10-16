@@ -40,23 +40,23 @@ Open **http://localhost:8000**. `jac run` reads the web-app entry point from `ja
 
 ### Troubleshooting
 
-If `jac install` reports `ensurepip is not available`, or `jac run` reports `missing frontend packages` such as `vite` or `jspdf`, install the frontend dependencies manually.
+If `jac install` reports `ensurepip is not available`, or `jac run` reports `missing frontend packages` such as `vite`, `jspdf` or `qrcode`, install the frontend dependencies manually.
 
 These steps require Node.js and npm. Stop the running app with Ctrl+C, then run the following from the project root:
 
 ```sh
 cp .jac/client/configs/package.json .jac/client/package.json
 npm install --prefix .jac/client --include=dev
-npm install --prefix .jac/client jspdf@4.2.1 --save --include=dev
+npm install --prefix .jac/client jspdf@4.2.1 qrcode@1.5.4 --save --include=dev
 ```
 
-Confirm that both packages are installed:
+Confirm that the packages are installed:
 
 ```sh
-npm ls --prefix .jac/client jspdf vite
+npm ls --prefix .jac/client jspdf qrcode vite
 ```
 
-If both appear, start the app again:
+If they all appear, start the app again:
 
 ```sh
 jac run
@@ -72,7 +72,13 @@ jac run
 | Meal suggestions         | Three randomized, research-informed ideas selected for the diet preference and approximate per-meal calorie range. Each has a researched YouTube recipe thumbnail. They are not a complete daily menu.                                    |
 | Workout feedback         | One rating per workout: too easy, just right, or too hard. Easy/hard changes future unlogged strength repetitions by one or cardio duration by two minutes. Current, past, and already logged workouts stay fixed; adjustments are bounded. |
 
-On first visit, a setup dialog asks how data should be entered (manually or from connected apps) and whether Stride may store data on this browser. If the user chooses connected apps, it then offers Apple Health or Android Health Connect, followed by other apps such as Oura, Fitbit, Garmin Connect, WHOOP and Strava. These connections are a labeled preview: choices are recorded, but no health data is read and the form is still filled in manually. **Data settings** reopens the dialog.
+On first visit, a setup dialog asks how data should be entered (manually or from connected apps) and whether Stride may store data on this browser. If the user chooses connected apps, it then offers Apple Health or Android Health Connect, followed by other apps such as Oura, Fitbit, Garmin Connect, WHOOP and Strava. Apple Health works through the Stride Health iPhone app (see below). The other connections are a labeled preview: choices are recorded, but no health data is read and the form is still filled in manually. **Data settings** reopens the dialog.
+
+### Apple Health sync
+
+When Apple Health is chosen, the weekly averages section shows **Send sync request to iPhone**. Stride creates a one-time request and shows a QR code and link. On an iPhone with the [Stride Health companion app](ios/StrideHealth/README.md) installed, scanning the code opens the app. The person confirms the server address, and Apple Health asks which of steps, heart rate, sleep and workouts to share. The app then uploads the last 28 days through the open-source [Open Wearables iOS SDK](https://github.com/the-momentum/open_wearables_ios_sdk). The Jac server reduces the samples to the four weekly averages, and the web page fills them in for review. The calorie target is never filled from Apple Health.
+
+The iPhone must be on the same Wi-Fi as the computer running `jac run`. The development server already accepts network connections on port 8000 and forwards `/api` and `/function` calls to the Jac API. Requests and running totals are kept only in server memory and expire after 15 minutes without activity; raw samples are not stored. This needs a single server process.
 
 If storage is allowed, the browser saves the profile, week and feedback in `localStorage` (`stride-jac-v1`) and the data choices in `stride-data-prefs-v1`. If it is declined, nothing is saved, any earlier saved plan is removed, and the dialog appears again on the next visit. Refresh restores a server-validated copy. Download exports JSON; Clear saved data removes it. Creating a new week resets feedback. Storage is specific to this browser and origin.
 
@@ -82,6 +88,10 @@ If storage is allowed, the browser saves the profile, week and feedback in `loca
 - `frontend.jac`: reactive form, weekly cards, meals, feedback, saving and download.
 - `onboarding.jac`: first-visit data setup dialog (data source, storage consent, app connection preview).
 - `planner.jac`: validation and deterministic planning; public `create_plan`, `submit_feedback`, and `restore_plan` functions become Jac RPC endpoints.
+- `health_sync.jac`: Apple Health sync requests, the Open Wearables SDK upload endpoints (`/api/v1/sdk/users/{id}/sync` and `/logs`) and the weekly-average summary.
+- `health_panel.jac`: the Apple Health panel with the QR code and status polling.
+- `health_sync_tests.jac`: summary de-duplication, time zones, missing data, phone address and request lifecycle tests.
+- `ios/StrideHealth/`: the Stride Health SwiftUI companion app (the only non-Jac application code, because HealthKit needs a native iOS app). See its README for building with Xcode.
 - `planner_tests.jac`: five Jac test blocks, including all 648 profile combinations, feedback direction/bounds, completed-workout preservation, invalid input rejection and saved-state restoration.
 - `global.css`: responsive visual styling.
 - `jac.toml`: compiler pin, project entry point, dependencies, ports and test discovery.
@@ -95,6 +105,6 @@ Validation on October 5: fresh-directory `jac install`, bare `jac run`, compiler
 
 ## Scope and next steps
 
-Planning uses deterministic rules and curated meal examples, with Codex-assisted development. There is no live LLM, wearable/health integration, camera analysis, location search, account workflow, or cross-device synchronization. The app sends its saved planning state to the local Jac server for validation and feedback; it does not write fitness profiles into the server database. Jac's framework initializes its own runtime database.
+Planning uses deterministic rules and curated meal examples, with Codex-assisted development. Apple Health is the only health integration, through the iOS companion app; other wearables are not connected. There is no live LLM, camera analysis, location search, account workflow, or cross-device synchronization. The app sends its saved planning state to the local Jac server for validation and feedback; it does not write fitness profiles into the server database. Jac's framework initializes its own runtime database.
 
 Next: teammate PR review and a short usability session, then agree on a grounded model feature and oversight rules. This Jac prototype can be run from the repository. It requires a Jac server and cannot be replaced by uploading static files to that host.
