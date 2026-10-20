@@ -59,6 +59,30 @@ test "invalid inputs are rejected" {
     assert not restore_plan(state)["ok"];
 }
 
+test "optional weekly averages are preserved and validated" {
+    state = make_state(profile());
+    assert state["profile"]["avg_daily_steps"] is None;
+    assert state["profile"]["avg_heart_rate"] is None;
+    assert state["profile"]["avg_sleep_hours"] is None;
+    assert state["profile"]["avg_workouts_per_week"] is None;
+
+    p = profile();
+    p["avg_daily_steps"] = 8250;
+    p["avg_heart_rate"] = 64.5;
+    p["avg_sleep_hours"] = 7.5;
+    p["avg_workouts_per_week"] = 3.5;
+    state = make_state(p);
+    restored = restore_plan(state);
+    assert restored["ok"];
+    assert restored["state"]["profile"]["avg_daily_steps"] == 8250;
+    assert restored["state"]["profile"]["avg_heart_rate"] == 64.5;
+    assert restored["state"]["profile"]["avg_sleep_hours"] == 7.5;
+    assert restored["state"]["profile"]["avg_workouts_per_week"] == 3.5;
+
+    p["avg_sleep_hours"] = 25;
+    assert not create_plan(p)["ok"];
+}
+
 test "feedback bounds and duplicate logs" {
     state = make_state(profile(days=6));
     for i in range(5) { state = update_feedback(state, i, "easy"); }
