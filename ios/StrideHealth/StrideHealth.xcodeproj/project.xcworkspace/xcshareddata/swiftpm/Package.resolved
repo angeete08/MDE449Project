@@ -1,0 +1,15 @@
+{
+  "originHash" : "9a5bc4e2f54a6105a6ac531b83a731868a7a3b49916b0ef525d381d782329f6f",
+  "pins" : [
+    {
+      "identity" : "open_wearables_ios_sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/the-momentum/open_wearables_ios_sdk",
+      "state" : {
+        "revision" : "995c32018809b3b3703f100a552601244f7bb151",
+        "version" : "0.15.0"
+      }
+    }
+  ],
+  "version" : 3
+}
