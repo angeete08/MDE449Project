@@ -46,7 +46,7 @@ def:pub describe_data_prefs(prefs: dict[str, any]) -> str {
     return apple + "App connections requested (" + requested + ") · not live yet, enter details below · " + saving;
 }
 
-def:pub DataSetup(initial: dict[str, any], onFinish: Callable[[dict[str, any]], None]) -> JsxElement {
+def:pub DataSetup(initial: dict[str, any], onFinish: Callable[[dict[str, any]], None], serverSaving: bool = False) -> JsxElement {
     has step: int = 1, source: str = initial["source"] if initial else "",
         store: str = ("yes" if initial["store"] else "no") if initial else "",
         hub: str = initial["hub"] if initial else "", apps: list[str] = initial["apps"] if initial else [];
@@ -76,10 +76,10 @@ def:pub DataSetup(initial: dict[str, any], onFinish: Callable[[dict[str, any]], 
                 </div>
             } elif step == 2 {
                 <h2 id="setup-title">Can Stride store your data?</h2>
-                <p className="modal-lead">Saving keeps your profile, weekly plan and workout feedback on this browser so they return after a refresh. Nothing is saved to an account or the server database.</p>
+                <p className="modal-lead">{"Your demo account already saves plans on this server. This choice only controls browser storage for guest mode and connection preferences. To remove server data, use Reset demo account in Account." if serverSaving else "Saving keeps your guest profile, weekly plan and workout feedback on this browser so they return after a refresh. Server saving is enabled separately when you open the demo account."}</p>
                 <div className="choices">
                     <button className="choice" aria-pressed={store == "yes"} onClick={lambda { store = "yes"; }}><strong>Yes, save on this browser</strong><span>You can clear saved data at any time.</span></button>
-                    <button className="choice" aria-pressed={store == "no"} onClick={lambda { store = "no"; }}><strong>No, don't store my data</strong><span>Your plan lasts until you refresh or close the page. Anything saved earlier on this browser is removed.</span></button>
+                    <button className="choice" aria-pressed={store == "no"} onClick={lambda { store = "no"; }}><strong>No, don't save on this browser</strong><span>Guest plans last until refresh. Earlier browser saves are removed. This does not delete the server demo account.</span></button>
                 </div>
             } elif step == 3 {
                 <h2 id="setup-title">Connect your phone's health app</h2>

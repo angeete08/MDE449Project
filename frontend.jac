@@ -3,14 +3,18 @@ import from planner { create_plan, submit_feedback, restore_plan, meal_video }
 import from .pdf_export { download_plan_pdf }
 import from .onboarding { DataSetup, clean_data_prefs, describe_data_prefs }
 import from .health_panel { AppleHealthSync }
+import from accounts { starter_meals, open_demo_account, read_demo_account, rename_demo_account, save_demo_plan, sync_demo_health, reset_demo_account, close_demo_account }
 
 def:pub FitnessApp -> JsxElement {
     has goal: str = "active", experience: str = "beginner", days: str = "3",
-        equipment: str = "bodyweight", diet: str = "none", calories: str = "2000",
+        equipment: str = "bodyweight", diet: str = "none", calories: str = "",
         avgSteps: str = "", avgHeartRate: str = "", avgSleep: str = "", avgWorkouts: str = "",
-    state: dict[str, any] = {}, mealVideos: dict[str, any] = {}, status: str = "", busy: bool = False,
+    state: dict[str, any] = {}, mealVideos: dict[str, any] = {}, status: str = "", busy: bool = True,
     dataPrefs: dict[str, any] = {}, setupOpen: bool = False,
-    historyIndex: int = -1, startDate: str = "", loadFailed: bool = False, saveWarning: str = "";
+    historyIndex: int = -1, startDate: str = "", loadFailed: bool = False, saveWarning: str = "",
+    demoToken: str = "", account: dict[str, any] = {}, accountOpen: bool = False,
+    displayName: str = "", accountMessage: str = "", defaults: list[dict[str, any]] = [],
+    healthSource: str = "";
 
     async def loadMealVideos(meals: list[dict[str, any]]) -> None {
         videos: dict[str, any] = {};
@@ -28,8 +32,15 @@ def:pub FitnessApp -> JsxElement {
     }
 
     viewed = state["history"][historyIndex] if historyIndex >= 0 else state;
+    shownMeals = viewed["meals"] if state else defaults;
 
-    def remember(value: dict[str, any]) -> None {
+    async def saveAccount(value: dict[str, any]) -> None {
+        try { await save_demo_plan(demoToken, value); saveWarning = ""; }
+        except Exception { saveWarning = "Server saving failed. Download a PDF before signing out; reopening the demo account restores its last successful save."; }
+    }
+
+    async def remember(value: dict[str, any]) -> None {
+        if demoToken { await saveAccount(value); return; }
         if not dataPrefs or not dataPrefs["store"] { return; }
         try { localStorage.setItem("stride-jac-v2", JSON.stringify(value)); saveWarning = ""; }
         except Exception { saveWarning = "Changes are only in this tab: browser storage failed or is full. Keep this tab open and download a PDF for your records."; }
@@ -48,7 +59,7 @@ def:pub FitnessApp -> JsxElement {
                     restored = result["state"];
                     state = restored;
                     historyIndex = -1;
-                    remember(restored);
+                    await remember(restored);
                     goal = restored["profile"]["goal"];
                     experience = restored["profile"]["experience"];
                     days = str(restored["profile"]["days"]);
@@ -65,25 +76,44 @@ def:pub FitnessApp -> JsxElement {
         } except Exception { loadFailed = True; status = "Saved history could not be loaded. Retry when the server is available; your stored data has not been changed."; }
         finally { busy = False; }
     }
-    def openSetup -> None {
+    async def openSetup -> None {
         startDate = localMonday();
         try { dataPrefs = clean_data_prefs(JSON.parse(localStorage.getItem("stride-data-prefs-v1") or "null")); }
         except Exception { dataPrefs = {}; }
-        if dataPrefs and dataPrefs["store"] { loadSaved(); } else { setupOpen = True; }
+        try { defaults = await starter_meals(); await loadMealVideos(defaults); }
+        except Exception { status = "Could not load starter recipes. Reload when the server is available."; }
+        try {
+            savedToken = sessionStorage.getItem("stride-demo-session") or "";
+            if savedToken {
+                demoToken = savedToken;
+                await restoreAccount(await read_demo_account(savedToken, int(Date.now())));
+                busy = False;
+                return;
+            }
+        } except Exception {
+            demoToken = "";
+            try { sessionStorage.removeItem("stride-demo-session"); } except Exception { }
+            accountMessage = "Your session ended. Open the demo account to restore server-saved data.";
+        }
+        if dataPrefs and dataPrefs["store"] { await loadSaved(); }
+        busy = False;
     }
     can with entry { openSetup(); }
 
-    def finishSetup(prefs: dict[str, any]) -> None {
+    async def finishSetup(prefs: dict[str, any]) -> None {
         dataPrefs = prefs;
         setupOpen = False;
         if prefs["source"] == "manual" { window.location.hash = "weekly-averages"; }
         try {
             if prefs["store"] {
                 localStorage.setItem("stride-data-prefs-v1", JSON.stringify(prefs));
-                if state { remember(state); } else { loadSaved(); }
+                if not demoToken {
+                    if state { await remember(state); } else { await loadSaved(); }
+                }
             } else {
                 localStorage.removeItem("stride-data-prefs-v1");
                 localStorage.removeItem("stride-jac-v1");
+                localStorage.removeItem("stride-jac-v2");
             }
         } except Exception { status = "This browser could not update saved data."; }
     }
@@ -105,9 +135,9 @@ def:pub FitnessApp -> JsxElement {
                 state = result["state"];
                 historyIndex = -1;
                 mealVideos = {};
-                remember(result["state"]);
+                await remember(result["state"]);
                 await loadMealVideos(result["state"]["meals"]);
-                if not dataPrefs["store"] { status = status + " It is not stored, so it will be gone after a refresh."; }
+                if not demoToken and (not dataPrefs or not dataPrefs["store"]) { status = status + " It is not stored, so it will be gone after a refresh."; }
             }
         } except Exception { status = "Could not reach the Jac server. Your current plan is unchanged; please try again."; }
         finally { busy = False; }
@@ -119,12 +149,13 @@ def:pub FitnessApp -> JsxElement {
         try {
             result = await submit_feedback(state, index, rating);
             status = result["message"];
-            if result["ok"] { state = result["state"]; historyIndex = -1; remember(result["state"]); }
+            if result["ok"] { state = result["state"]; historyIndex = -1; await remember(result["state"]); }
         } except Exception { status = "Feedback could not be saved. Please try again when the server is available."; }
         finally { busy = False; }
     }
 
     def useHealthSummary(summary: dict[str, any]) -> None {
+        healthSource = "Apple Health · 28-day summary";
         filled: list[str] = [];
         if summary["avg_daily_steps"] is not None { avgSteps = str(summary["avg_daily_steps"]); filled.append("steps"); }
         if summary["avg_heart_rate"] is not None { avgHeartRate = str(summary["avg_heart_rate"]); filled.append("heart rate"); }
@@ -132,6 +163,108 @@ def:pub FitnessApp -> JsxElement {
         if summary["avg_workouts_per_week"] is not None { avgWorkouts = str(summary["avg_workouts_per_week"]); filled.append("workouts"); }
         status = ("Filled from Apple Health: " + ", ".join(filled) + ".") if len(filled) > 0 else "Apple Health returned no steps, heart rate, sleep or workouts for the last 28 days. Enter any averages manually.";
         window.location.hash = "weekly-averages";
+    }
+
+    async def restoreAccount(value: dict[str, any]) -> None {
+        await clearView();
+        account = value;
+        displayName = value["name"];
+        state = {};
+        historyIndex = -1;
+        loadFailed = False;
+        saveWarning = "";
+        if bool(value["plan"]) {
+            result = await restore_plan(value["plan"], localMonday());
+            if not result["ok"] { loadFailed = True; status = result["message"]; return; }
+            restored = result["state"];
+            state = restored;
+            goal = restored["profile"]["goal"];
+            experience = restored["profile"]["experience"];
+            days = str(restored["profile"]["days"]);
+            equipment = restored["profile"]["equipment"];
+            diet = restored["profile"]["diet"];
+            calories = str(restored["profile"]["calories"]);
+            avgSteps = str(restored["profile"]["avg_daily_steps"]) if restored["profile"]["avg_daily_steps"] is not None else "";
+            avgHeartRate = str(restored["profile"]["avg_heart_rate"]) if restored["profile"]["avg_heart_rate"] is not None else "";
+            avgSleep = str(restored["profile"]["avg_sleep_hours"]) if restored["profile"]["avg_sleep_hours"] is not None else "";
+            avgWorkouts = str(restored["profile"]["avg_workouts_per_week"]) if restored["profile"]["avg_workouts_per_week"] is not None else "";
+            healthSource = "Saved profile averages · review or sync again to verify their source";
+            await loadMealVideos(restored["meals"]);
+        }
+        status = "Demo account connected. Plans and feedback save on this server. Starter recipes need no profile.";
+    }
+
+    async def connectAccount -> None {
+        busy = True;
+        try {
+            result = await open_demo_account();
+            demoToken = result["token"];
+            try { sessionStorage.setItem("stride-demo-session", demoToken); }
+            except Exception { accountMessage = "Session storage is unavailable. Reconnect after refreshing."; }
+            await restoreAccount(result["account"]);
+            accountMessage = "Connected to the shared local demo account.";
+        } except Exception { accountMessage = "Could not connect to the demo account. Check the Jac server and try again."; }
+        finally { busy = False; }
+    }
+
+    async def renameAccount(e: FormEvent) -> None {
+        e.preventDefault();
+        busy = True;
+        try {
+            account = await rename_demo_account(demoToken, displayName);
+            displayName = account["name"];
+            accountMessage = "Display name saved on the server.";
+        } except Exception { accountMessage = "Could not save. Use 1–60 characters, or reconnect if the session expired."; }
+        finally { busy = False; }
+    }
+
+    async def testSync -> None {
+        busy = True;
+        try {
+            summary = await sync_demo_health(demoToken);
+            avgSteps = str(summary["avg_daily_steps"]);
+            avgHeartRate = str(summary["avg_heart_rate"]);
+            avgSleep = str(summary["avg_sleep_hours"]);
+            avgWorkouts = str(summary["avg_workouts_per_week"]);
+            account = await read_demo_account(demoToken, int(Date.now()));
+            healthSource = "Synthetic server test data · 28-day example";
+            accountMessage = "Test connection synced: 7,200 steps/day, 72 bpm, 7.5 hours sleep, 3 workouts/week. Review the form before creating a plan.";
+        } except Exception { accountMessage = "Test sync failed. Reconnect to the demo account and try again."; }
+        finally { busy = False; }
+    }
+
+    async def clearView -> None {
+        state = {}; historyIndex = -1; calories = "";
+        avgSteps = ""; avgHeartRate = ""; avgSleep = ""; avgWorkouts = "";
+        goal = "active"; experience = "beginner"; days = "3"; equipment = "bodyweight"; diet = "none";
+        healthSource = ""; loadFailed = False; saveWarning = "";
+        await loadMealVideos(defaults);
+    }
+
+    async def signOut -> None {
+        busy = True;
+        try {
+            await close_demo_account(demoToken);
+            try { sessionStorage.removeItem("stride-demo-session"); } except Exception { }
+            demoToken = ""; account = {}; displayName = "";
+            await clearView();
+            accountMessage = "Signed out. Your demo data remains on this server.";
+            status = "Browse starter meals or reconnect to your demo account.";
+        } except Exception { accountMessage = "Could not sign out. Check the server connection and retry."; }
+        finally { busy = False; }
+    }
+
+    async def resetAccount -> None {
+        if not window.confirm("Reset the shared demo account? This deletes its server-saved plan, history, health test data and display name.") { return; }
+        busy = True;
+        try {
+            account = await reset_demo_account(demoToken);
+            displayName = account["name"];
+            await clearView();
+            accountMessage = "Demo account reset. Starter recipes are ready.";
+            status = "Demo account reset.";
+        } except Exception { accountMessage = "Could not reset the account. Reconnect and try again."; }
+        finally { busy = False; }
     }
 
     def downloadPdf -> None {
@@ -143,9 +276,10 @@ def:pub FitnessApp -> JsxElement {
     }
 
     def clearSaved -> None {
-        if not window.confirm("Clear your saved profile, plan, workout feedback and data choices?") { return; }
+        if not window.confirm("Clear this browser's saved profile, plan, feedback and data choices? The server demo account is managed separately in Account.") { return; }
         try { localStorage.removeItem("stride-jac-v1"); localStorage.removeItem("stride-jac-v2"); localStorage.removeItem("stride-data-prefs-v1"); }
         except Exception { status = "This browser could not clear saved data."; return; }
+        if demoToken { dataPrefs = {}; status = "Browser data cleared. The demo account on this server is unchanged."; return; }
         state = {};
         mealVideos = {};
         dataPrefs = {};
@@ -158,16 +292,36 @@ def:pub FitnessApp -> JsxElement {
 
 
     <div>
-        <header><a className="brand" href="#">◈ <strong>stride</strong></a><span>GROUP 10 <b> / </b> JAC PROTOTYPE</span><div className="header-actions"><button className="quiet" onClick={lambda { setupOpen = True; }} disabled={busy}>Data settings</button><button className="quiet" onClick={clearSaved} disabled={busy}>Clear saved data</button></div></header>
-        {setupOpen and <DataSetup initial={dataPrefs} onFinish={finishSetup}/>}
+        <header><a className="brand" href="#">◈ <strong>stride</strong></a><span>GROUP 10 <b> / </b> JAC PROTOTYPE</span><div className="header-actions"><button className="quiet" onClick={lambda { accountOpen = True; }} disabled={busy}>{account["name"] if bool(account) else "Account"}</button><button className="quiet" onClick={lambda { setupOpen = True; }} disabled={busy}>Data settings</button><button className="quiet" onClick={clearSaved} disabled={busy}>Clear browser data</button></div></header>
+        {if accountOpen {
+            <div className="modal-backdrop"><section className="modal" role="dialog" aria-modal="true" aria-labelledby="account-title">
+                <div className="section-label">SINGLE-USER DEMO</div><h2 id="account-title">Your Stride account</h2>
+                {if account {
+                    <p>{account["email"]}{" · Shared local demo"}</p>
+                    <form onSubmit={renameAccount}><label>Display name<input value={displayName} maxLength={60} required={True} onChange={lambda (e: ChangeEvent) { displayName = e.target.value; }}/></label><button className="primary" disabled={busy}>Save display name</button></form>
+                    <div className="account-connection"><h3>Server test connection</h3><p>Synthetic health data for the demo. No wearable account, external API or iPhone is required.</p><button className="quiet" onClick={testSync} disabled={busy}>Sync test data</button>{if bool(account["health"]) { <p>Test summary saved on this server. Sync again to fill the form.</p> }}</div>
+                    <p>Plans, workout feedback and test summaries are saved on this computer's server. Your session expires after 12 hours or a server restart.</p>
+                    <div className="account-actions"><button className="quiet" onClick={signOut} disabled={busy}>Sign out</button><button className="quiet" onClick={resetAccount} disabled={busy}>Reset demo account</button></div>
+                } else {
+                    <p>Open the shared demo account to save plans and feedback on this server and try a synthetic health connection. Everyone using this local demo sees the same account. Existing browser plans are kept separately.</p>
+                    <button className="primary" onClick={connectAccount} disabled={busy}>Open demo account &amp; enable server saving</button>
+                }}
+                <p role="status" aria-live="polite">{accountMessage}</p>
+                <button className="quiet" onClick={lambda { accountOpen = False; }} disabled={busy}>Close account</button>
+            </section></div>
+        }}
+        {setupOpen and <DataSetup initial={dataPrefs} onFinish={finishSetup} serverSaving={bool(demoToken)}/>}
         <main>
             <section className="intro"><div><p className="eyebrow">A LITTLE STRUCTURE. A LOT OF MOMENTUM.</p><h1>Your week.<br/>Your pace.</h1><p className="lead">Build a routine around your goals, your equipment,<br className="desktop"/> and the life you actually have.</p></div><div className="hero-art" aria-hidden="true"><div className="orbit"/><div className="orb"/><span>MAKE ROOM<br/>FOR MOVEMENT ↗</span></div></section>
             <div className="layout">
                 <aside className="panel"><div className="section-label">01 / YOUR STARTING POINT</div><h2>Make it yours</h2>
+                    <p className="hint">Starter recipes are ready below. Customize this form only when you want a workout plan.</p>
+                    {if account { <p className="data-source">{"Demo account: " + account["name"] + " · Plans save on this server"}</p> }}
                     {bool(dataPrefs) and <p className="data-source">{describe_data_prefs(dataPrefs)}</p>}
                     <form onSubmit={generate}>
                         <h3 id="weekly-averages">Weekly averages <span className="optional">optional</span></h3>
                         <p className="hint">Enter only the values available from your app.</p>
+                        {if healthSource { <p className="data-source">{healthSource}</p> }}
                         {if bool(dataPrefs) and dataPrefs["hub"] == "apple" { <AppleHealthSync onSynced={useHealthSummary}/> }}
                         <label>Average daily steps<input type="number" min="0" max="100000" step="1" required={False} value={avgSteps} onChange={lambda (e: ChangeEvent) { avgSteps = e.target.value; }}/></label>
                         <label>Average heart rate <span className="optional">bpm</span><input type="number" min="20" max="250" step="0.1" required={False} value={avgHeartRate} onChange={lambda (e: ChangeEvent) { avgHeartRate = e.target.value; }}/></label>
@@ -194,7 +348,7 @@ def:pub FitnessApp -> JsxElement {
                             <h3>{viewed["start_date"]}{" to "}{viewed["end_date"]}</h3>
                             <p>{viewed["memory_note"]}</p>
                             <p><strong>Saved difficulty for the next week:</strong>{" "}{10 + viewed["offsets"]["strength"]}{" strength reps / "}{20 + 2 * viewed["offsets"]["cardio"]}{" cardio minutes."}</p>
-                            <small>{len(state["history"])}{" archived weeks · Saved in this browser only."}</small>
+                            <small>{len(state["history"])}{" archived weeks · "}{"Saved to the demo account on this server." if demoToken else ("Saved in this browser only." if dataPrefs and dataPrefs["store"] else "Not stored after refresh.")}</small>
                             {if historyIndex >= 0 { <p className="archive-notice">Archived week: read-only. Download PDF exports this selected week.</p> }}
                         </div>
                     }}
@@ -208,7 +362,7 @@ def:pub FitnessApp -> JsxElement {
                     </div>
                     <p id="status" role="status" aria-live="polite">{status}</p>
                     {if saveWarning { <p className="archive-notice" role="alert">{saveWarning}</p> }}
-                    {if loadFailed { <button className="quiet" onClick={lambda { loadSaved(); }} disabled={busy}>Retry loading saved history</button> }}
+                    {if loadFailed { <button className="quiet" onClick={lambda { if demoToken { accountOpen = True; } else { loadSaved(); } }} disabled={busy}>Retry loading saved history</button> }}
                     <div className="week">
                         {if not state { <div className="empty"><div className="empty-icon">↗</div><h3>Your next step starts here.</h3><p>Choose your preferences, then create a week with exercise and room to recover.</p></div> } else {
                             for day in viewed["plan"] {
@@ -232,12 +386,12 @@ def:pub FitnessApp -> JsxElement {
                             }
                         }}
                     </div>
-                    <section className="nutrition"><div className="section-label">03 / FUEL YOUR ROUTINE</div><h2>Simple meals. More possibilities.</h2><p>{"Approximate calories per serving. These ideas do not add up to your daily target." if len(state) > 0 else "Meal ideas will follow your diet preference."}</p><div className="meals">{if state { for (i, meal) in enumerate(viewed["meals"]) {
+                    <section className="nutrition"><div className="section-label">03 / FUEL YOUR ROUTINE</div><h2>Simple meals. More possibilities.</h2><p>{"Approximate calories per serving. These ideas do not add up to your daily target." if len(state) > 0 else "Starter recipes · No profile needed. These examples are not personalized. Approximate calories per serving."}</p><div className="meals">{for (i, meal) in enumerate(shownMeals) {
                         <article key={meal["name"]} className="meal"><span className="meal-number">{"IDEA 0" + str(i + 1)}</span><h3><a className="meal-name" href={"https://www.youtube.com/results?search_query=" + encodeURIComponent(meal["name"] + " recipe video")} target="_blank" rel="noreferrer">{meal["name"]}</a></h3><p>{meal["detail"]}</p>{if mealVideos.get(meal["name"], {}).get("thumbnail") { <a className="meal-video" href={mealVideos[meal["name"]]["url"]} target="_blank" rel="noreferrer"><img src={mealVideos[meal["name"]]["thumbnail"]} onError={lambda (e: any) { e.currentTarget.src = mealVideos[meal["name"]]["fallback"]; }} alt={"YouTube video: " + mealVideos[meal["name"]]["title"]}/></a> }}<strong>{"≈ " + str(meal["calories"]) + " kcal"}</strong></article>
-                    } }}</div></section>
+                    } }</div></section>
                 </section>
             </div>
-            <footer><p>Jac server and UI · Demo planning rules · {"Saved on this browser" if bool(dataPrefs) and dataPrefs["store"] else "Not stored"}</p><p>Workout examples and approximate meal calories are for demonstration. Meal ideas are not a complete daily menu. Pause exercise if it causes pain.</p></footer>
+            <footer><p>Jac server and UI · Demo planning rules · {"Saved on this server · shared demo account" if demoToken else ("Saved on this browser" if bool(dataPrefs) and dataPrefs["store"] else "Not stored")}</p><p>Workout examples and approximate meal calories are for demonstration. Meal ideas are not a complete daily menu. Pause exercise if it causes pain.</p></footer>
         </main>
     </div>
 }
