@@ -155,13 +155,18 @@ def:pub FitnessApp -> JsxElement {
     }
 
     def useHealthSummary(summary: dict[str, any]) -> None {
+        # Each sync replaces the previous summary, including unavailable metrics.
+        avgSteps = "";
+        avgHeartRate = "";
+        avgSleep = "";
+        avgWorkouts = "";
         healthSource = "Apple Health · 28-day summary";
         filled: list[str] = [];
         if summary["avg_daily_steps"] is not None { avgSteps = str(summary["avg_daily_steps"]); filled.append("steps"); }
         if summary["avg_heart_rate"] is not None { avgHeartRate = str(summary["avg_heart_rate"]); filled.append("heart rate"); }
         if summary["avg_sleep_hours"] is not None { avgSleep = str(summary["avg_sleep_hours"]); filled.append("sleep"); }
         if summary["avg_workouts_per_week"] is not None { avgWorkouts = str(summary["avg_workouts_per_week"]); filled.append("workouts"); }
-        status = ("Filled from Apple Health: " + ", ".join(filled) + ".") if len(filled) > 0 else "Apple Health returned no steps, heart rate, sleep or workouts for the last 28 days. Enter any averages manually.";
+        status = ("Filled from Apple Health: " + ", ".join(filled) + ". Missing values are left blank.") if len(filled) > 0 else "Apple Health returned no steps, heart rate, sleep or workouts for the last 28 days. All average fields were cleared; enter any averages manually.";
         window.location.hash = "weekly-averages";
     }
 
