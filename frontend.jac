@@ -1,6 +1,5 @@
 """Jac components and browser interactions; no handwritten JavaScript."""
 import from planner { create_plan, submit_feedback, restore_plan, meal_video }
-import from ".feature-calorie-calculator" { CalorieCalculator }
 
 def:pub FitnessApp -> JsxElement {
     has goal: str = "active", experience: str = "beginner", days: str = "3",
@@ -126,7 +125,6 @@ def:pub FitnessApp -> JsxElement {
                     <section className="nutrition"><div className="section-label">03 / FUEL YOUR ROUTINE</div><h2>Simple meals. More possibilities.</h2><p>{"Approximate calories per serving. These ideas do not add up to your daily target." if len(state) > 0 else "Meal ideas will follow your diet preference."}</p><div className="meals">{if state { for (i, meal) in enumerate(state["meals"]) {
                         <article key={meal["name"]} className="meal"><span className="meal-number">{"IDEA 0" + str(i + 1)}</span><h3><a className="meal-name" href={"https://www.youtube.com/results?search_query=" + encodeURIComponent(meal["name"] + " recipe video")} target="_blank" rel="noreferrer">{meal["name"]}</a></h3><p>{meal["detail"]}</p>{if mealVideos.get(meal["name"], {}).get("thumbnail") { <a className="meal-video" href={mealVideos[meal["name"]]["url"]} target="_blank" rel="noreferrer"><img src={mealVideos[meal["name"]]["thumbnail"]} onError={lambda (e: any) { e.currentTarget.src = mealVideos[meal["name"]]["fallback"]; }} alt={"YouTube video: " + mealVideos[meal["name"]]["title"]}/></a> }}<strong>{"≈ " + str(meal["calories"]) + " kcal"}</strong></article>
                     } }}</div></section>
-                    <CalorieCalculator/>
                 </section>
             </div>
             <footer><p>Jac server and UI · Demo planning rules · Saved on this browser</p><p>Workout examples and approximate meal calories are for demonstration. Meal ideas are not a complete daily menu. Pause exercise if it causes pain.</p></footer>
