@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" preserveAspectRatio="none" fill="none">
+  <defs>
+    <filter id="edge" x="-8%" y="-18%" width="116%" height="136%">
+      <feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="3" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="16"/>
+      <feGaussianBlur stdDeviation=".45"/>
+    </filter>
+  </defs>
+  <g filter="url(#edge)" fill="#183c35">
+    <path d="M106 173C81 146 125 110 178 126C211 102 239 129 281 111C344 93 355 119 401 96C476 62 531 86 584 72C630 63 657 89 704 63C746 39 811 37 824 60C843 84 793 95 819 119C841 143 804 155 829 179C857 206 828 221 839 241C854 267 810 274 776 270C727 303 678 273 641 300C597 327 544 299 505 327C464 353 410 328 367 343C315 366 300 325 258 343C218 359 197 323 160 333C125 342 111 306 85 311C51 318 54 274 75 260C53 240 83 224 69 208C53 189 86 189 106 173Z"/>
+    <path d="M139 143C325 93 562 126 779 51" stroke="#183c35" stroke-width="12" stroke-linecap="round"/>
+    <path d="M112 300C291 342 521 278 722 294M167 353C302 319 425 346 568 303M381 95C517 52 621 86 729 39" stroke="#183c35" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <g fill="#183c35">
+    <ellipse cx="42" cy="214" rx="12" ry="9" transform="rotate(-24 42 214)"/>
+    <ellipse cx="850" cy="109" rx="10" ry="7" transform="rotate(31 850 109)"/>
+    <circle cx="116" cy="86" r="7"/><circle cx="77" cy="132" r="3"/>
+    <circle cx="36" cy="278" r="4"/><circle cx="222" cy="374" r="6"/>
+    <circle cx="677" cy="338" r="8"/><circle cx="777" cy="317" r="4"/>
+    <circle cx="868" cy="230" r="5"/><circle cx="591" cy="34" r="4"/>
+    <circle cx="875" cy="146" r="2"/><circle cx="179" cy="91" r="2"/>
+    <circle cx="152" cy="370" r="2"/><circle cx="326" cy="379" r="3"/>
+  </g>
+</svg>

@@ -1,0 +1,124 @@
+{
+  "model": "qwen3:1.7b",
+  "description": "Development spot check; dish quantities have no reference calorie labels. Not an independent nutrition accuracy study.",
+  "results": [
+    {
+      "query": "olive oil",
+      "seconds": 7.54,
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "olive oil",
+        "grams": 100.0,
+        "calories": 130.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "commercial",
+        "assumptions": "Typical commercial olive oil; unrefined, cold-pressed; may vary by brand and region.",
+        "food": {
+          "id": "model",
+          "name": "olive oil",
+          "kcal_per_100g": 130,
+          "energy_basis": "Unverified local model estimate"
+        }
+      },
+      "reference": {}
+    },
+    {
+      "query": "granulated sugar",
+      "seconds": 4.45,
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "granulated sugar",
+        "grams": 100.0,
+        "calories": 39.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "commercially prepared",
+        "assumptions": "Typical granulated sugar; assume standard commercial preparation; assume a typical cooked recipe for unspecified dishes; assume a typical serving size of 100 g; account for water in cooked dishes.",
+        "food": {
+          "id": "model",
+          "name": "granulated sugar",
+          "kcal_per_100g": 39,
+          "energy_basis": "Unverified local model estimate"
+        }
+      },
+      "reference": {
+        "id": 746784,
+        "name": "Sugars, granulated",
+        "kcal_per_100g": 385,
+        "energy_basis": "Energy"
+      }
+    },
+    {
+      "query": "hummus commercial",
+      "seconds": 4.08,
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "hummus commercial",
+        "grams": 100.0,
+        "calories": 145.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "commercial",
+        "assumptions": "Typical commercial hummus; may vary by brand and preparation. Assumed to be cooked or prepared with oil, spices, and legumes. Water may be added for consistency.",
+        "food": {
+          "id": "model",
+          "name": "hummus commercial",
+          "kcal_per_100g": 145,
+          "energy_basis": "Unverified local model estimate"
+        }
+      },
+      "reference": {
+        "id": 321358,
+        "name": "Hummus, commercial",
+        "kcal_per_100g": 229,
+        "energy_basis": "Energy"
+      }
+    },
+    {
+      "query": "chicken curry",
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "chicken curry",
+        "grams": 100.0,
+        "calories": 320.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "cooked",
+        "assumptions": "Typical cooked chicken curry with standard cooking methods; assumes average cooking intensity and typical ingredients (e.g., chicken, spices, vegetables).",
+        "food": {
+          "id": "model",
+          "name": "chicken curry",
+          "kcal_per_100g": 320,
+          "energy_basis": "Unverified local model estimate"
+        }
+      }
+    },
+    {
+      "query": "spaghetti bolognese",
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "spaghetti bolognese",
+        "grams": 100.0,
+        "calories": 150.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "cooked",
+        "assumptions": "Typical cooked spaghetti bolognese with tomato sauce, meat (usually beef or pork), and pasta. Assumed to be a standard recipe with typical ingredients and cooking method. Water and other liquids are included in the calculation.",
+        "food": {
+          "id": "model",
+          "name": "spaghetti bolognese",
+          "kcal_per_100g": 150,
+          "energy_basis": "Unverified local model estimate"
+        }
+      }
+    },
+    {
+      "query": "zzzznotfood123",
+      "result": {
+        "ok": false,
+        "message": "The local model did not recognize this food. Try its common name and preparation."
+      }
+    }
+  ]
+}

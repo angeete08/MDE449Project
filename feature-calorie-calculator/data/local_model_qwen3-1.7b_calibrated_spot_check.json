@@ -1,0 +1,133 @@
+{
+  "model": "qwen3:1.7b",
+  "description": "Development spot check; dish quantities have no reference calorie labels. Not an independent nutrition accuracy study.",
+  "results": [
+    {
+      "query": "olive oil",
+      "seconds": 5.49,
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "olive oil",
+        "grams": 100.0,
+        "calories": 884.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "raw",
+        "assumptions": "Assumes 100 g of raw olive oil, typical composition, no water added, and no cooking. Water weight is not included in the energy estimate as it is not part of the edible food.",
+        "food": {
+          "id": "model",
+          "name": "olive oil",
+          "kcal_per_100g": 884,
+          "energy_basis": "Unverified local model estimate"
+        }
+      },
+      "reference": {}
+    },
+    {
+      "query": "granulated sugar",
+      "seconds": 6.17,
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "granulated sugar",
+        "grams": 100.0,
+        "calories": 400.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "raw",
+        "assumptions": "Assumes the food is consumed in its raw form, without cooking. The value of 400 kcal per 100 g is based on the standard nutritional composition of granulated sugar, which is primarily sucrose. Water weight is not included in this estimate as it is already accounted for in the 400 kcal value.",
+        "food": {
+          "id": "model",
+          "name": "granulated sugar",
+          "kcal_per_100g": 400,
+          "energy_basis": "Unverified local model estimate"
+        }
+      },
+      "reference": {
+        "id": 746784,
+        "name": "Sugars, granulated",
+        "kcal_per_100g": 385,
+        "energy_basis": "Energy"
+      }
+    },
+    {
+      "query": "hummus commercial",
+      "seconds": 5.04,
+      "result": {
+        "ok": false,
+        "message": "The local model did not recognize this food. Try its common name and preparation."
+      },
+      "reference": {
+        "id": 321358,
+        "name": "Hummus, commercial",
+        "kcal_per_100g": 229,
+        "energy_basis": "Energy"
+      }
+    },
+    {
+      "query": "chicken curry",
+      "result": {
+        "ok": false,
+        "message": "The local model did not recognize this food. Try its common name and preparation."
+      }
+    },
+    {
+      "query": "spaghetti bolognese",
+      "result": {
+        "ok": false,
+        "message": "The local model did not recognize this food. Try its common name and preparation."
+      }
+    },
+    {
+      "query": "cooked white rice",
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "cooked white rice",
+        "grams": 100.0,
+        "calories": 130.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "cooked",
+        "assumptions": "Assumed typical cooked white rice with standard cooking method (boiling or steaming), without additional ingredients. Water weight included in the energy estimate.",
+        "food": {
+          "id": "model",
+          "name": "cooked white rice",
+          "kcal_per_100g": 130,
+          "energy_basis": "Unverified local model estimate"
+        }
+      }
+    },
+    {
+      "query": "butter",
+      "result": {
+        "ok": false,
+        "message": "The local model did not recognize this food. Try its common name and preparation."
+      }
+    },
+    {
+      "query": "raw apple",
+      "result": {
+        "ok": true,
+        "kind": "food",
+        "name": "raw apple",
+        "grams": 100.0,
+        "calories": 89.0,
+        "local_model": "qwen3:1.7b",
+        "preparation": "raw",
+        "assumptions": "The food is raw and unprocessed. Water weight is included in the energy estimate for cooked dishes, but since this is raw, the energy content is directly from the dry matter. The estimate assumes no additional processing or cooking, so the kcal per 100g is based on the natural composition of raw apple.",
+        "food": {
+          "id": "model",
+          "name": "raw apple",
+          "kcal_per_100g": 89,
+          "energy_basis": "Unverified local model estimate"
+        }
+      }
+    },
+    {
+      "query": "zzzznotfood123",
+      "result": {
+        "ok": false,
+        "message": "The local model did not recognize this food. Try its common name and preparation."
+      }
+    }
+  ]
+}

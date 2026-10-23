@@ -1,0 +1,62 @@
+{
+  "scope": "Development regression examples; not independent generalization accuracy",
+  "examples": [
+    {
+      "query": "spagheti bolognese",
+      "expected": "Spaghetti Bolognese",
+      "actual": "Spaghetti Bolognese",
+      "correct": true
+    },
+    {
+      "query": "bolognese spaghetti",
+      "expected": "Spaghetti Bolognese",
+      "actual": "Spaghetti Bolognese",
+      "correct": true
+    },
+    {
+      "query": "peanut buter cookies",
+      "expected": "Peanut Butter Cookies",
+      "actual": "Peanut Butter Cookies",
+      "correct": true
+    },
+    {
+      "query": "  HUMMUS  ",
+      "expected": "Hummus",
+      "actual": "Hummus",
+      "correct": true
+    },
+    {
+      "query": "banana pancaks",
+      "expected": "Banana Pancakes",
+      "actual": "Banana Pancakes",
+      "correct": true
+    },
+    {
+      "query": "salmon avocado salad",
+      "expected": "Salmon Avocado Salad",
+      "actual": "Salmon Avocado Salad",
+      "correct": true
+    },
+    {
+      "query": "pancakes",
+      "expected": "Pancakes",
+      "actual": "Pancakes",
+      "correct": true
+    },
+    {
+      "query": "chicken curry",
+      "expected": "Chicken Curry",
+      "actual": "Nutty Chicken Curry",
+      "correct": false
+    },
+    {
+      "query": "hummus commercial",
+      "expected": "Hummus, commercial",
+      "actual": "Hummus, commercial",
+      "correct": true
+    }
+  ],
+  "correct": 8,
+  "total": 9,
+  "model_fitted_at": "2026-10-12T19:00:11Z"
+}

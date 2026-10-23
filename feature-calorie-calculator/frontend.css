@@ -1,0 +1,108 @@
+.exercise-name, .meal-name {
+  color: inherit;
+  text-decoration-color: #b6c1b5;
+  text-underline-offset: 3px;
+}
+
+/* Preserve the original canvases, showing the wordmark in the header
+   and Logo 2's athlete in the hero illustration area. */
+.stride-brand {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  position: relative;
+  isolation: isolate;
+  flex-shrink: 0;
+}
+.stride-brand::before {
+  content: "";
+  position: absolute;
+  inset: -8px -14px;
+  z-index: -1;
+  background: url("./assets/brush-paint-texture.png") center / 100% 100% no-repeat;
+  transform: scaleX(-1);
+  pointer-events: none;
+}
+.stride-brand-wordmark {
+  display: block;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+}
+.stride-brand-wordmark {
+  width: 144px;
+  height: 55px;
+  background-image: url("./assets/logo1.png");
+  background-size: 180px auto;
+  background-position: -25px -187px;
+  /* Keep the capital S's full upper curve while excluding the separate
+     illustration above the other letters on Logo 1's source canvas. */
+  clip-path: polygon(0 4px, 45% 4px, 45% 8px, 100% 8px, 100% 100%, 0 100%);
+}
+.hero-art.hero-logo {
+  height: 280px;
+  overflow: visible;
+  border-radius: 0;
+  background-color: transparent;
+  background-image: none;
+  isolation: isolate;
+}
+.hero-logo::before, .hero-logo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hero-logo::before {
+  background: url("./assets/brush-paint-texture.png") center / 100% 100% no-repeat;
+  transform: translateX(-12px) rotate(-10deg) scaleX(-1);
+}
+.hero-logo::after {
+  background: url("./assets/logo2.png") 106% 50% / 128% auto no-repeat;
+}
+@media (max-width: 650px) {
+  header { flex-wrap: wrap; gap: 12px; }
+}
+
+.exercise-name:hover, .meal-name:hover {
+  text-decoration-color: currentColor;
+}
+
+.meal-video {
+  display: block;
+  margin: 1rem 0;
+  width: 100%;
+  max-width: 220px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.meal-video img {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+}
+
+.calorie-calculator { margin-top: 2rem; padding: 1.5rem; border: 1px solid #d5ded2; border-radius: 16px; background: #f7faf4; }
+.calorie-search, .calorie-portion { display: grid; gap: 1rem; margin-top: 1rem; }
+.calorie-calculator label { display: grid; gap: .5rem; }
+.calorie-calculator select, .calorie-calculator input { width: 100%; min-width: 0; }
+.calorie-result { background: #e6efdc; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; }
+.calorie-result > strong { font-size: 1.8rem; }
+.calorie-calculator small { line-height: 1.5; }
+@media (min-width: 700px) {
+  .calorie-search { grid-template-columns: minmax(0, 1fr) 140px auto; align-items: end; }
+}
+.calorie-search label { margin-bottom: 0; }
+.calorie-search .primary { margin-top: 0; }
+.match-alternatives { margin: 1rem 0; }
+.match-alternatives summary, .recipe-ingredients summary { cursor: pointer; padding: .5rem 0; }
+.match-alternatives > div { display: grid; gap: .5rem; margin-top: .5rem; }
+.recipe-ingredients { display: grid; gap: 1rem; }
+.ingredient-row { border-top: 1px solid #d5ded2; padding-top: .75rem; }
+.ingredient-search, .ingredient-values { display: grid; gap: .75rem; align-items: end; }
+.ingredient-row label { margin-bottom: .75rem; }
+@media (min-width: 700px) {
+  .ingredient-search { grid-template-columns: minmax(0, 1fr) auto; }
+  .ingredient-values { grid-template-columns: minmax(0, 1fr) 140px; }
+}
