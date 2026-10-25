@@ -5,6 +5,8 @@ node_modules/
 dist/
 .openai/
 *.log
+.env
+.env.*
 .DS_Store
 xcuserdata/
 DerivedData/

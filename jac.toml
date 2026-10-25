@@ -1,34 +1,73 @@
 [project]
 name = "stride-fitness"
-version = "0.2.0"
-description = "Group 10 fitness prototype written in Jac"
+version = "0.3.0"
+description = "Stride JacHammer dashboard with weekly planning and activity goals"
 entry-point = "main"
-kind = "web-app"
 jac-version = "==0.37.21"
+kind = "web-app"
 
+[jac-shadcn]
+style = "vega"
+baseColor = "neutral"
+theme = "emerald"
+font = "figtree"
+radius = "medium"
+menuAccent = "bold"
+menuColor = "default"
 [dependencies]
 [dependencies.npm]
 jspdf = "4.2.1"
 qrcode = "1.5.4"
+"@fontsource-variable/figtree" = "5.3.0"
 react = "^19.2.0"
 react-dom = "^19.2.0"
 react-router-dom = "^6.22.0"
 react-error-boundary = "^5.0.0"
-"@tanstack/react-form" = "^1.33.0"
-zod = "^4.3.6"
+"@hugeicons/react" = "1.1.10"
+"@hugeicons/core-free-icons" = "4.3.3"
+radix-ui = "1.6.7"
+class-variance-authority = "0.7.1"
+shadcn = "^3.8.5"
+clsx = "^2.1.1"
+tailwind-merge = "^3.5.0"
+tw-animate-css = "^1.4.0"
 
 [dependencies.npm.dev]
 vite = "^6.4.1"
-"@vitejs/plugin-react" = "^4.7.0"
+"@vitejs/plugin-react" = "^4.2.1"
 typescript = "^5.3.3"
 "@types/react" = "^19.2.0"
 "@types/react-dom" = "^19.2.0"
-
-[client]
+tailwindcss = "4.3.3"
+"@tailwindcss/vite" = "4.3.3"
 
 [serve]
 host = "127.0.0.1"
 port = 8000
+base_route_app = "app"
+
+[client]
+[client.vite]
+plugins = ["tailwindcss()"]
+lib_imports = ["import tailwindcss from '@tailwindcss/vite'"]
+
+[client.app_meta_data]
+title = "Stride"
+description = "Your personalized weekly fitness plan, meals and calorie goals."
+keywords = "fitness, workout, meals, streak, health"
+author = "Stride"
+theme_color = "#10b981"
+og_type = "website"
+og_title = "Stride"
+og_description = "A weekly plan that fits your body, your diet and your week."
+og_site_name = "Stride"
+
+[jacpack]
+name = 'personal-fitness-stride'
+description = 'Jac IDE snapshot for personal-fitness-stride'
+
+[jachammer]
+project_id = "prj_b486acd1437d4a298fb72fcd70e6fa91"
 
 [test]
 directory = "."

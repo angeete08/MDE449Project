@@ -1,11 +1,51 @@
-"""Stride full-stack Jac entry point."""
-import from planner { create_plan, submit_feedback, restore_plan, meal_video }
-import from health_sync { start_health_sync, health_sync_status, finish_health_sync, receive_health_batch, receive_health_log, release_health_sync }
-import from accounts { starter_meals, open_demo_account, read_demo_account, rename_demo_account, save_demo_plan, sync_demo_health, reset_demo_account, close_demo_account }
-import ".global.css";
-import ".frontend.css";
-import from .frontend { FitnessApp }
+import from health_sync {
+    start_health_sync,
+    health_sync_status,
+    finish_health_sync,
+    receive_health_batch,
+    receive_health_log,
+    release_health_sync
+}
+import from services.stride {
+    save_profile,
+    get_profile,
+    get_plan,
+    get_logs,
+    get_scoreboard,
+    give_feedback,
+    save_log,
+    meal_plan,
+    regenerate_plan,
+    get_plan_state,
+    set_weekly_goal,
+    get_activity_summary,
+    save_health_summary,
+    get_health_summary,
+    get_movement_break,
+    clear_account_data,
+    Profile,
+    PlanDay,
+    DailyLog,
+    FriendView,
+}
 
-def:pub app -> JsxElement {
-    <FitnessApp/>
+import ".styles.global.css";
+import from "@jac/runtime" { Router, Routes, Route, AuthGuard }
+import from .components.Landing { Landing }
+import from .components.LoginPage { LoginPage }
+import from .components.OnboardingWizard { OnboardingWizard }
+import from .components.DashboardApp { DashboardApp }
+
+def:pub app() -> JsxElement {
+    return
+        <Router>
+            <Routes>
+                <Route path="/" element={<Landing/>}/>
+                <Route path="/login" element={<LoginPage/>}/>
+                <Route element={<AuthGuard redirect="/login"/>}>
+                    <Route path="/onboarding" element={<OnboardingWizard/>}/>
+                    <Route path="/app" element={<DashboardApp/>}/>
+                </Route>
+            </Routes>
+        </Router>;
 }
