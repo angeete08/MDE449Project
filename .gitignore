@@ -6,3 +6,8 @@ dist/
 .openai/
 *.log
 .DS_Store
+xcuserdata/
+DerivedData/
+*.xcuserstate
+ios/**/.build/
+ios/**/.swiftpm/
