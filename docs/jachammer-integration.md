@@ -45,3 +45,11 @@ Changed the weekly goal to 120 minutes, logged 30 minutes, replaced that date wi
 All three displayed recipe thumbnails loaded and linked directly to YouTube videos. Workout exercise names linked to YouTube tutorial searches. Rating Monday “Too hard” retained Monday's 2×10 workout and changed Friday's matching strength exercises to 2×9. The PDF export handler completed without a browser error. The API integration test verifies archived exact workouts, feedback and inherited difficulty, and agreement between displayed meals and saved PDF meal data.
 
 Manual weekly averages saved with their source label and unavailable metrics stayed blank. The iPhone sync action produced a QR code and companion deep link. A physical iPhone sync was not repeated during this session. Browser console contained no application errors during these flows.
+
+## Review artifacts
+
+- [PR #9: JacHammer interface and activity goals](https://github.com/angeete08/MDE449Project/pull/9), open against `dev` for teammate review.
+- [Issue #10: integration review and next health-data scope](https://github.com/angeete08/MDE449Project/issues/10).
+- [October 28 readout slide](https://docs.google.com/presentation/d/1-qHyGSSGXR-DmAtANlujQsp4FOTtu3hmfA4Ny83XuUk/edit#slide=id.h1a1db0561e04d6ac_0_5), updated with both links.
+
+Final `jac install` completed successfully after dependencies were provisioned, and the working tree matches the pushed branch. The GitHub connector lacked write access for PR/issues; those artifacts were created through the existing Git authentication with the GitHub CLI.
