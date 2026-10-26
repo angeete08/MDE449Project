@@ -7,8 +7,18 @@ test "account data is isolated and duplicate log replaces totals" {
         try {
             denied = client.post("/function/get_profile", json={});
             assert denied.status_code == 401;
+            denied_coach = client.post(
+                "/function/ask_coach",
+                json={"question": "What is in my plan?", "conversation": []}
+            );
+            assert denied_coach.status_code == 401;
             client.register_user("stride-test-alice", "test-password-449");
             client.login("stride-test-alice", "test-password-449");
+            invalid_coach = client.post(
+                "/function/ask_coach",
+                json={"question": " ", "conversation": []}
+            );
+            assert invalid_coach.status_code >= 400;
             result = client.post(
                 "/function/save_profile",
                 json={

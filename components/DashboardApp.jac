@@ -42,6 +42,7 @@ import from ..services.stride {
 }
 import from ..health_panel { AppleHealthSync }
 import from .ManualAverages { ManualAverages }
+import from .ChatCoach { ChatCoach }
 import from ..pdf_export { download_plan_pdf }
 
 # All date comparisons and week totals use this browser-local calendar date.
@@ -355,12 +356,20 @@ def:pub DashboardApp() -> JsxElement {
                 <Tabs value={tab} onValueChange={lambda (v: str) { tab = v; }}>
                     <TabsList className="flex flex-wrap h-auto">
                         <TabsTrigger value="today">Today</TabsTrigger>
+                        <TabsTrigger value="coach">Coach</TabsTrigger>
                         <TabsTrigger value="plan">Plan</TabsTrigger>
                         <TabsTrigger value="meals">Meals</TabsTrigger>
                         <TabsTrigger value="progress">Progress</TabsTrigger>
                         <TabsTrigger value="health">Health</TabsTrigger>
                         <TabsTrigger value="history">History</TabsTrigger>
                     </TabsList>
+                    <TabsContent value="coach" className="pt-2">
+                        <Card>
+                            <CardContent className="pt-6">
+                                <ChatCoach/>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
                     <TabsContent value="today" className="flex flex-col gap-6 pt-2">
                         <div className="grid gap-6 md:grid-cols-2">
                             <Card>

@@ -23,6 +23,7 @@ import from services.stride {
     get_health_summary,
     get_movement_break,
     clear_account_data,
+    ask_coach,
     Profile,
     PlanDay,
     DailyLog,

@@ -15,6 +15,7 @@ radius = "medium"
 menuAccent = "bold"
 menuColor = "default"
 [dependencies]
+litellm = "~=1.106"
 [dependencies.npm]
 jspdf = "4.2.1"
 qrcode = "1.5.4"
@@ -50,6 +51,9 @@ base_route_app = "app"
 [client.vite]
 plugins = ["tailwindcss()"]
 lib_imports = ["import tailwindcss from '@tailwindcss/vite'"]
+
+[byllm.model]
+default_model = "gemini/gemini-2.5-flash"
 
 [client.app_meta_data]
 title = "Stride"

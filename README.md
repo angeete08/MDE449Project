@@ -15,7 +15,7 @@ jac install
 jac run
 ```
 
-Open **http://localhost:8000**. The API runs on 8001. Sign up, sign in, complete onboarding and explicitly enable account storage. No model API key is required. Initial startup downloads the dependencies and Jac's embedded database runtime. Stop with Ctrl+C. Use `jac run --port 8010` for a different web port (API 8011).
+Open **http://localhost:8000**. The API runs on 8001. Sign up, sign in, complete onboarding and explicitly enable account storage. Stride Coach uses Google Gemini; create a key in [Google AI Studio](https://aistudio.google.com/apikey) and put `GOOGLE_API_KEY=your-key` in the project-root `.env` file. Gemini API free-tier availability, quotas and limits depend on Google's current terms and account/region. The rest of the app can be used without the key, but Coach replies require it. Initial startup downloads the dependencies and Jac's embedded database runtime. Stop with Ctrl+C. Use `jac run --port 8010` for a different web port (API 8011).
 
 If the bundled frontend installer stalls, stop it before trying npm (requires Node/npm):
 
@@ -30,6 +30,7 @@ Do not run two dependency installers at once. Generated dependencies, database s
 ## Dashboard features
 
 - **Today:** manually logged daily totals, a user-selected weekly goal in active minutes, current session feedback and an optional three-minute movement break based on sitting time you enter.
+- **Coach:** Google Gemini-powered answers about Stride and general fitness guidance. Questions, recent chat history and limited fitness preferences are sent to Google; stored health notes and summaries are excluded. Conversations are not saved to the account. Responses are informational, not medical advice.
 - **Plan:** the existing server-validated planner, equipment-specific exercises, YouTube tutorial searches, feedback that adjusts only later unlogged workouts of the same type, and a two-page PDF download. **Create next week** archives the current plan and carries difficulty forward.
 - **Meals:** curated diet-specific meal ideas, approximate calories per serving and clickable YouTube recipe thumbnails. Videos can use different ingredients or portions. These ideas are not a complete daily menu and do not add up to your target.
 - **Progress:** editable activity totals by date and consecutive active-day streaks. Saving the same date replaces its totals. Weekly totals use Monday through the browser's local current date. Logging workout feedback and logging daily active minutes are separate actions to avoid assuming durations or counting activity twice.
