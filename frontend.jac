@@ -297,7 +297,7 @@ def:pub FitnessApp -> JsxElement {
 
 
     <div>
-        <header><a className="brand" href="#">◈ <strong>stride</strong></a><span>GROUP 10 <b> / </b> JAC PROTOTYPE</span><div className="header-actions"><button className="quiet" onClick={lambda { accountOpen = True; }} disabled={busy}>{account["name"] if bool(account) else "Account"}</button><button className="quiet" onClick={lambda { setupOpen = True; }} disabled={busy}>Data settings</button><button className="quiet" onClick={clearSaved} disabled={busy}>Clear browser data</button></div></header>
+        <header><a className="brand stride-brand" href="#" aria-label="Stride home"><span className="stride-brand-wordmark" role="img" aria-label="STRIDE wordmark from Logo 1"/></a><span>GROUP 10 <b> / </b> JAC PROTOTYPE</span><div className="header-actions"><button className="quiet" onClick={lambda { accountOpen = True; }} disabled={busy}>{account["name"] if bool(account) else "Account"}</button><button className="quiet" onClick={lambda { setupOpen = True; }} disabled={busy}>Data settings</button><button className="quiet" onClick={clearSaved} disabled={busy}>Clear browser data</button></div></header>
         {if accountOpen {
             <div className="modal-backdrop"><section className="modal" role="dialog" aria-modal="true" aria-labelledby="account-title">
                 <div className="section-label">SINGLE-USER DEMO</div><h2 id="account-title">Your Stride account</h2>
@@ -317,7 +317,7 @@ def:pub FitnessApp -> JsxElement {
         }}
         {setupOpen and <DataSetup initial={dataPrefs} onFinish={finishSetup} serverSaving={bool(demoToken)}/>}
         <main>
-            <section className="intro"><div><p className="eyebrow">A LITTLE STRUCTURE. A LOT OF MOMENTUM.</p><h1>Your week.<br/>Your pace.</h1><p className="lead">Build a routine around your goals, your equipment,<br className="desktop"/> and the life you actually have.</p></div><div className="hero-art" aria-hidden="true"><div className="orbit"/><div className="orb"/><span>MAKE ROOM<br/>FOR MOVEMENT ↗</span></div></section>
+            <section className="intro"><div><p className="eyebrow">A LITTLE STRUCTURE. A LOT OF MOMENTUM.</p><h1>Your week.<br/>Your pace.</h1><p className="lead">Build a routine around your goals, your equipment,<br className="desktop"/> and the life you actually have.</p></div><div className="hero-art hero-logo" role="img" aria-label="Stride Logo 2: athlete lifting a dumbbell"/></section>
             <div className="layout">
                 <aside className="panel"><div className="section-label">01 / YOUR STARTING POINT</div><h2>Make it yours</h2>
                     <p className="hint">Starter recipes are ready below. Customize this form only when you want a workout plan.</p>
