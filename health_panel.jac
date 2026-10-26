@@ -14,7 +14,7 @@ def:pub AppleHealthSync(onSynced: Callable[[dict[str, any]], None]) -> JsxElemen
                 phase = "complete";
                 syncId = "";
                 onSynced(result["summary"]);
-                message = "Apple Health data received. Review the averages below before you create your week.";
+                message = "Apple Health data received. Review the imported averages.";
             } elif result["state"] == "expired" {
                 phase = "expired";
                 syncId = "";
