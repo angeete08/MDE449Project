@@ -30,7 +30,7 @@ Do not run two dependency installers at once. Generated dependencies, database s
 ## Dashboard features
 
 - **Today:** manually logged daily totals, a user-selected weekly goal in active minutes, current session feedback and an optional three-minute movement break based on sitting time you enter.
-- **Coach:** Google Gemini-powered answers about Stride and general fitness guidance. Questions, recent chat history and limited fitness preferences are sent to Google; stored health notes and summaries are excluded. Conversations are not saved to the account. Responses are informational, not medical advice.
+- **Coach:** Gemini 3.8 Flash answers questions about Stride and general fitness. It uses low reasoning effort and, if Gemini is temporarily unavailable or times out, retries once with Gemini 3.6 Flash. Questions, recent chat history and limited fitness preferences are sent to Google; stored health notes and summaries are excluded. Conversations are not saved to the account. Responses are informational, not medical advice.
 - **Plan:** the existing server-validated planner, equipment-specific exercises, YouTube tutorial searches, feedback that adjusts only later unlogged workouts of the same type, and a two-page PDF download. **Create next week** archives the current plan and carries difficulty forward.
 - **Meals:** curated diet-specific meal ideas, approximate calories per serving and clickable YouTube recipe thumbnails. Videos can use different ingredients or portions. These ideas are not a complete daily menu and do not add up to your target.
 - **Progress:** editable activity totals by date and consecutive active-day streaks. Saving the same date replaces its totals. Weekly totals use Monday through the browser's local current date. Logging workout feedback and logging daily active minutes are separate actions to avoid assuming durations or counting activity twice.
@@ -49,7 +49,7 @@ The iPhone must run the companion app and reach this server on the same Wi-Fi. I
 
 ## Current scope
 
-Planning and coaching here use explicit rules, not a live conversational model. Readiness/recovery scoring, automatic progressive overload from biomarkers, calorie or meal-portion prescriptions from height/weight, friends sharing and weekly catch-up volume changes are deferred. HRV, resting-heart-rate baselines, daily sleep, stand time and exercise-energy trends are not available in the existing four-average sync contract. Friends sharing needs an explicit invitation and consent design; the prototype's all-account scoreboard is disabled.
+Planning uses explicit rules; Stride Coach uses Gemini 3.8 Flash for live conversational answers. Readiness/recovery scoring, automatic progressive overload from biomarkers, calorie or meal-portion prescriptions from height/weight, friends sharing and weekly catch-up volume changes are deferred. HRV, resting-heart-rate baselines, daily sleep, stand time and exercise-energy trends are not available in the existing four-average sync contract. Friends sharing needs an explicit invitation and consent design; the prototype's all-account scoreboard is disabled.
 
 ## Validation
 

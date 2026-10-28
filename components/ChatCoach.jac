@@ -29,7 +29,7 @@ def:pub ChatCoach() -> JsxElement {
             answer = await ask_coach(question, previous);
             messages = [*pending, {"role": "assistant", "content": answer}];
         } except Exception {
-            error = "The coach could not respond. Check the server log, Gemini API key and available quota, then try again.";
+            error = "Gemini 3.8 Flash and its 3.6 Flash fallback did not respond. Check your internet connection, API key, quota or Google's service status, then try again.";
         } finally {
             sending = False;
         }
