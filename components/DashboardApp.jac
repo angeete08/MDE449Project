@@ -112,7 +112,7 @@ def:pub DashboardApp() -> JsxElement {
         }
         busy = True;
         try {
-            plan = await give_feedback(day_id, rating);
+            plan = await give_feedback(day_id, rating, local_today());
             plan_state = await get_plan_state();
             message = "Workout logged. Only later unlogged workouts of the same type may change.";
         } except Exception {

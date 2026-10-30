@@ -24,6 +24,7 @@ import from services.stride {
     get_movement_break,
     clear_account_data,
     ask_coach,
+    coach_available,
     Profile,
     PlanDay,
     DailyLog,

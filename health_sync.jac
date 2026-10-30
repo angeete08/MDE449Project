@@ -17,7 +17,7 @@ glob SYNCS: dict[str, dict[str, any]] = {};
 
 def new_sync(now: datetime, offset_minutes: int) -> dict[str, any] {
     return {"created": now, "updated": now, "state": "waiting", "offset": offset_minutes, "expected": 0, "received": 0, "summary": {},
-        "seen": set(), "steps": {}, "sleep": {}, "workouts": set(), "hr_total": 0.0, "hr_count": 0};
+        "seen": set(), "steps": {}, "sleep": {}, "workouts": [], "hr_total": 0.0, "hr_count": 0};
 }
 
 def parse_time(stamp: any) -> datetime | None {
@@ -63,7 +63,7 @@ def add_batch(sync: dict[str, any], data: any) -> int {
             sync["seen"].add(item["id"]);
             added += 1;
             if group == "workouts" {
-                sync["workouts"].add(item["id"]);
+                sync["workouts"].append((start, end));
             } elif group == "sleep" {
                 if item.get("stage") in ASLEEP {
                     key = (local_day(end, item.get("zoneOffset"), sync["offset"]), source_key(item));
@@ -84,6 +84,22 @@ def add_batch(sync: dict[str, any], data: any) -> int {
     return added;
 }
 
+"""Workouts whose times overlap (the same session saved by a Watch and an imported
+app, for example) count once."""
+def count_sessions(spans: list[tuple[datetime, datetime]]) -> int {
+    sessions = 0;
+    last_end: datetime | None = None;
+    for (start, end) in sorted(spans) {
+        if last_end is None or start >= last_end {
+            sessions += 1;
+            last_end = end;
+        } elif end > last_end {
+            last_end = end;
+        }
+    }
+    return sessions;
+}
+
 """Weekly averages for the form. Overlapping sources (iPhone and Watch) are not added
 together: each day or night uses the source with the largest total. Missing data stays None."""
 def summarize(sync: dict[str, any], now: datetime) -> dict[str, any] {
@@ -97,9 +113,10 @@ def summarize(sync: dict[str, any], now: datetime) -> dict[str, any] {
     steps = min(round(sum(daily.values()) / len(daily)), 100000) if daily else None;
     heart = round(sync["hr_total"] / sync["hr_count"], 1) if sync["hr_count"] else None;
     sleep = round(sum(nights.values()) / len(nights) / 3600, 1) if nights else None;
-    workouts = min(round(len(sync["workouts"]) * 7 / SYNC_DAYS, 1), 50) if sync["workouts"] else None;
+    sessions = count_sessions(sync["workouts"]);
+    workouts = min(round(sessions * 7 / SYNC_DAYS, 1), 50) if sessions else None;
     return {"avg_daily_steps": steps, "avg_heart_rate": heart, "avg_sleep_hours": sleep, "avg_workouts_per_week": workouts,
-        "days": SYNC_DAYS, "days_with_steps": len(daily), "heart_rate_samples": sync["hr_count"], "nights_with_sleep": len(nights), "workouts": len(sync["workouts"])};
+        "days": SYNC_DAYS, "days_with_steps": len(daily), "heart_rate_samples": sync["hr_count"], "nights_with_sleep": len(nights), "workouts": sessions};
 }
 
 def purge(now: datetime) {
