@@ -39,6 +39,39 @@ test "account data is isolated and duplicate log replaces totals" {
                 }
             );
             assert result.status_code == 200 , str(result.json());
+            with unittest.mock.patch.dict(
+                "os.environ", {"GOOGLE_API_KEY": "", "GEMINI_API_KEY": ""}
+            ) {
+                available = client.post("/function/coach_available", json={}).json();
+                assert available["data"]["result"] is False , str(available);
+                missing = client.post(
+                    "/function/ask_coach",
+                    json={"question": "What is a dead bug?", "conversation": []}
+                ).json();
+                assert not missing["ok"];
+                assert "not set up" in missing["error"]["message"];
+                assert "Traceback" not in missing["error"]["message"];
+            }
+            unittest.mock.patch.dict(
+                "os.environ", {"GOOGLE_API_KEY": "test-key"}
+            ).start();
+            assert client.post("/function/coach_available", json={}).json()["data"]["result"] is True;
+            rejected_key = litellm.AuthenticationError(
+                message="API key not valid. Traceback (most recent call last): /server/path",
+                llm_provider="gemini",
+                model="gemini/gemini-3.8-flash"
+            );
+            with unittest.mock.patch("litellm.completion", side_effect=rejected_key) {
+                denied_key = client.post(
+                    "/function/ask_coach",
+                    json={"question": "What is a dead bug?", "conversation": []}
+                ).json();
+                assert not denied_key["ok"];
+                assert denied_key["error"]["message"].endswith(
+                    "Gemini rejected the API key. Check GOOGLE_API_KEY in the project .env file."
+                ) , str(denied_key);
+                assert "Traceback" not in denied_key["error"]["message"];
+            }
             mock_response = ModelResponse(
                 choices=[{"message": {"content": "A dead bug is a core exercise."}}]
             );
@@ -59,6 +92,7 @@ test "account data is isolated and duplicate log replaces totals" {
                 assert call["model"] == "gemini/gemini-3.8-flash";
                 assert call["reasoning_effort"] == "low";
                 assert call["timeout"] == 30;
+                assert "temperature" not in call;
                 assert call["num_retries"] == 0;
                 assert "dead bug" in call["messages"][1]["content"].lower();
             }
@@ -142,6 +176,19 @@ test "account data is isolated and duplicate log replaces totals" {
                 "/function/give_feedback", json={"day_id": "0", "feedback": "too_hard"}
             );
             assert rated.status_code == 200;
+            current = client.post("/function/get_plan_state", json={}).json()["data"][
+                "result"
+            ];
+            future = client.post(
+                "/function/give_feedback",
+                json={
+                    "day_id": "4",
+                    "feedback": "too_easy",
+                    "today": current["plan"][0]["date"]
+                }
+            ).json();
+            assert not future["ok"] , str(future);
+            assert "scheduled day" in future["error"]["message"];
             previous = client.post("/function/get_plan_state", json={}).json()["data"][
                 "result"
             ];
@@ -176,6 +223,7 @@ test "account data is isolated and duplicate log replaces totals" {
             logs = client.post("/function/get_logs", json={}).json();
             assert logs["data"]["result"] == [] , str(logs);
         } finally {
+            unittest.mock.patch.stopall();
             client.close();
         }
     }

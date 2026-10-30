@@ -1,4 +1,4 @@
-import from ..services.stride { ask_coach }
+import from ..services.stride { ask_coach, coach_available }
 import from .ui.button { Button }
 import from .ui.input { Input }
 
@@ -11,7 +11,16 @@ def:pub ChatCoach() -> JsxElement {
         ],
         draft: str = "",
         error: str = "",
-        sending: bool = False;
+        sending: bool = False,
+        configured: bool = True;
+
+    async can with entry {
+        try {
+            configured = await coach_available();
+        } except Exception {
+            configured = True;
+        }
+    }
 
     async def send_message() {
         question = draft.strip();
@@ -29,7 +38,7 @@ def:pub ChatCoach() -> JsxElement {
             answer = await ask_coach(question, previous);
             messages = [*pending, {"role": "assistant", "content": answer}];
         } except Exception {
-            error = "Gemini 3.8 Flash and its 3.6 Flash fallback did not respond. Check your internet connection, API key, quota or Google's service status, then try again.";
+            error = "Stride Coach could not get a reply from Gemini. Try again in a minute; if it keeps failing, check the API key, quota and internet connection.";
         } finally {
             sending = False;
         }
@@ -69,6 +78,9 @@ def:pub ChatCoach() -> JsxElement {
                     Stride Coach is thinking…
                 </p>}
             </div>
+            {not configured and <p className="text-sm text-destructive" role="alert">
+                Stride Coach is not set up on this server. Add GOOGLE_API_KEY to the project .env file and restart jac run.
+            </p>}
             {error and <p className="text-sm text-destructive" role="alert">{error}</p>}
             <div className="flex gap-2">
                 <Input
@@ -76,11 +88,11 @@ def:pub ChatCoach() -> JsxElement {
                     maxLength="1200"
                     aria-label="Ask Stride Coach"
                     placeholder="Ask about your plan or fitness…"
-                    disabled={sending}
+                    disabled={sending or not configured}
                     onChange={lambda (e: ChangeEvent) { draft = e.target.value; }}
                 />
                 <Button
-                    disabled={sending or not draft.strip()}
+                    disabled={sending or not configured or not draft.strip()}
                     onClick={send_message}
                 >
                     Send

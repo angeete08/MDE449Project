@@ -1,5 +1,5 @@
 import from datetime { datetime, timedelta, timezone }
-import from health_sync { SYNCS, new_sync, add_batch, summarize, phone_base_url, start_health_sync, health_sync_status, finish_health_sync, receive_health_batch }
+import from health_sync { SYNCS, new_sync, add_batch, summarize, count_sessions, phone_base_url, start_health_sync, health_sync_status, finish_health_sync, receive_health_batch }
 
 glob NOW: datetime = datetime(2026, 10, 15, 14, 0, tzinfo=timezone.utc);
 
@@ -81,4 +81,18 @@ test "sync requests finish once and then refuse uploads" {
     SYNCS[started["sync_id"]]["updated"] = datetime.now(timezone.utc) - timedelta(hours=1);
     assert health_sync_status(started["sync_id"])["state"] == "expired";
     assert not health_sync_status("unknown")["ok"];
+}
+
+test "overlapping workouts from two sources count once" {
+    sync = new_sync(NOW, 0);
+    add_batch(sync, {"workouts": [
+        {"id": "watch", "startDate": "2026-10-10T12:00:00Z", "endDate": "2026-10-10T12:45:00Z"},
+        {"id": "strava", "startDate": "2026-10-10T12:02:00Z", "endDate": "2026-10-10T12:44:00Z"},
+        {"id": "later", "startDate": "2026-10-10T18:00:00Z", "endDate": "2026-10-10T18:30:00Z"},
+        {"id": "next", "startDate": "2026-10-11T12:00:00Z", "endDate": "2026-10-11T12:30:00Z"}
+    ]});
+    summary = summarize(sync, NOW);
+    assert summary["workouts"] == 3;
+    assert summary["avg_workouts_per_week"] == 0.8;
+    assert count_sessions([]) == 0;
 }

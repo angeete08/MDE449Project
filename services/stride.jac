@@ -233,7 +233,7 @@ def:priv regenerate_plan() -> list[PlanDay] {
     return plan_days(result["state"]);
 }
 
-def:priv give_feedback(day_id: str, feedback: str) -> list[PlanDay] {
+def:priv give_feedback(day_id: str, feedback: str, today: str = "") -> list[PlanDay] {
     if not day_id.isdigit() or int(day_id) not in range(7) {
         raise ValueError("Choose a workout in your plan.");
     }
@@ -242,7 +242,12 @@ def:priv give_feedback(day_id: str, feedback: str) -> list[PlanDay] {
         raise ValueError("Choose a valid rating.");
     }
     p = require_profile();
-    state = update_feedback(get_plan_state(), int(day_id), ratings[feedback]);
+    current = calendar_date(today if today else CalendarDate.today().isoformat());
+    plan_state = get_plan_state();
+    if calendar_date(plan_state["plan"][int(day_id)]["date"]) > current {
+        raise ValueError("Rate a workout on or after its scheduled day.");
+    }
+    state = update_feedback(plan_state, int(day_id), ratings[feedback]);
     p.plan_json = json.dumps(state);
     return plan_days(state);
 }
@@ -389,15 +394,23 @@ def:priv meal_plan() -> list[dict[str, any]] {
 
 glob _COACH_TIMEOUT_SECONDS = 30;
 
+def coach_api_key -> str {
+    return os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY") or "";
+}
+
+"""Whether a Gemini key is configured, so the Coach tab can explain setup up front."""
+def:protect coach_available -> bool {
+    return bool(coach_api_key());
+}
+
 def _call_coach_model(
     model: str, messages: list[dict[str, str]], timeout_seconds: int
 ) -> ModelResponse {
+    # Gemini 3 models are tuned for the default temperature; lower values can loop.
     response = litellm.completion(
         model=model,
-        api_key=os.environ.get("GOOGLE_API_KEY")
-            or os.environ.get("GEMINI_API_KEY"),
+        api_key=coach_api_key(),
         messages=messages,
-        temperature=0.4,
         max_tokens=600,
         reasoning_effort="low",
         timeout=timeout_seconds,
@@ -425,13 +438,25 @@ def _generate_coach_reply(
                 + "\nLatest question:\n" + question
         }
     ];
+    if not coach_api_key() {
+        raise RuntimeError("Stride Coach is not set up: add GOOGLE_API_KEY to the project .env file and restart jac run.");
+    }
+    # Provider errors carry tracebacks and server paths; only plain messages reach the browser.
     response: ModelResponse;
     try {
-        response = _call_coach_model(
-            "gemini/gemini-3.8-flash", messages, _COACH_TIMEOUT_SECONDS
-        );
-    } except (litellm.ServiceUnavailableError, litellm.Timeout) {
-        response = _call_coach_model("gemini/gemini-3.6-flash", messages, 15);
+        try {
+            response = _call_coach_model(
+                "gemini/gemini-3.8-flash", messages, _COACH_TIMEOUT_SECONDS
+            );
+        } except (litellm.ServiceUnavailableError, litellm.Timeout) {
+            response = _call_coach_model("gemini/gemini-3.6-flash", messages, 15);
+        }
+    } except litellm.AuthenticationError {
+        raise RuntimeError("Gemini rejected the API key. Check GOOGLE_API_KEY in the project .env file.");
+    } except litellm.RateLimitError {
+        raise RuntimeError("Gemini's rate limit or quota was reached. Try again later.");
+    } except Exception {
+        raise RuntimeError("Gemini did not respond. Try again in a minute.");
     }
     answer = response.choices[0].message.content;
     if not isinstance(answer, str) or not answer.strip() {
