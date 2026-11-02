@@ -343,7 +343,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                         {p.goal.replace("_", " ").capitalize()}
                     </Badge>
                 </div>
-                <MobileAccess/>
+                {if not mobile { <MobileAccess/> }}
                 {message
                     and <p
                         className="rounded-lg border bg-background p-3 text-sm"
