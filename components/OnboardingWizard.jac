@@ -3,7 +3,6 @@ import from "@hugeicons/react" { HugeiconsIcon }
 import from "@hugeicons/core-free-icons" {
     ArrowRight01Icon,
     ArrowLeft01Icon,
-    DashboardSquare01Icon,
     CheckmarkCircle02Icon
 }
 import from .ui.button { Button }
@@ -14,6 +13,8 @@ import from .ui.badge { Badge }
 import from .ui.progress { Progress }
 import from .ui.select { Select, SelectTrigger, SelectValue, SelectContent, SelectItem }
 import from ..lib.utils { cn }
+import from .MobileAccess { MobileAccess }
+import from .BrandMark { BrandMark }
 import from ..services.stride { save_profile, get_profile }
 
 glob GOALS: list[dict[str, any]] = [
@@ -58,7 +59,7 @@ glob WEARABLES: list[dict[str, any]] = [
 
      ];
 
-def:pub OnboardingWizard() -> JsxElement {
+def:pub OnboardingWizard(mobile: bool = False) -> JsxElement {
     has step: int = 1;
     has name: str = "";
     has goal: str = "lose_weight";
@@ -149,7 +150,7 @@ def:pub OnboardingWizard() -> JsxElement {
                 wearables,
                 stamp
             );
-            nav("/app");
+            nav("/mobile" if mobile else "/app");
         } except Exception {
             error = "Could not save. Use 1–6 workout days, a calorie target of 1–10000 and enable account storage.";
         } finally {
@@ -180,18 +181,11 @@ def:pub OnboardingWizard() -> JsxElement {
     }
 
     return
-        <div className="min-h-svh bg-muted/40">
+        <div className="stride-onboarding min-h-svh bg-muted/40">
+            <MobileAccess/>
             <div className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-10">
-                <div className="flex items-center gap-2.5">
-                    <div
-                        className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm"
-                    >
-                        <HugeiconsIcon
-                            icon={DashboardSquare01Icon}
-                            strokeWidth={2}
-                            className="size-4"
-                        />
-                    </div>
+                <div className="stride-brand flex items-center gap-2.5">
+                    <BrandMark compact={True}/>
                     <span className="text-base font-semibold tracking-tight">
                         Stride
                     </span>

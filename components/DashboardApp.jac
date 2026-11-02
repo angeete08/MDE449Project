@@ -1,7 +1,6 @@
 import from "@jac/runtime" { Link, useNavigate, jacLogout }
 import from "@hugeicons/react" { HugeiconsIcon }
 import from "@hugeicons/core-free-icons" {
-    DashboardSquare01Icon,
     PlusSignIcon,
     Settings01Icon,
     Logout01Icon
@@ -21,6 +20,7 @@ import from .ui.dialog {
     DialogFooter
 }
 import from .ui.progress { Progress }
+import from .BrandMark { BrandMark }
 import from ..services.stride {
     Profile,
     PlanDay,
@@ -41,6 +41,7 @@ import from ..services.stride {
     clear_account_data
 }
 import from ..health_panel { AppleHealthSync }
+import from .MobileAccess { MobileAccess }
 import from .ManualAverages { ManualAverages }
 import from .ChatCoach { ChatCoach }
 import from ..pdf_export { download_plan_pdf }
@@ -59,7 +60,7 @@ def local_today() -> str {
     return str(d.getFullYear()) + "-" + mm + "-" + dd;
 }
 
-def:pub DashboardApp() -> JsxElement {
+def:pub DashboardApp(mobile: bool = False) -> JsxElement {
     has profile: Profile | None = None;
     has plan: list[PlanDay] = [],
         logs: list[DailyLog] = [];
@@ -251,7 +252,7 @@ def:pub DashboardApp() -> JsxElement {
         busy = True;
         try {
             await clear_account_data();
-            nav("/onboarding");
+            nav("/mobile-onboarding" if mobile else "/onboarding");
         } except Exception {
             message = "Could not delete saved data. Try again.";
         } finally {
@@ -277,30 +278,27 @@ def:pub DashboardApp() -> JsxElement {
             <main className="mx-auto max-w-2xl px-6 py-24 text-center">
                 <h1 className="text-2xl font-semibold">Welcome to Stride</h1>
                 <p role="status">{message}</p>
-                <Link to="/onboarding">
+                <Link to={"/mobile-onboarding" if mobile else "/onboarding"}>
                     <Button>Start onboarding</Button>
                 </Link>
             </main>;
     }
 
     return
-        <div className="min-h-svh bg-muted/40">
+        <div className={"stride-dashboard min-h-svh bg-muted/40" + (" stride-mobile-version" if mobile else "")}>
             <header
                 className="sticky top-0 z-20 border-b bg-background/90 backdrop-blur"
             >
                 <div
-                    className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6"
+                    className={"mx-auto flex min-h-16 max-w-6xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6" + (" stride-mobile-header-row" if mobile else "")}
                 >
-                    <Link to="/app" className="flex items-center gap-2 font-semibold">
-                        <HugeiconsIcon
-                            icon={DashboardSquare01Icon}
-                            className="size-6 text-primary"
-                        />
-                        Stride
+                    <Link to={"/mobile" if mobile else "/app"} className="stride-brand flex items-center gap-2 font-semibold">
+                        <BrandMark compact={True}/>
+                        <span>Stride</span>
                     </Link>
                     <span className="text-sm text-muted-foreground">{p.name}</span>
-                    <div className="ml-auto flex flex-wrap gap-2">
-                        <Link to="/onboarding">
+                    <div className={"ml-auto flex flex-wrap gap-2" + (" stride-mobile-actions" if mobile else "")}>
+                        <Link to={"/mobile-onboarding" if mobile else "/onboarding"}>
                             <Button variant="outline" size="sm">
                                 <HugeiconsIcon
                                     icon={Settings01Icon}
@@ -318,7 +316,7 @@ def:pub DashboardApp() -> JsxElement {
                             size="sm"
                             onClick={lambda {
                                 jacLogout();
-                                nav("/login");
+                                nav("/mobile-login" if mobile else "/login");
                             }}
                         >
                             <HugeiconsIcon icon={Logout01Icon} className="size-4"/>
@@ -327,7 +325,7 @@ def:pub DashboardApp() -> JsxElement {
                     </div>
                 </div>
             </header>
-            <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
+            <main className={"mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6" + (" stride-mobile-main" if mobile else "")}>
                 <div className="flex flex-wrap items-end justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-semibold tracking-tight">
@@ -345,6 +343,7 @@ def:pub DashboardApp() -> JsxElement {
                         {p.goal.replace("_", " ").capitalize()}
                     </Badge>
                 </div>
+                <MobileAccess/>
                 {message
                     and <p
                         className="rounded-lg border bg-background p-3 text-sm"
@@ -354,7 +353,7 @@ def:pub DashboardApp() -> JsxElement {
                         {message}
                     </p>}
                 <Tabs value={tab} onValueChange={lambda (v: str) { tab = v; }}>
-                    <TabsList className="flex flex-wrap h-auto">
+                    <TabsList className={"flex flex-wrap h-auto" + (" stride-mobile-tabs" if mobile else "")}>
                         <TabsTrigger value="today">Today</TabsTrigger>
                         <TabsTrigger value="coach">Coach</TabsTrigger>
                         <TabsTrigger value="plan">Plan</TabsTrigger>

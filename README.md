@@ -17,6 +17,8 @@ jac run
 
 Open **http://localhost:8000**. The API runs on 8001. Sign up, sign in, complete onboarding and explicitly enable account storage. Stride Coach uses Google Gemini; create a key in [Google AI Studio](https://aistudio.google.com/apikey) and put `GOOGLE_API_KEY=your-key` in the project-root `.env` file. Gemini API free-tier availability, quotas and limits depend on Google's current terms and account/region. The rest of the app can be used without the key, but Coach replies require it. Initial startup downloads the dependencies and Jac's embedded database runtime. Stop with Ctrl+C. Use `jac run --port 8010` for a different web port (API 8011).
 
+The public landing page includes a QR code for the separate `/mobile` dashboard. It shares the same account and features as `/app`, with a touch-friendly mobile layout. For phone access, run `jac run --host 0.0.0.0` and open Stride using a phone-reachable LAN or deployed URL before scanning; `localhost` only works on the device running the server.
+
 If the bundled frontend installer stalls, stop it before trying npm (requires Node/npm):
 
 ```sh
@@ -64,6 +66,7 @@ Tests cover the original planner and Apple Health relay, dashboard plan adaptati
 
 - `main.jac`: routes and endpoint registration
 - `components/`, `styles/`, `lib/`: JacHammer interface and UI primitives
+- `assets/stride-logo.png`: shared Stride brand mark used across desktop and mobile
 - `services/stride.jac`: authenticated persistence and dashboard adapter
 - `planner.jac`, `pdf_export.jac`: retained planning rules and PDF export
 - `health_sync.jac`, `health_panel.jac`, `ios/StrideHealth/`: retained Apple Health bridge

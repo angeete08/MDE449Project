@@ -43,9 +43,14 @@ def:pub app() -> JsxElement {
             <Routes>
                 <Route path="/" element={<Landing/>}/>
                 <Route path="/login" element={<LoginPage/>}/>
+                <Route path="/mobile-login" element={<LoginPage mobile={True}/>}/>
                 <Route element={<AuthGuard redirect="/login"/>}>
                     <Route path="/onboarding" element={<OnboardingWizard/>}/>
                     <Route path="/app" element={<DashboardApp/>}/>
+                </Route>
+                <Route element={<AuthGuard redirect="/mobile-login"/>}>
+                    <Route path="/mobile-onboarding" element={<OnboardingWizard mobile={True}/>}/>
+                    <Route path="/mobile" element={<DashboardApp mobile={True}/>}/>
                 </Route>
             </Routes>
         </Router>;

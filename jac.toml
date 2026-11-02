@@ -48,6 +48,9 @@ port = 8000
 base_route_app = "app"
 
 [client]
+[client.assets]
+dir = "assets"
+
 [client.vite]
 plugins = ["tailwindcss()"]
 lib_imports = ["import tailwindcss from '@tailwindcss/vite'"]
