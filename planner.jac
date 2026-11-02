@@ -358,10 +358,7 @@ def:pub create_plan(profile: dict[str, any], previous: dict[str, any] | None = N
         if previous {
             old = validate_state(previous, start_date);
             next_start = (date.fromisoformat(old["start_date"]) + timedelta(days=7)).isoformat();
-            state = make_state(profile, next_start, old["offsets"], old["start_date"]);
-            history = old.pop("history");
-            history.append(old);
-            state["history"] = history;
+            state = current_week_state(profile, old, next_start);
         }
         state["memory_note"] = memory_note(state);
         return {"ok": True, "state": state, "message": "New week ready. Previous workouts are archived and difficulty is carried forward." if previous else "Your first week is ready."};

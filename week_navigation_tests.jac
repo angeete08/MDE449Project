@@ -123,3 +123,16 @@ test "duplicate and invalid retained future weeks are rejected" {
         assert rejected;
     }
 }
+
+test "sequential navigation restores retained weeks and their feedback" {
+    p = navigation_profile();
+    first = make_state(p, "2026-11-02");
+    second = update_feedback(create_plan(p, first)["state"], 0, "hard");
+    third = create_plan(p, second)["state"];
+    restored = current_week_state(p, third, "2026-11-02");
+    advanced = create_plan(p, restored)["state"];
+    assert advanced["week_id"] == second["week_id"];
+    assert advanced["feedback"] == second["feedback"];
+    assert advanced["upcoming"][0]["week_id"] == third["week_id"];
+    assert validate_state(advanced) == advanced;
+}
