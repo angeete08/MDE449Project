@@ -96,6 +96,38 @@ test "account data is isolated and duplicate log replaces totals" {
                 assert call["num_retries"] == 0;
                 assert "dead bug" in call["messages"][1]["content"].lower();
             }
+            # Reproduce a real two-turn exchange: the model's first answer is
+            # longer than a user's question limit, then sent back as history.
+            long_reply = "A practical fitness explanation. " * 100;
+            with unittest.mock.patch(
+                "litellm.completion",
+                return_value=ModelResponse(
+                    choices=[{"message": {"content": long_reply}}]
+                )
+            ) {
+                first_turn = client.post(
+                    "/function/ask_coach",
+                    json={"question": "Explain my workout", "conversation": []}
+                ).json();
+                assert first_turn["ok"] , str(first_turn);
+                assert first_turn["data"]["result"] == long_reply.strip();
+            }
+            with unittest.mock.patch(
+                "litellm.completion", return_value=mock_response
+            ) as completion {
+                follow_up = client.post(
+                    "/function/ask_coach",
+                    json={
+                        "question": "Can you give me an example?",
+                        "conversation": [
+                            {"role": "user", "content": "Explain my workout"},
+                            {"role": "assistant", "content": first_turn["data"]["result"]}
+                        ]
+                    }
+                ).json();
+                assert follow_up["ok"] , str(follow_up);
+                assert long_reply.strip() in completion.call_args.kwargs["messages"][1]["content"];
+            }
             unavailable = litellm.ServiceUnavailableError(
                 message="Temporarily unavailable",
                 llm_provider="gemini",
