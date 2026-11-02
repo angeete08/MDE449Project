@@ -1,4 +1,4 @@
-import ".styles.global.css";
+import "./styles/global.css";
 import from "@jac/runtime" { Router, Routes, Route, AuthGuard }
 import from .components.Landing { Landing }
 import from .components.LoginPage { LoginPage }
