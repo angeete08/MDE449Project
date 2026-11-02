@@ -1,3 +1,37 @@
+import from health_sync {
+    start_health_sync,
+    health_sync_status,
+    finish_health_sync,
+    receive_health_batch,
+    receive_health_log,
+    release_health_sync
+}
+import from services.stride {
+    save_profile,
+    get_profile,
+    get_plan,
+    get_logs,
+    get_scoreboard,
+    give_feedback,
+    save_log,
+    meal_plan,
+    regenerate_plan,
+    preview_next_week,
+    get_plan_state,
+    set_weekly_goal,
+    get_activity_summary,
+    save_health_summary,
+    get_health_summary,
+    get_movement_break,
+    clear_account_data,
+    ask_coach,
+    coach_available,
+    Profile,
+    PlanDay,
+    DailyLog,
+    FriendView,
+}
+
 import "./styles/global.css";
 import from "@jac/runtime" { Router, Routes, Route, AuthGuard }
 import from .components.Landing { Landing }
