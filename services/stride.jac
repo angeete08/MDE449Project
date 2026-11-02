@@ -465,12 +465,12 @@ def _generate_coach_reply(
     return answer.strip();
 }
 
-def:protect ask_coach(
-    question: str, conversation: list[dict[str, str]]
-) -> str {
-    if not isinstance(question, str) or not question.strip() or len(question) > 1200 {
-        raise ValueError("Enter a question of 1 to 1200 characters.");
-    }
+glob _COACH_ASSISTANT_HISTORY_CHARS = 4000;
+glob _COACH_HISTORY_CHARS = 12000;
+
+# Bound model context without changing the full replies displayed in the browser.
+# Validate every message first, then retain the newest context in chronological order.
+def coach_history(conversation: list[dict[str, str]]) -> str {
     if not isinstance(conversation, list) or len(conversation) > 12 {
         raise ValueError("The conversation is too long. Start a new chat.");
     }
@@ -479,13 +479,37 @@ def:protect ask_coach(
     for message in conversation {
         if not isinstance(message, dict)
             or message.get("role") not in ["user", "assistant"]
-            or not isinstance(message.get("content"), str)
-            or len(message["content"]) > 1200 {
+            or not isinstance(message.get("content"), str) {
             raise ValueError("The conversation contains an invalid message.");
         }
+        if message["role"] == "user" and len(message["content"]) > 1200 {
+            raise ValueError("Previous questions must be at most 1200 characters.");
+        }
         role = "User" if message["role"] == "user" else "Coach";
-        history_lines.append(role + ": " + message["content"]);
+        content = message["content"];
+        if message["role"] == "assistant" and len(content) > _COACH_ASSISTANT_HISTORY_CHARS {
+            content = content[:_COACH_ASSISTANT_HISTORY_CHARS - 3] + "...";
+        }
+        history_lines.append(role + ": " + content);
     }
+    retained: list[str] = [];
+    remaining = _COACH_HISTORY_CHARS;
+    for line in reversed(history_lines) {
+        cost = len(line) + (1 if retained else 0);
+        if cost > remaining { break; }
+        retained.insert(0, line);
+        remaining -= cost;
+    }
+    return "\n".join(retained);
+}
+
+def:protect ask_coach(
+    question: str, conversation: list[dict[str, str]]
+) -> str {
+    if not isinstance(question, str) or not question.strip() or len(question) > 1200 {
+        raise ValueError("Enter a question of 1 to 1200 characters.");
+    }
+    history = coach_history(conversation);
 
     profile = require_profile();
     state = get_plan_state();
@@ -504,7 +528,7 @@ def:protect ask_coach(
         + "\nDiet preference: " + profile.diet.replace("_", " ")
         + "\nScheduled workouts: " + (", ".join(scheduled) if scheduled else "none")
     );
-    return _generate_coach_reply(question, "\n".join(history_lines), context);
+    return _generate_coach_reply(question, history, context);
 }
 
 def:priv save_health_summary(
