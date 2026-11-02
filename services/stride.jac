@@ -7,7 +7,7 @@ import os;
 import litellm;
 import from litellm.types.utils { ModelResponse }
 import from datetime { date, timedelta, date as CalendarDate }
-import from planner { validate_profile, create_plan, update_feedback, meal_video }
+import from planner { validate_profile, create_plan, update_feedback, meal_video, current_week_state, preview_week_state }
 
 node Profile {
     has name: str = "Athlete",
@@ -223,14 +223,19 @@ def:priv get_plan() -> list[PlanDay] {
     return plan_days(get_plan_state());
 }
 
-def:priv regenerate_plan() -> list[PlanDay] {
+def:priv regenerate_plan(today: str = "") -> list[PlanDay] {
     p = require_profile();
-    result = create_plan(planner_profile(p), get_plan_state());
-    if not result["ok"] {
-        raise ValueError(result["message"]);
-    }
-    p.plan_json = json.dumps(result["state"]);
-    return plan_days(result["state"]);
+    stamp = today if today else CalendarDate.today().isoformat();
+    calendar_date(stamp);
+    state = current_week_state(planner_profile(p), get_plan_state(), stamp);
+    p.plan_json = json.dumps(state);
+    return plan_days(state);
+}
+
+def:priv preview_next_week(today: str = "") -> dict[str, any] {
+    stamp = today if today else CalendarDate.today().isoformat();
+    calendar_date(stamp);
+    return preview_week_state(planner_profile(require_profile()), get_plan_state(), stamp);
 }
 
 def:priv give_feedback(day_id: str, feedback: str, today: str = "") -> list[PlanDay] {

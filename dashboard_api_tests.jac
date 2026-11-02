@@ -192,7 +192,11 @@ test "account data is isolated and duplicate log replaces totals" {
             previous = client.post("/function/get_plan_state", json={}).json()["data"][
                 "result"
             ];
-            next_week = client.post("/function/regenerate_plan", json={});
+            preview = client.post("/function/preview_next_week", json={"today": "2026-10-25"});
+            assert preview.status_code == 200 , str(preview.json());
+            assert preview.json()["data"]["result"]["start_date"] == "2026-10-26";
+            assert client.post("/function/get_plan_state", json={}).json()["data"]["result"] == previous;
+            next_week = client.post("/function/regenerate_plan", json={"today": "2026-10-26"});
             assert next_week.status_code == 200;
             saved = client.post("/function/get_plan_state", json={}).json()["data"][
                 "result"
@@ -201,6 +205,9 @@ test "account data is isolated and duplicate log replaces totals" {
             assert saved["history"][0]["plan"] == previous["plan"];
             assert saved["history"][0]["feedback"] == {"0": "hard"};
             assert saved["starting_offsets"] == previous["offsets"];
+            repeated = client.post("/function/regenerate_plan", json={"today": "2026-10-26"});
+            assert repeated.status_code == 200;
+            assert client.post("/function/get_plan_state", json={}).json()["data"]["result"] == saved;
             meals = client.post("/function/meal_plan", json={}).json()["data"][
                 "result"
             ];

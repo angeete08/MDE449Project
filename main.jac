@@ -16,6 +16,7 @@ import from services.stride {
     save_log,
     meal_plan,
     regenerate_plan,
+    preview_next_week,
     get_plan_state,
     set_weekly_goal,
     get_activity_summary,
