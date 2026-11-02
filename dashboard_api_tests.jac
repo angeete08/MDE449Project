@@ -59,7 +59,7 @@ test "account data is isolated and duplicate log replaces totals" {
             rejected_key = litellm.AuthenticationError(
                 message="API key not valid. Traceback (most recent call last): /server/path",
                 llm_provider="gemini",
-                model="gemini/gemini-3.8-flash"
+                model="gemini/gemini-3.1-flash-lite"
             );
             with unittest.mock.patch("litellm.completion", side_effect=rejected_key) {
                 denied_key = client.post(
@@ -89,12 +89,32 @@ test "account data is isolated and duplicate log replaces totals" {
                 coach_answer = coach.json()["data"]["result"];
                 assert isinstance(coach_answer, str) and coach_answer.strip();
                 call = completion.call_args.kwargs;
-                assert call["model"] == "gemini/gemini-3.8-flash";
-                assert call["reasoning_effort"] == "low";
-                assert call["timeout"] == 30;
+                assert call["model"] == "gemini/gemini-3.1-flash-lite";
+                assert call["reasoning_effort"] == "minimal";
+                assert call["timeout"] == 10;
                 assert "temperature" not in call;
                 assert call["num_retries"] == 0;
                 assert "dead bug" in call["messages"][1]["content"].lower();
+            }
+            limited = ModelResponse(choices=[{
+                "finish_reason": "length", "message": {"content": "Start with a mix of"}
+            }]);
+            with unittest.mock.patch(
+                "litellm.completion", side_effect=[limited, mock_response]
+            ) as completion {
+                recovered = client.post(
+                    "/function/ask_coach", json={"question": "Suggest a plan", "conversation": []}
+                ).json();
+                assert recovered["data"]["result"] == mock_response.choices[0].message.content;
+                assert completion.call_args_list[0].kwargs["max_tokens"] == 2048;
+                assert completion.call_args_list[1].kwargs["max_tokens"] == 4096;
+            }
+            with unittest.mock.patch("litellm.completion", return_value=limited) as completion {
+                incomplete = client.post(
+                    "/function/ask_coach", json={"question": "Suggest a plan", "conversation": []}
+                ).json();
+                assert not incomplete["ok"];
+                assert completion.call_count == 2;
             }
             # Reproduce a real two-turn exchange: the model's first answer is
             # longer than a user's question limit, then sent back as history.
@@ -131,7 +151,7 @@ test "account data is isolated and duplicate log replaces totals" {
             unavailable = litellm.ServiceUnavailableError(
                 message="Temporarily unavailable",
                 llm_provider="gemini",
-                model="gemini/gemini-3.8-flash"
+                model="gemini/gemini-3.1-flash-lite"
             );
             with unittest.mock.patch(
                 "litellm.completion",
@@ -156,7 +176,7 @@ test "account data is isolated and duplicate log replaces totals" {
             timed_out = litellm.Timeout(
                 message="Connection timed out",
                 llm_provider="gemini",
-                model="gemini/gemini-3.8-flash"
+                model="gemini/gemini-3.1-flash-lite"
             );
             with unittest.mock.patch(
                 "litellm.completion",

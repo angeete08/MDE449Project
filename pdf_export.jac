@@ -49,6 +49,7 @@ def:pub build_plan_pdf(state: dict[str, any]) -> any {
 
     doc.setProperties({"title": "Stride - Weekly Fitness Plan", "author": "Stride", "subject": "Your current workouts and meal suggestions"});
     frame(1, "A week with intention.", "Your routine at a glance, with space to recover.");
+    text("Week of " + str(state["start_date"]), 190, 46, 11, True, ink);
     for (i, item) in enumerate([[str(profile["days"]), "WORKOUT DAYS"], [str(profile["calories"]), "KCAL / DAY TARGET"], [str(len(Object.keys(state["feedback"]))), "WORKOUTS LOGGED"]]) {
         x = 38 + i * 177;
         box(x, 144, 165, 69, accent if i == 0 else "#e7eddf");
