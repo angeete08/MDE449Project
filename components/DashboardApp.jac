@@ -88,12 +88,20 @@ def:pub DashboardApp() -> JsxElement {
     async def refresh() {
         profile = await get_profile();
         if profile is not None {
-            plan = await get_plan();
-            logs = await get_logs();
-            plan_state = await get_plan_state();
-            activity = await get_activity_summary(local_today());
-            health = await get_health_summary();
-            meals = await meal_plan();
+            results: any = await Promise.all([
+                get_plan(),
+                get_logs(),
+                get_plan_state(),
+                get_activity_summary(local_today()),
+                get_health_summary(),
+                meal_plan()
+            ]);
+            plan = results[0];
+            logs = results[1];
+            plan_state = results[2];
+            activity = results[3];
+            health = results[4];
+            meals = results[5];
             goal = str(profile.weekly_minutes_goal);
         }
     }
