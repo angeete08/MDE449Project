@@ -59,7 +59,7 @@ test "account data is isolated and duplicate log replaces totals" {
             rejected_key = litellm.AuthenticationError(
                 message="API key not valid. Traceback (most recent call last): /server/path",
                 llm_provider="gemini",
-                model="gemini/gemini-3.8-flash"
+                model="gemini/gemini-3.1-flash-lite"
             );
             with unittest.mock.patch("litellm.completion", side_effect=rejected_key) {
                 denied_key = client.post(
@@ -89,17 +89,69 @@ test "account data is isolated and duplicate log replaces totals" {
                 coach_answer = coach.json()["data"]["result"];
                 assert isinstance(coach_answer, str) and coach_answer.strip();
                 call = completion.call_args.kwargs;
-                assert call["model"] == "gemini/gemini-3.8-flash";
-                assert call["reasoning_effort"] == "low";
-                assert call["timeout"] == 30;
+                assert call["model"] == "gemini/gemini-3.1-flash-lite";
+                assert call["reasoning_effort"] == "minimal";
+                assert call["timeout"] == 10;
                 assert "temperature" not in call;
                 assert call["num_retries"] == 0;
                 assert "dead bug" in call["messages"][1]["content"].lower();
             }
+            limited = ModelResponse(choices=[{
+                "finish_reason": "length", "message": {"content": "Start with a mix of"}
+            }]);
+            with unittest.mock.patch(
+                "litellm.completion", side_effect=[limited, mock_response]
+            ) as completion {
+                recovered = client.post(
+                    "/function/ask_coach", json={"question": "Suggest a plan", "conversation": []}
+                ).json();
+                assert recovered["data"]["result"] == mock_response.choices[0].message.content;
+                assert completion.call_args_list[0].kwargs["max_tokens"] == 2048;
+                assert completion.call_args_list[1].kwargs["max_tokens"] == 4096;
+            }
+            with unittest.mock.patch("litellm.completion", return_value=limited) as completion {
+                incomplete = client.post(
+                    "/function/ask_coach", json={"question": "Suggest a plan", "conversation": []}
+                ).json();
+                assert not incomplete["ok"];
+                assert completion.call_count == 2;
+            }
+            # Reproduce a real two-turn exchange: the model's first answer is
+            # longer than a user's question limit, then sent back as history.
+            long_reply = "A practical fitness explanation. " * 100;
+            with unittest.mock.patch(
+                "litellm.completion",
+                return_value=ModelResponse(
+                    choices=[{"message": {"content": long_reply}}]
+                )
+            ) {
+                first_turn = client.post(
+                    "/function/ask_coach",
+                    json={"question": "Explain my workout", "conversation": []}
+                ).json();
+                assert first_turn["ok"] , str(first_turn);
+                assert first_turn["data"]["result"] == long_reply.strip();
+            }
+            with unittest.mock.patch(
+                "litellm.completion", return_value=mock_response
+            ) as completion {
+                follow_up = client.post(
+                    "/function/ask_coach",
+                    json={
+                        "question": "Can you give me an example?",
+                        "conversation": [
+                            {"role": "user", "content": "Explain my workout"},
+                            {"role": "assistant", "content": first_turn["data"]["result"]}
+                        ]
+                    }
+                ).json();
+                assert follow_up["ok"] , str(follow_up);
+                assert long_reply.strip() in completion.call_args.kwargs["messages"][1]["content"];
+            }
             unavailable = litellm.ServiceUnavailableError(
                 message="Temporarily unavailable",
                 llm_provider="gemini",
-                model="gemini/gemini-3.8-flash"
+                model="gemini/gemini-3.1-flash-lite"
             );
             with unittest.mock.patch(
                 "litellm.completion",
@@ -124,7 +176,7 @@ test "account data is isolated and duplicate log replaces totals" {
             timed_out = litellm.Timeout(
                 message="Connection timed out",
                 llm_provider="gemini",
-                model="gemini/gemini-3.8-flash"
+                model="gemini/gemini-3.1-flash-lite"
             );
             with unittest.mock.patch(
                 "litellm.completion",
@@ -192,7 +244,11 @@ test "account data is isolated and duplicate log replaces totals" {
             previous = client.post("/function/get_plan_state", json={}).json()["data"][
                 "result"
             ];
-            next_week = client.post("/function/regenerate_plan", json={});
+            preview = client.post("/function/preview_next_week", json={"today": "2026-10-25"});
+            assert preview.status_code == 200 , str(preview.json());
+            assert preview.json()["data"]["result"]["start_date"] == "2026-10-26";
+            assert client.post("/function/get_plan_state", json={}).json()["data"]["result"] == previous;
+            next_week = client.post("/function/regenerate_plan", json={"today": "2026-10-26"});
             assert next_week.status_code == 200;
             saved = client.post("/function/get_plan_state", json={}).json()["data"][
                 "result"
@@ -201,6 +257,9 @@ test "account data is isolated and duplicate log replaces totals" {
             assert saved["history"][0]["plan"] == previous["plan"];
             assert saved["history"][0]["feedback"] == {"0": "hard"};
             assert saved["starting_offsets"] == previous["offsets"];
+            repeated = client.post("/function/regenerate_plan", json={"today": "2026-10-26"});
+            assert repeated.status_code == 200;
+            assert client.post("/function/get_plan_state", json={}).json()["data"]["result"] == saved;
             meals = client.post("/function/meal_plan", json={}).json()["data"][
                 "result"
             ];

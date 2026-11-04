@@ -32,6 +32,7 @@ import from ..services.stride {
     save_log,
     meal_plan,
     regenerate_plan,
+    preview_next_week,
     get_plan_state,
     set_weekly_goal,
     get_activity_summary,
@@ -75,6 +76,8 @@ def:pub DashboardApp() -> JsxElement {
         message: str = "",
         goal: str = "150",
         sitting: str = "60";
+    has week_preview: dict[str, any] = {},
+        preview_open: bool = False;
     has log_date: str = "",
         log_steps: str = "0",
         log_calories: str = "0",
@@ -85,12 +88,20 @@ def:pub DashboardApp() -> JsxElement {
     async def refresh() {
         profile = await get_profile();
         if profile is not None {
-            plan = await get_plan();
-            logs = await get_logs();
-            plan_state = await get_plan_state();
-            activity = await get_activity_summary(local_today());
-            health = await get_health_summary();
-            meals = await meal_plan();
+            results: any = await Promise.all([
+                get_plan(),
+                get_logs(),
+                get_plan_state(),
+                get_activity_summary(local_today()),
+                get_health_summary(),
+                meal_plan()
+            ]);
+            plan = results[0];
+            logs = results[1];
+            plan_state = results[2];
+            activity = results[3];
+            health = results[4];
+            meals = results[5];
             goal = str(profile.weekly_minutes_goal);
         }
     }
@@ -113,6 +124,7 @@ def:pub DashboardApp() -> JsxElement {
         busy = True;
         try {
             plan = await give_feedback(day_id, rating, local_today());
+            week_preview = {};
             plan_state = await get_plan_state();
             message = "Workout logged. Only later unlogged workouts of the same type may change.";
         } except Exception {
@@ -191,24 +203,33 @@ def:pub DashboardApp() -> JsxElement {
         }
     }
 
-    async def next_week() {
-        if busy
-            or not window.confirm(
-                "Archive this week and create the next week? Your workout history will be kept."
-            ) {
+    async def open_current_week() {
+        if busy {
             return;
         }
         busy = True;
         try {
-            plan = await regenerate_plan();
+            plan = await regenerate_plan(local_today());
             plan_state = await get_plan_state();
             meals = await meal_plan();
-            message = "Next week ready. Previous workouts are in History.";
+            week_preview = {};
+            message = "This week's plan is ready. Saved workouts and ratings are preserved.";
         } except Exception {
-            message = "Could not create the next week. Your current plan is still saved.";
+            message = "Could not open this week. Your saved plan has not been replaced.";
         } finally {
             busy = False;
         }
+    }
+
+    async def show_next_week() {
+        if busy { return; }
+        busy = True;
+        try {
+            week_preview = await preview_next_week(local_today());
+            preview_open = True;
+        } except Exception {
+            message = "Could not preview next week. Try again.";
+        } finally { busy = False; }
     }
 
     async def imported(summary: dict[str, any]) {
@@ -371,6 +392,14 @@ def:pub DashboardApp() -> JsxElement {
                         </Card>
                     </TabsContent>
                     <TabsContent value="today" className="flex flex-col gap-6 pt-2">
+                        {if today is None {
+                            <Card>
+                                <CardContent className="flex flex-col gap-3 pt-6">
+                                    <p>Your saved plan is for a different week. Open this week to restore a saved plan or generate one for today's calendar week.</p>
+                                    <Button disabled={busy} onClick={open_current_week}>Open / generate this week</Button>
+                                </CardContent>
+                            </Card>
+                        }}
                         <div className="grid gap-6 md:grid-cols-2">
                             <Card>
                                 <CardHeader>
@@ -596,9 +625,12 @@ def:pub DashboardApp() -> JsxElement {
                                 <Button
                                     variant="outline"
                                     disabled={busy}
-                                    onClick={next_week}
+                                    onClick={open_current_week}
                                 >
-                                    Create next week
+                                    Open / generate this week
+                                </Button>
+                                <Button variant="outline" disabled={busy} onClick={show_next_week}>
+                                    Preview next week
                                 </Button>
                             </div>
                         </div>
@@ -862,7 +894,7 @@ def:pub DashboardApp() -> JsxElement {
                         <h2 className="text-lg font-semibold">Previous weeks</h2>
                         {if not plan_state.get("history", []) {
                             <p className="text-sm text-muted-foreground">
-                                Create your next week to archive this plan and its workout feedback.
+                                Earlier weeks appear here when you open a later calendar week. Saved future weeks are retained until their dates arrive.
                             </p>
                         }}
                         {for week in plan_state.get("history", []) {
@@ -912,6 +944,28 @@ def:pub DashboardApp() -> JsxElement {
                     </TabsContent>
                 </Tabs>
             </main>
+            <Dialog open={preview_open} onOpenChange={lambda (o: any) { preview_open = o as bool; }}>
+                <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>{"Next week preview · " + str(week_preview.get("start_date", ""))}</DialogTitle>
+                    </DialogHeader>
+                    <p className="text-sm text-muted-foreground">
+                        Preview only. Your current plan, ratings and history have not changed.
+                        New previews may change after feedback or preference edits.
+                    </p>
+                    {for day in week_preview.get("plan", []) {
+                        <div key={day["date"]} className="border-t pt-2 text-sm">
+                            <strong>{day["date"] + " · " + day["title"]}</strong>
+                            {for e in day["exercises"] {
+                                <p key={e["name"]}>
+                                    {e["name"] + " · " + (str(e.get("duration")) + " min" if e.get("duration") else str(e["sets"]) + " × " + str(e["reps"]))}
+                                </p>
+                            }}
+                        </div>
+                    }}
+                    <Button variant="outline" onClick={lambda { preview_open = False; }}>Close preview</Button>
+                </DialogContent>
+            </Dialog>
             <Dialog
                 open={log_open}
                 onOpenChange={lambda (o: any) { log_open = o as bool; }}

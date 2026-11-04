@@ -221,7 +221,7 @@ def validate_week(state: dict[str, any], migration_date: str = "") -> dict[str, 
         week_id = state.get("week_id", "");
         if not isinstance(week_id, str) or str(UUID(week_id)) != week_id { raise ValueError("Invalid week ID."); }
         source = state.get("source_week", "");
-        if source and (not isinstance(source, str) or monday(source) != source or date.fromisoformat(source) + timedelta(days=7) != date.fromisoformat(start)) { raise ValueError("Invalid source week."); }
+        if source and (not isinstance(source, str) or monday(source) != source or source >= start) { raise ValueError("Invalid source week."); }
         if not isinstance(state.get("legacy_dates"), bool) { raise ValueError("Invalid migration flag."); }
         clean = make_state(profile, start, level, source);
         clean["week_id"] = week_id;
@@ -275,7 +275,60 @@ def validate_state(state: dict[str, any], migration_date: str = "") -> dict[str,
         clean["history"].append(week);
     }
     if clean["week_id"] in seen { raise ValueError("Duplicate current week."); }
+    # Retain plans accidentally advanced into the future by older versions.
+    # Omit the optional field when empty to preserve existing saved snapshots.
+    upcoming = state.get("upcoming", []);
+    if not isinstance(upcoming, list) { raise ValueError("Invalid upcoming weeks."); }
+    future: list[dict[str, any]] = [];
+    previous = str(clean["start_date"]);
+    for item in upcoming {
+        if not isinstance(item, dict) or "history" in item or "upcoming" in item { raise ValueError("Invalid upcoming snapshot."); }
+        week = validate_week(item);
+        if week["week_id"] in seen or week["week_id"] == clean["week_id"] or week["start_date"] <= previous { raise ValueError("Duplicate or unordered upcoming weeks."); }
+        seen.append(str(week["week_id"]));
+        previous = str(week["start_date"]);
+        future.append(week);
+    }
+    if future { clean["upcoming"] = future; }
     return clean;
+}
+
+# Calendar navigation is separate from sequential creation used by the legacy UI.
+# This function is idempotent for the same week and never discards a saved week.
+def current_week_state(profile: dict[str, any], previous: dict[str, any], today: str) -> dict[str, any] {
+    target = monday(today);
+    old = validate_state(previous);
+    weeks = old.pop("history") as list[dict[str, any]];
+    weeks.extend(old.pop("upcoming", []) as list[dict[str, any]]);
+    weeks.append(old);
+    weeks.sort(key=lambda (week: dict[str, any]) { return str(week["start_date"]); });
+    past = [week for week in weeks if str(week["start_date"]) < target];
+    future = [week for week in weeks if str(week["start_date"]) > target];
+    matches = [week for week in weeks if week["start_date"] == target];
+    selected: dict[str, any] = {};
+    if matches {
+        selected = matches[0];
+    } else {
+        # Never inherit difficulty from a week that has not happened yet.
+        source = past[-1] if past else None;
+        selected = make_state(profile, target, (source["offsets"] as dict[str, any]) if source else None, str(source["start_date"]) if source else "");
+        selected.pop("history");
+    }
+    selected["history"] = past;
+    if future { selected["upcoming"] = future; }
+    selected["memory_note"] = memory_note(selected);
+    return selected;
+}
+
+def preview_week_state(profile: dict[str, any], previous: dict[str, any], today: str) -> dict[str, any] {
+    current = current_week_state(profile, previous, today);
+    target = (date.fromisoformat(str(current["start_date"])) + timedelta(days=7)).isoformat();
+    for week in (current.get("upcoming", []) as list[dict[str, any]]) {
+        if week["start_date"] == target { return copy.deepcopy(week); }
+    }
+    preview = make_state(profile, target, current["offsets"] as dict[str, any], str(current["start_date"]));
+    preview["memory_note"] = memory_note(preview);
+    return preview;
 }
 
 def update_feedback(state: dict[str, any], index: int, rating: str) -> dict[str, any] {
@@ -305,10 +358,7 @@ def:pub create_plan(profile: dict[str, any], previous: dict[str, any] | None = N
         if previous {
             old = validate_state(previous, start_date);
             next_start = (date.fromisoformat(old["start_date"]) + timedelta(days=7)).isoformat();
-            state = make_state(profile, next_start, old["offsets"], old["start_date"]);
-            history = old.pop("history");
-            history.append(old);
-            state["history"] = history;
+            state = current_week_state(profile, old, next_start);
         }
         state["memory_note"] = memory_note(state);
         return {"ok": True, "state": state, "message": "New week ready. Previous workouts are archived and difficulty is carried forward." if previous else "Your first week is ready."};

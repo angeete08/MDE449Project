@@ -17,9 +17,13 @@ def:pub FitnessApp -> JsxElement {
     healthSource: str = "";
 
     async def loadMealVideos(meals: list[dict[str, any]]) -> None {
-        videos: dict[str, any] = {};
-        for meal in meals { videos[meal["name"]] = await meal_video(meal["name"], meal["detail"]); }
-        mealVideos = videos;
+        try {
+            videos: dict[str, any] = {};
+            for meal in meals { videos[meal["name"]] = await meal_video(meal["name"], meal["detail"]); }
+            mealVideos = videos;
+        } except Exception {
+            status = "Recipe videos are unavailable right now. Recipe links remain available.";
+        }
     }
 
     def localMonday -> str {
@@ -70,7 +74,7 @@ def:pub FitnessApp -> JsxElement {
                     avgHeartRate = str(restored["profile"]["avg_heart_rate"]) if restored["profile"]["avg_heart_rate"] is not None else "";
                     avgSleep = str(restored["profile"]["avg_sleep_hours"]) if restored["profile"]["avg_sleep_hours"] is not None else "";
                     avgWorkouts = str(restored["profile"]["avg_workouts_per_week"]) if restored["profile"]["avg_workouts_per_week"] is not None else "";
-                    await loadMealVideos(restored["meals"]);
+                    loadMealVideos(restored["meals"]);
                 } else { loadFailed = True; }
             }
         } except Exception { loadFailed = True; status = "Saved history could not be loaded. Retry when the server is available; your stored data has not been changed."; }
@@ -80,7 +84,10 @@ def:pub FitnessApp -> JsxElement {
         startDate = localMonday();
         try { dataPrefs = clean_data_prefs(JSON.parse(localStorage.getItem("stride-data-prefs-v1") or "null")); }
         except Exception { dataPrefs = {}; }
-        try { defaults = await starter_meals(); await loadMealVideos(defaults); }
+        try {
+            defaults = await starter_meals();
+            loadMealVideos(defaults);
+        }
         except Exception { status = "Could not load starter recipes. Reload when the server is available."; }
         try {
             savedToken = sessionStorage.getItem("stride-demo-session") or "";
@@ -136,7 +143,7 @@ def:pub FitnessApp -> JsxElement {
                 historyIndex = -1;
                 mealVideos = {};
                 await remember(result["state"]);
-                await loadMealVideos(result["state"]["meals"]);
+                loadMealVideos(result["state"]["meals"]);
                 if not demoToken and (not dataPrefs or not dataPrefs["store"]) { status = status + " It is not stored, so it will be gone after a refresh."; }
             }
         } except Exception { status = "Could not reach the Jac server. Your current plan is unchanged; please try again."; }
@@ -194,7 +201,7 @@ def:pub FitnessApp -> JsxElement {
             avgSleep = str(restored["profile"]["avg_sleep_hours"]) if restored["profile"]["avg_sleep_hours"] is not None else "";
             avgWorkouts = str(restored["profile"]["avg_workouts_per_week"]) if restored["profile"]["avg_workouts_per_week"] is not None else "";
             healthSource = "Saved profile averages · review or sync again to verify their source";
-            await loadMealVideos(restored["meals"]);
+            loadMealVideos(restored["meals"]);
         }
         status = "Demo account connected. Plans and feedback save on this server. Starter recipes need no profile.";
     }
@@ -243,7 +250,7 @@ def:pub FitnessApp -> JsxElement {
         avgSteps = ""; avgHeartRate = ""; avgSleep = ""; avgWorkouts = "";
         goal = "active"; experience = "beginner"; days = "3"; equipment = "bodyweight"; diet = "none";
         healthSource = ""; loadFailed = False; saveWarning = "";
-        await loadMealVideos(defaults);
+        loadMealVideos(defaults);
     }
 
     async def signOut -> None {
