@@ -44,6 +44,7 @@ import from ..services.stride {
 import from ..health_panel { AppleHealthSync }
 import from .ManualAverages { ManualAverages }
 import from .ChatCoach { ChatCoach }
+import from ..nutrition.CalorieCalculator { CalorieCalculator }
 import from ..pdf_export { download_plan_pdf }
 
 # All date comparisons and week totals use this browser-local calendar date.
@@ -769,6 +770,7 @@ def:pub DashboardApp() -> JsxElement {
                         <p className="text-sm text-muted-foreground">
                             Meal ideas are examples, not a complete daily menu. They do not add up to your user-entered calorie target. Recipe videos may use different portions or ingredients.
                         </p>
+                        <CalorieCalculator/>
                     </TabsContent>
                     <TabsContent value="progress" className="flex flex-col gap-4 pt-2">
                         <Card>

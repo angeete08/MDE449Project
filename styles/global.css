@@ -136,3 +136,23 @@
 .health-request { display: grid; gap: .75rem; }
 .health-request ol { list-style: decimal; padding-left: 1.5rem; font-size: .875rem; }
 .health-sync .quiet { border: 1px solid var(--border); border-radius: .5rem; padding: .5rem .75rem; width: fit-content; font-size: .875rem; cursor: pointer; }
+
+.stride-calorie-calculator label {
+  @apply my-2 grid gap-1 text-sm font-medium;
+}
+
+.stride-calorie-calculator :is(input, select) {
+  @apply w-full min-w-0 rounded-md border bg-background px-3 py-2;
+}
+
+.stride-calorie-calculator summary {
+  @apply cursor-pointer py-2 text-sm;
+}
+
+.stride-calorie-calculator a {
+  @apply text-primary underline;
+}
+
+.stride-calorie-calculator small {
+  @apply text-muted-foreground;
+}
