@@ -1,3 +1,4 @@
+import from .offline_store { clear_for_logout, erase_offline, read_offline }
 import from .MobileAccess { MobileAccess }
 import from "@jac/runtime" { Link, useNavigate, jacLogout }
 import from "@hugeicons/react" { HugeiconsIcon }
@@ -101,6 +102,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
             await refresh();
         } except Exception {
             message = "Could not load your account. Reload or sign in again.";
+            try { if read_offline() { nav("/offline"); } } except Exception { }
         } finally {
             loading = False;
             log_date = local_today();
@@ -252,6 +254,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
         busy = True;
         try {
             await clear_account_data();
+            erase_offline();
             nav("/mobile-onboarding" if mobile else "/onboarding");
         } except Exception {
             message = "Could not delete saved data. Try again.";
@@ -318,6 +321,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                             variant="ghost"
                             size="sm"
                             onClick={lambda {
+                                if not clear_for_logout() { return; }
                                 jacLogout();
                                 nav("/mobile-login" if mobile else "/login");
                             }}

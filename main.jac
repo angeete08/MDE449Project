@@ -1,3 +1,6 @@
+import from services.offline { offline_snapshot, sync_offline_change }
+import from .components.OfflineApp { OfflineApp }
+import from .components.OfflineSetup { OfflineSetup }
 import from health_sync {
     start_health_sync,
     health_sync_status,
@@ -45,7 +48,9 @@ def:pub app() -> JsxElement {
             <link rel="apple-touch-icon" href="/static/assets/mobile-icon-192.png"/>
             <meta name="apple-mobile-web-app-capable" content="yes"/>
             <meta name="apple-mobile-web-app-title" content="Stride"/>
+            <OfflineSetup/>
             <Routes>
+                <Route path="/offline" element={<OfflineApp/>}/>
                 <Route path="/" element={<Landing/>}/>
                 <Route path="/login" element={<LoginPage/>}/>
                 <Route path="/mobile-login" element={<LoginPage mobile={True}/>}/>

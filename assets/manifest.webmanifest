@@ -4,7 +4,7 @@
   "short_name": "Stride",
   "description": "Your workouts, meals, activity and fitness coach.",
   "lang": "en",
-  "start_url": "/mobile",
+  "start_url": "/offline",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",

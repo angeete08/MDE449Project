@@ -1,6 +1,8 @@
 # Stride mobile mini app
 
-## Choice and scope
+> Offline support supersedes the original online-only scope below. See [the offline-use guide](offline-use.md) for current preparation, functionality and sync behavior. The home-screen start URL is now `/offline`.
+
+## Original choice and scope
 
 An online, installable Progressive Web App is the best fit for the requested lightweight iPhone/Android app. It reuses Stride's Jac/React UI, authentication and server APIs. A native React Native implementation would require replacing the DOM/Radix UI; a WeChat Mini Program introduces a different platform without meeting the requested general phone scope.
 

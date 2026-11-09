@@ -1,7 +1,6 @@
 import from "@jac/runtime" { Link }
 
-# Installation is deliberately online-only: account and health responses are
-# never copied into a service-worker cache.
+# Personal offline copies are opt-in; API responses are never cached by the worker.
 def:pub MobileAccess(mobile: bool = False) -> JsxElement {
     return
         <aside className="stride-mobile-access" aria-label="Stride on your phone">
@@ -11,7 +10,7 @@ def:pub MobileAccess(mobile: bool = False) -> JsxElement {
             <details>
                 <summary>Add Stride to your home screen</summary>
                 <p>On iPhone, open this site in Safari, tap Share, then Add to Home Screen. On Android, open it in Chrome and choose Add to home screen or Install app from the menu.</p>
-                <p>Use the secure HTTPS address supplied by your host. Stride needs an internet connection to load and save your account. Apple Health sync still uses the Stride Health iOS companion.</p>
+                <p>Use the secure HTTPS address supplied by your host. Open Offline workspace to save a device copy and prepare drafts without a connection. Apple Health sync still uses the Stride Health iOS companion.</p>
             </details>
         </aside>;
 }

@@ -27,7 +27,7 @@ Do not run two dependency installers at once. Generated dependencies, database s
 
 ## Mobile mini app
 
-Open `/mobile` for the phone layout. The same account and backend power phone and desktop. For home-screen installation, serve Stride over HTTPS; on iPhone use Safari → Share → Add to Home Screen, or on Android use Chrome → Add to home screen / Install app. This version requires a connection; Apple Health still uses the iOS companion. See [mobile setup, architecture and verification](docs/mobile-mini-app.md).
+Open `/mobile` for the phone layout. The same account and backend power phone and desktop. For home-screen installation, serve Stride over HTTPS; on iPhone use Safari → Share → Add to Home Screen, or on Android use Chrome → Add to home screen / Install app. After saving a device copy, the offline workspace supports local planning, feedback, activity tracking, goals, history and PDF export even when the server is unreachable. Coach and live health sync still need a connection. See [offline preparation, supported features and sync rules](docs/offline-use.md). See [mobile setup, architecture and verification](docs/mobile-mini-app.md).
 
 ## Dashboard features
 
