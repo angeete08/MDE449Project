@@ -6,11 +6,9 @@ Stride now uses the team's JacHammer prototype as the main interface: landing pa
 
 ## Run locally
 
-Use **Jac 0.37.21** (the release pinned in `jac.toml`). From a checkout of this integration branch:
+Use **Jac 0.37.21** (the release pinned in `jac.toml`). From a checkout of this mobile branch:
 
 ```sh
-git clone --branch feature/jachammer-stride-integration https://github.com/angeete08/MDE449Project.git
-cd MDE449Project
 jac install
 jac run
 ```
@@ -26,6 +24,10 @@ jac run
 ```
 
 Do not run two dependency installers at once. Generated dependencies, database state and `.env` files are ignored by Git.
+
+## Mobile mini app
+
+Open `/mobile` for the phone layout. The same account and backend power phone and desktop. For home-screen installation, serve Stride over HTTPS; on iPhone use Safari → Share → Add to Home Screen, or on Android use Chrome → Add to home screen / Install app. This version requires a connection; Apple Health still uses the iOS companion. See [mobile setup, architecture and verification](docs/mobile-mini-app.md).
 
 ## Dashboard features
 

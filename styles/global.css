@@ -128,6 +128,62 @@
         @apply font-sans;
     }
 }
+/* Mobile shell adapted from feature/mobile-app, retaining dev's theme. */
+.stride-mobile-access {
+    margin: 1rem auto;
+    padding: 1rem;
+    max-width: 72rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--background);
+    font-size: .875rem;
+}
+.stride-mobile-access summary { cursor: pointer; padding: .75rem 0; }
+.stride-mobile-access p { max-width: 65ch; margin: .5rem 0; }
+.stride-mobile-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    gap: .5rem;
+}
+.stride-mobile-actions > a > button,
+.stride-mobile-actions > button {
+    width: 100%;
+    min-width: 0;
+    min-height: 2.75rem;
+    white-space: normal;
+}
+.stride-mobile-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+}
+.stride-mobile-tabs > button {
+    flex: 0 0 auto;
+    min-height: 2.75rem;
+    padding-inline: .875rem;
+}
+.stride-mobile-version {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    overflow-wrap: anywhere;
+}
+.stride-mobile-version > header {
+    padding-top: env(safe-area-inset-top, 0px);
+}
+@media (max-width: 640px) {
+    input, textarea, select { font-size: 16px !important; }
+    [data-slot="dialog-content"] {
+        max-height: 85dvh;
+        overflow-y: auto;
+    }
+    .stride-mobile-version main { padding: 1rem .75rem 2rem; min-width: 0; }
+    .stride-mobile-version [data-slot="tabs-content"] { min-width: 0; }
+    .stride-mobile-version [data-slot="card"] { min-width: 0; }
+}
 /* Existing iPhone sync panel, styled within the JacHammer dashboard. */
 .health-sync { display: grid; gap: .75rem; }
 .health-sync-top { display: flex; align-items: center; gap: .75rem; }
