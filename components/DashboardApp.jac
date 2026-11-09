@@ -43,8 +43,8 @@ import from ..services.stride {
 }
 import from ..health_panel { AppleHealthSync }
 import from .ManualAverages { ManualAverages }
+import from .Nutrition { Nutrition }
 import from .ChatCoach { ChatCoach }
-import from ..nutrition.CalorieCalculator { CalorieCalculator }
 import from ..pdf_export { download_plan_pdf }
 
 # All date comparisons and week totals use this browser-local calendar date.
@@ -81,6 +81,7 @@ def:pub DashboardApp() -> JsxElement {
         preview_open: bool = False;
     has log_date: str = "",
         log_steps: str = "0",
+        log_extra: str = "0",
         log_calories: str = "0",
         log_miles: str = "0",
         log_minutes: str = "0";
@@ -138,12 +139,14 @@ def:pub DashboardApp() -> JsxElement {
     def edit_log(stamp: str) {
         log_date = stamp;
         log_steps = "0";
+        log_extra = "0";
         log_calories = "0";
         log_miles = "0";
         log_minutes = "0";
         for l in logs {
             if l.date == stamp {
                 log_steps = str(l.steps);
+                log_extra = str(l.extra_activities or 0);
                 log_calories = str(l.calories_burned);
                 log_miles = str(l.run_miles);
                 log_minutes = str(l.active_minutes);
@@ -158,6 +161,10 @@ def:pub DashboardApp() -> JsxElement {
         }
         busy = True;
         try {
+            if not log_extra.isdigit() or int(log_extra) > 100 {
+                message = "Enter 0–100 additional activities.";
+                return;
+            }
             if not log_steps.isdigit()
                 or not log_calories.isdigit()
                 or not log_minutes.isdigit()
@@ -171,7 +178,8 @@ def:pub DashboardApp() -> JsxElement {
                 int(log_calories),
                 float(log_miles),
                 int(log_minutes),
-                local_today()
+                local_today(),
+                int(log_extra)
             );
             logs = await get_logs();
             activity = await get_activity_summary(local_today());
@@ -266,7 +274,7 @@ def:pub DashboardApp() -> JsxElement {
     async def clear_data() {
         if busy
             or not window.confirm(
-                "Delete your saved profile, plan history, activity logs and health summary? Your sign-in account will remain."
+                "Delete your saved profile, plan history, food entries, activity logs and health summary? Your sign-in account will remain."
             ) {
             return;
         }
@@ -381,6 +389,7 @@ def:pub DashboardApp() -> JsxElement {
                         <TabsTrigger value="coach">Coach</TabsTrigger>
                         <TabsTrigger value="plan">Plan</TabsTrigger>
                         <TabsTrigger value="meals">Meals</TabsTrigger>
+                        <TabsTrigger value="nutrition">Got your nutritions?</TabsTrigger>
                         <TabsTrigger value="progress">Progress</TabsTrigger>
                         <TabsTrigger value="health">Health</TabsTrigger>
                         <TabsTrigger value="history">History</TabsTrigger>
@@ -724,7 +733,9 @@ def:pub DashboardApp() -> JsxElement {
                             }}
                         </div>
                     </TabsContent>
+                    <TabsContent value="nutrition" className="pt-2"><Nutrition key={local_today()} photos={True} day={local_today()} plan={plan} logs={logs} target={p.calorie_target}/></TabsContent>
                     <TabsContent value="meals" className="flex flex-col gap-4 pt-2">
+                        <Nutrition key={local_today()} photos={False} day={local_today()} plan={plan} logs={logs} target={p.calorie_target}/>
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {for m in meals {
                                 <Card key={m["name"]}>
@@ -770,7 +781,6 @@ def:pub DashboardApp() -> JsxElement {
                         <p className="text-sm text-muted-foreground">
                             Meal ideas are examples, not a complete daily menu. They do not add up to your user-entered calorie target. Recipe videos may use different portions or ingredients.
                         </p>
-                        <CalorieCalculator/>
                     </TabsContent>
                     <TabsContent value="progress" className="flex flex-col gap-4 pt-2">
                         <Card>
@@ -987,8 +997,12 @@ def:pub DashboardApp() -> JsxElement {
                                 type="date"
                                 max={local_today()}
                                 value={log_date}
-                                onChange={lambda (e: any) { log_date = e.target.value; }}
+                                onChange={lambda (e: any) { edit_log(e.target.value); }}
                             />
+                        </Field>
+                        <Field>
+                            <FieldLabel htmlFor="log-extra">Additional activities completed (exclude workouts marked done in Plan)</FieldLabel>
+                            <Input id="log-extra" type="number" min="0" max="100" value={log_extra} onChange={lambda (e: any) { log_extra = e.target.value; }}/>
                         </Field>
                         <Field>
                             <FieldLabel htmlFor="log-steps">

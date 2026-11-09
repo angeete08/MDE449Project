@@ -1,5 +1,4 @@
-import from nutrition.local_calories { estimate_local_food }
-import from nutrition.recipe_calories { match_calories, resolve_match, find_ingredient, estimate_recipe }
+import from services.nutrition { daily_food, analyze_food, log_food, set_consumed }
 import from health_sync {
     start_health_sync,
     health_sync_status,

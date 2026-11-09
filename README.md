@@ -14,7 +14,7 @@ Stride is a fitness-planning web application that creates personalized weekly wo
 - A working Jac installation compatible with **Jac 0.37.21** (pinned in `jac.toml`).
 - Internet access for initial dependency installation.
 - Node.js and npm if manual frontend dependency installation is necessary.
-- Optional: a Google Gemini API key for the Coach feature.
+- Optional: a Google Gemini API key for Coach and meal photo analysis.
 - Optional: a Mac with Xcode and an iPhone for native Apple Health syncing.
 
 ### 1. Clone and install
@@ -33,7 +33,7 @@ Get an API key from [Google AI Studio](https://aistudio.google.com/apikey). Crea
 GOOGLE_API_KEY=your_google_api_key_here
 ```
 
-Keep the key private; do not commit `.env`. The rest of Stride works without a Gemini key, but the Coach cannot generate responses. API access, model availability, rate limits, and billing depend on your Google account and Google's current terms.
+Keep the key private; do not commit `.env`. The rest of Stride works without a Gemini key, but Coach replies and meal photo estimates require it. API access, model availability, rate limits, and billing depend on your Google account and Google's current terms.
 
 ### 3. Start the application
 
@@ -67,7 +67,8 @@ Do not run two installers simultaneously.
 | **Today**         | Shows today's scheduled workout and manually logged activity; lets you set a weekly active-minutes goal and request an optional movement break based on entered sitting time. |
 | **Coach**         | Uses Google Gemini to answer general fitness questions and questions about your saved fitness preferences and scheduled workouts.                                             |
 | **Plan**          | Shows a seven-day workout schedule, exercise details, tutorial searches, difficulty feedback, a next-week preview, and a downloadable PDF.                                    |
-| **Meals**         | Displays curated meal ideas based on diet preferences, with approximate calories and links to recipe videos. Includes a food and recipe calorie calculator.                                                                  |
+| **Meals** | Tracks intake against your daily target, completed activities, logged calories burned and signed energy balance. Includes meal ideas and manual food logging. |
+| **Got your nutritions?** | Drop or choose up to ten food photos per day, review Gemini’s nutrient and portion estimates, and add selected foods to Meals. |
 | **Progress**      | Lets you add or edit daily steps, calories burned, running distance, and active minutes; shows weekly totals and activity streaks.                                            |
 | **Health**        | Accepts optional manual averages or a 28-day Apple Health summary through the iOS companion.                                                                                  |
 | **History**       | Displays saved previous weeks, including workouts, exercise amounts, and recorded feedback.                                                                                   |
@@ -98,10 +99,6 @@ Important limitations:
 ### Meals and activity tracking
 
 Meal suggestions are curated examples, not a complete daily nutrition plan. Calories are approximate, and linked videos may use different ingredients or portions. **Daily calorie targets are entered by the user**; Stride does not calculate or prescribe them automatically.
-
-In **Meals**, enter a food or dish name and select **Find calories**. The default lookup uses bundled USDA Foundation Foods and TheMealDB data without API keys. Food portions start at 100 g. For recipes, review ingredient matches and weights, adjust the batch size or servings, and fill in any missing values before using the estimate. The calculator does not change your daily calorie target.
-
-To use **Local Qwen estimate**, start Ollama on the machine running Stride and run `ollama pull qwen3:1.7b`. The model produces rough estimates from food names. For optional online evidence, configure `SERPAPI_API_KEY` for Google results or `BYLLM_DEFAULT_MODEL` and its provider key for agent-assisted lookup. `USDA_API_KEY` enables broader USDA searches for that agent.
 
 Activity totals are entered manually. Saving a second log for the same date replaces that date's totals. Weekly progress counts logged active minutes from Monday through the browser's current local date. Workout difficulty feedback and activity logs are separate: rating a workout does not automatically add active minutes.
 

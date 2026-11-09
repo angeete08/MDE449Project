@@ -1,4 +1,6 @@
 import tempfile;
+import base64;
+import json;
 import unittest.mock;
 import litellm;
 import from litellm.types.utils { ModelResponse }
@@ -56,6 +58,40 @@ test "account data is isolated and duplicate log replaces totals" {
                 "os.environ", {"GOOGLE_API_KEY": "test-key"}
             ).start();
             assert client.post("/function/coach_available", json={}).json()["data"]["result"] is True;
+            stamp = "2026-10-25";
+            estimate = {"food": True, "title": "Rice bowl", "description": "Rice with tofu.",
+                        "level": 3, "calories": 450, "fiber": "Some", "fat": "Unclear",
+                        "protein": "Tofu", "processing": "Mixed"};
+            with unittest.mock.patch("litellm.completion", return_value=ModelResponse(
+                choices=[{"message": {"content": json.dumps(estimate)}}]
+            )) as vision {
+                for index in range(11) {
+                    photo = "data:image/jpeg;base64," + base64.b64encode(
+                        bytes.fromhex("ffd8ff") + str(index).encode()
+                    ).decode();
+                    args = {"day": stamp, "photo": photo};
+                    answer = client.post("/function/analyze_food", json=args).json();
+                    assert answer["data"]["result"] == ("analyzed" if index < 10 else "daily limit reached"), str(answer);
+                    if index == 0 {
+                        assert client.post("/function/analyze_food", json=args).json()["data"]["result"] == "already analyzed";
+                    }
+                }
+                assert vision.call_count == 10;
+                format_spec = vision.call_args.kwargs["response_format"];
+                assert format_spec["type"] == "json_schema";
+                schema = format_spec["json_schema"]["schema"];
+                assert set(schema["required"]) == set(estimate);
+                assert schema["properties"]["calories"]["type"] == "integer";
+                assert vision.call_args.kwargs["messages"][0]["content"][1]["type"] == "image_url";
+            }
+            foods = client.post("/function/daily_food", json={"day": stamp}).json()["data"]["result"];
+            assert len(foods) == 10 and not any(r["consumed"] for r in foods);
+            assert client.post("/function/set_consumed", json={
+                "day": stamp, "token": foods[0]["token"], "consumed": True
+            }).json()["ok"];
+            foods = client.post("/function/daily_food", json={"day": stamp}).json()["data"]["result"];
+            assert sum(r["calories"] for r in foods if r["consumed"]) == 450;
+            assert client.post("/function/daily_food", json={"day": "2026-10-26"}).json()["data"]["result"] == [];
             rejected_key = litellm.AuthenticationError(
                 message="API key not valid. Traceback (most recent call last): /server/path",
                 llm_provider="gemini",

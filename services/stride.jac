@@ -46,7 +46,13 @@ obj PlanDay {
     has feedback: str = "";
 }
 
+node FoodEntry {
+    has day: str, token: str, title: str, calories: int,
+        analysis: dict[str, any] = {}, consumed: bool = False;
+}
+
 node DailyLog {
+    has extra_activities: int = 0;
     has date: str = "",
         steps: int = 0,
         calories_burned: int = 0;
@@ -296,13 +302,20 @@ def:priv save_log(
     calories_burned: int,
     run_miles: float,
     active_minutes: int = 0,
-    today: str = ""
+    today: str = "",
+    extra_activities: int = -1
 ) -> DailyLog {
     require_profile();
     current = today if today else CalendarDate.today().isoformat();
     validate_log(date, steps, calories_burned, run_miles, active_minutes, current);
+    # Jac RPC may deliver omitted numeric defaults as strings.
+    extra_activities = int(extra_activities);
+    if not -1 <= extra_activities <= 100 {
+        raise ValueError("Enter 0–100 additional activities.");
+    }
     for log in get_logs() {
         if log.date == date {
+            if extra_activities >= 0 { log.extra_activities = extra_activities; }
             log.steps = steps;
             log.calories_burned = calories_burned;
             log.run_miles = run_miles;
@@ -311,6 +324,7 @@ def:priv save_log(
         }
     }
     log = DailyLog(
+        extra_activities=max(0, extra_activities),
         date=date,
         steps=steps,
         calories_burned=calories_burned,
@@ -603,6 +617,7 @@ def:priv get_movement_break(sitting_minutes: int) -> dict[str, any] {
 }
 
 def:priv clear_account_data() -> bool {
+    for item in [root-->][?:FoodEntry] { del item; }
     for log in get_logs() {
         del log;
     }
