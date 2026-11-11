@@ -10,7 +10,7 @@ import from .ui.button { Button }
 import from .ui.input { Input }
 import from .ui.field { Field, FieldLabel, FieldGroup }
 
-def:pub LoginPage() -> JsxElement {
+def:pub LoginPage(mobile: bool = False) -> JsxElement {
     has mode: str = "login";
     has email: str = "";
     has password: str = "";
@@ -43,7 +43,7 @@ def:pub LoginPage() -> JsxElement {
                 busy = False;
                 return;
             }
-            nav("/onboarding");
+            nav("/mobile-onboarding" if mobile else "/onboarding");
         } else {
             login_ok: bool = False;
             try {
@@ -58,7 +58,7 @@ def:pub LoginPage() -> JsxElement {
                 busy = False;
                 return;
             }
-            nav("/app");
+            nav("/mobile" if mobile else "/app");
         }
     }
 

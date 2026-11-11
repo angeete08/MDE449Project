@@ -128,6 +128,62 @@
         @apply font-sans;
     }
 }
+/* Mobile shell adapted from feature/mobile-app, retaining dev's theme. */
+.stride-mobile-access {
+    margin: 1rem auto;
+    padding: 1rem;
+    max-width: 72rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--background);
+    font-size: .875rem;
+}
+.stride-mobile-access summary { cursor: pointer; padding: .75rem 0; }
+.stride-mobile-access p { max-width: 65ch; margin: .5rem 0; }
+.stride-mobile-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    gap: .5rem;
+}
+.stride-mobile-actions > a > button,
+.stride-mobile-actions > button {
+    width: 100%;
+    min-width: 0;
+    min-height: 2.75rem;
+    white-space: normal;
+}
+.stride-mobile-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+}
+.stride-mobile-tabs > button {
+    flex: 0 0 auto;
+    min-height: 2.75rem;
+    padding-inline: .875rem;
+}
+.stride-mobile-version {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    overflow-wrap: anywhere;
+}
+.stride-mobile-version > header {
+    padding-top: env(safe-area-inset-top, 0px);
+}
+@media (max-width: 640px) {
+    input, textarea, select { font-size: 16px !important; }
+    [data-slot="dialog-content"] {
+        max-height: 85dvh;
+        overflow-y: auto;
+    }
+    .stride-mobile-version main { padding: 1rem .75rem 2rem; min-width: 0; }
+    .stride-mobile-version [data-slot="tabs-content"] { min-width: 0; }
+    .stride-mobile-version [data-slot="card"] { min-width: 0; }
+}
 /* Existing iPhone sync panel, styled within the JacHammer dashboard. */
 .health-sync { display: grid; gap: .75rem; }
 .health-sync-top { display: flex; align-items: center; gap: .75rem; }
@@ -136,3 +192,20 @@
 .health-request { display: grid; gap: .75rem; }
 .health-request ol { list-style: decimal; padding-left: 1.5rem; font-size: .875rem; }
 .health-sync .quiet { border: 1px solid var(--border); border-radius: .5rem; padding: .5rem .75rem; width: fit-content; font-size: .875rem; cursor: pointer; }
+
+.stride-offline-banner { display: flex; flex-wrap: wrap; gap: .75rem; padding: .75rem 1rem; background: var(--muted); font-size: .875rem; }
+.stride-offline-banner a { text-decoration: underline; font-weight: 600; }
+.stride-offline { max-width: 54rem; margin: auto; padding: 1rem 1rem max(2rem, env(safe-area-inset-bottom)); }
+.stride-offline h1 { font-size: 1.75rem; font-weight: 700; }
+.stride-offline h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: .75rem; }
+.stride-offline h3 { font-weight: 600; }
+.stride-offline p { margin: .5rem 0; }
+.stride-offline section { margin: 1rem 0; padding: 1rem; border: 1px solid var(--border); border-radius: .75rem; }
+.stride-offline article { padding: .75rem 0; border-bottom: 1px solid var(--border); }
+.stride-offline pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .85rem; }
+.stride-offline button { padding: .65rem .85rem; min-height: 44px; border-radius: .5rem; border: 1px solid var(--border); background: var(--secondary); cursor: pointer; }
+.stride-offline button:disabled { opacity: .5; cursor: default; }
+.stride-offline label { display: grid; gap: .25rem; margin: .75rem 0; }
+.stride-offline input { width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: .35rem; padding: .6rem; font-size: 16px; }
+.offline-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.offline-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .5rem; }

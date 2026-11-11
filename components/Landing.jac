@@ -1,3 +1,4 @@
+import from .MobileAccess { MobileAccess }
 import from "@jac/runtime" { Link }
 import from "@hugeicons/react" { HugeiconsIcon }
 import from "@hugeicons/core-free-icons" {
@@ -38,6 +39,7 @@ def:pub Landing() -> JsxElement {
     year = str(new(Date).getFullYear());
     return
         <div className="min-h-svh bg-muted/40">
+            <MobileAccess/>
             <nav className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
                 <div
                     className="mx-auto flex h-16 max-w-6xl items-center gap-8 pl-6 pr-6"
