@@ -223,7 +223,23 @@ footer strong {
   color:#2d4936}
 [hidden] {
   display:none!important}
+.goal-picture { margin:16px 0; }
+.goal-picture svg { display:block; width:100%; max-height:260px; }
+.goal-picture figcaption { margin-top:12px; }
+.goal-dialog { width:min(880px,calc(100% - 32px)); max-height:90dvh; overflow:auto; border:1px solid #b4c3ac; border-radius:18px; padding:26px; color:#20342d; }
+.goal-dialog::backdrop { background:#142b23aa; }
+.studio-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+.dialog-history { max-height:180px; overflow:auto; font-size:13px; overflow-wrap:anywhere; }
+.balance-warning { padding:16px; border:1px solid #c49b53; border-radius:10px; background:#fff7e7; font-size:13px; margin:16px 0; }
+.analysis-panel { border-top:1px solid #dce3d7; margin-top:20px; padding-top:8px; }
+.analysis-panel dl { font-size:13px; }
+.analysis-panel dt { font-weight:700; }
+.analysis-panel dd { margin:0 0 10px; }
+.consent { display:flex; gap:8px; align-items:flex-start; }
+.consent input { flex-shrink:0; margin-top:4px; }
 @media(max-width:760px){
+.studio-grid { grid-template-columns:1fr; }
+.goal-dialog { padding:18px; }
   main{
   padding:20px 16px}
 .layout{

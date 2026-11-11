@@ -2,8 +2,9 @@
 import from "react" { useEffect }
 import from .coach_media { PhotoResult, prepare_photo }
 import from .camera_lifecycle { stop_tracks, is_current }
+import from .vision_ui { VisionPanel }
 
-def:pub PhotoCapture() -> JsxElement {
+def:pub PhotoCapture(onFocus: Callable[[str], None]) -> JsxElement {
     has preview: str = "", original: str = "", error: str = "", notice: str = "",
         busy: bool = False, camera: bool = False, requesting: bool = False,
         crop: int = 100, offsetX: int = 50, offsetY: int = 50;
@@ -144,10 +145,10 @@ def:pub PhotoCapture() -> JsxElement {
     }
 
     <div className="capture">
-        <div className="privacy"><strong>Private, optional photo</strong><p>Only the local coach server processes your image to check it and remove metadata. No external AI service receives it. Photos are not saved.</p></div>
+        <div className="privacy"><strong>Private, optional photo</strong><p>The local server checks your photo and removes metadata. Analysis happens only when you request it. API mode asks for consent before sending a photo to the displayed provider. This app does not save photos.</p></div>
         <video ref={video} hidden={not camera} autoPlay muted playsInline aria-label="Live camera preview"/>
         {if not camera {
-            if preview { <img className="preview" src={preview} alt="Your selected coach photo. No body analysis has been performed."/> }
+            if preview { <img className="preview" src={preview} alt="Your selected coach photo"/> }
             else { <div className="empty"><span aria-hidden="true">＋</span><h3>A starting point, if you want one</h3><p>Use your camera or choose a photo.<br/>You can also skip this step entirely.</p></div> }
         }}
         <div className="actions"><label className="button">Upload photo<input className="file" type="file" accept="image/jpeg,image/png,image/webp" onChange={chooseFile} disabled={busy or requesting}/></label><button type="button" onClick={openCamera} disabled={busy or requesting}>{"Retake with camera" if preview else "Open camera"}</button></div>
@@ -163,6 +164,7 @@ def:pub PhotoCapture() -> JsxElement {
         }}
         {if preview or busy { <button type="button" onClick={clearPhoto}>Remove photo / cancel</button> }}
         <p className="error" role="alert">{error}</p><p className="hint" role="status">{"Preparing photo…" if busy else notice}</p>
-        <p className="hint">JPEG, PNG or WebP · up to 10 MB and 16 MP.<br/>Region recognition is not enabled yet. Choose your focus manually.</p>
+        <p className="hint">JPEG, PNG or WebP · up to 10 MB and 16 MP.<br/>Manual focus selection is always available.</p>
+        {if preview and not camera and not busy { <VisionPanel key={preview} photo={preview} onFocus={onFocus}/> }}
     </div>
 }
