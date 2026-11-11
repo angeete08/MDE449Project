@@ -36,13 +36,9 @@ import from ..services.stride {
     get_plan_state,
     set_weekly_goal,
     get_activity_summary,
-    save_health_summary,
-    get_health_summary,
     get_movement_break,
     clear_account_data
 }
-import from ..health_panel { AppleHealthSync }
-import from .ManualAverages { ManualAverages }
 import from .Nutrition { Nutrition }
 import from .ChatCoach { ChatCoach }
 import from ..pdf_export { download_plan_pdf }
@@ -67,7 +63,6 @@ def:pub DashboardApp() -> JsxElement {
         logs: list[DailyLog] = [];
     has meals: list[dict[str, any]] = [];
     has activity: dict[str, any] = {},
-        health: dict[str, any] = {},
         plan_state: dict[str, any] = {},
         snack: dict[str, any] = {};
     has loading: bool = True,
@@ -95,15 +90,13 @@ def:pub DashboardApp() -> JsxElement {
                 get_logs(),
                 get_plan_state(),
                 get_activity_summary(local_today()),
-                get_health_summary(),
                 meal_plan()
             ]);
             plan = results[0];
             logs = results[1];
             plan_state = results[2];
             activity = results[3];
-            health = results[4];
-            meals = results[5];
+            meals = results[4];
             goal = str(profile.weekly_minutes_goal);
         }
     }
@@ -239,15 +232,6 @@ def:pub DashboardApp() -> JsxElement {
         } except Exception {
             message = "Could not preview next week. Try again.";
         } finally { busy = False; }
-    }
-
-    async def imported(summary: dict[str, any]) {
-        try {
-            health = await save_health_summary(summary);
-            message = "Apple Health · 28-day summary saved. Unavailable metrics remain blank.";
-        } except Exception {
-            message = "Could not save the imported averages. Try syncing again.";
-        }
     }
 
     async def break_suggestion() {
@@ -391,7 +375,6 @@ def:pub DashboardApp() -> JsxElement {
                         <TabsTrigger value="meals">Meals</TabsTrigger>
                         <TabsTrigger value="nutrition">Got your nutritions?</TabsTrigger>
                         <TabsTrigger value="progress">Progress</TabsTrigger>
-                        <TabsTrigger value="health">Health</TabsTrigger>
                         <TabsTrigger value="history">History</TabsTrigger>
                     </TabsList>
                     <TabsContent value="coach" className="pt-2">
@@ -832,73 +815,6 @@ def:pub DashboardApp() -> JsxElement {
                                         </tbody>
                                     </table>
                                 } }
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                    <TabsContent value="health" className="flex flex-col gap-4 pt-2">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Apple Health</CardTitle>
-                                <CardDescription>
-                                    28-day averages from the Stride Health iOS companion. Other wearable connections are planned.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="flex flex-col gap-4">
-                                <AppleHealthSync onSynced={imported}/>
-                                {if health {
-                                    <h3 className="font-medium">{health["source"]}</h3>
-                                    <p className="text-sm">
-                                        {"Daily steps: "
-                                            + str(
-                                                health.get("avg_daily_steps")
-                                                    if health.get("avg_daily_steps")
-                                                        is not None
-                                                    else "Unavailable"
-                                            )}
-                                    </p>
-                                    <p className="text-sm">
-                                        {"Heart rate: "
-                                            + str(
-                                                health.get("avg_heart_rate")
-                                                    if health.get("avg_heart_rate")
-                                                        is not None
-                                                    else "Unavailable"
-                                            )}
-                                    </p>
-                                    <p className="text-sm">
-                                        {"Sleep hours: "
-                                            + str(
-                                                health.get("avg_sleep_hours")
-                                                    if health.get("avg_sleep_hours")
-                                                        is not None
-                                                    else "Unavailable"
-                                            )}
-                                    </p>
-                                    <p className="text-sm">
-                                        {"Workouts per week: "
-                                            + str(
-                                                health.get("avg_workouts_per_week")
-                                                    if health.get(
-                                                        "avg_workouts_per_week"
-                                                    )
-                                                        is not None
-                                                    else "Unavailable"
-                                            )}
-                                    </p>
-                                }}
-                                <ManualAverages
-                                    onSaved={lambda (value: dict[str, any]) { health = value; }}
-                                />
-                                <p className="text-sm text-muted-foreground">
-                                    These averages are separate from daily activity logs. They do not determine readiness or change your calorie target.
-                                </p>
-                                <Button
-                                    variant="outline"
-                                    disabled={busy}
-                                    onClick={clear_data}
-                                >
-                                    Delete saved Stride data
-                                </Button>
                             </CardContent>
                         </Card>
                     </TabsContent>
