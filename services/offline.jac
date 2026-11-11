@@ -70,8 +70,8 @@ def:priv sync_offline_change(owner: str, change: dict[str, any]) -> dict[str, an
         if kind == "plan" {
             cleaned = validate_state(desired);
             original = get_plan_state();
-            weeks = cleaned["history"] + [cleaned];
-            for old in original["history"] + [original] {
+            weeks = cleaned["history"] + [cleaned] + cleaned.get("upcoming", []);
+            for old in original["history"] + [original] + original.get("upcoming", []) {
                 matches = [w for w in weeks if w["week_id"] == old["week_id"]];
                 if len(matches) != 1 { raise ValueError("Offline plan must preserve existing weeks."); }
                 saved = matches[0];

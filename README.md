@@ -7,6 +7,8 @@ Stride is a fitness-planning web application that creates personalized weekly wo
 
 > **Project status:** Working course prototype. Workout planning is rule-based; the Coach uses Google Gemini. Some integrations require additional setup, and certain advanced fitness features are not implemented.
 
+The combined online/mobile/offline application is on `dev`, `feature/mobile-app`, and `feature/mobile-mini-app`. See the [November 11 integration notes](docs/nov11-integration.md) for feature boundaries, branch cleanup, and verification. Use `jac run --no-dev` when preparing an offline installation.
+
 ## Quick start
 
 ### Requirements

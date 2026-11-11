@@ -12,9 +12,23 @@ def:pub offline_week(previous: any) -> any {
     state: any = JSON.parse(JSON.stringify(previous));
     archived: any = JSON.parse(JSON.stringify(previous));
     del archived["history"];
+    upcoming: any = state.upcoming or [];
+    del archived["upcoming"];
     history = state.history;
     history.push(archived);
+    target = shift_day(previous.start_date, 7);
+    for saved in upcoming {
+        if saved.start_date == target {
+            restored: any = JSON.parse(JSON.stringify(saved));
+            restored.history = history;
+            remaining: any = [week for week in upcoming if week.start_date > target];
+            if len(remaining) > 0 { restored.upcoming = remaining; }
+            return restored;
+        }
+    }
     state.history = history;
+    del state["upcoming"];
+    if len(upcoming) > 0 { state.upcoming = upcoming; }
     browser_crypto: any = globalThis.crypto;
     state.week_id = browser_crypto.randomUUID();
     state.source_week = previous.start_date;

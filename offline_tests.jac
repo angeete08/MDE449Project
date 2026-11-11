@@ -40,6 +40,25 @@ test "offline API binds snapshots to accounts and conditionally applies drafts" 
             assert advanced["data"]["result"]["status"] == "applied", str(advanced);
             retried_plan = client.post("/function/sync_offline_change", json={"owner": snap["owner"], "change": plan_change}).json();
             assert retried_plan["data"]["result"]["status"] == "already_applied", str(retried_plan);
+            # Online calendar navigation may retain a previously created future week.
+            # Offline replay must retain that week too, including its identity.
+            client.post("/function/regenerate_plan", json={"today": "2026-11-09"});
+            calendar_snap = client.post("/function/offline_snapshot", json={}).json()["data"]["result"];
+            future_id = calendar_snap["state"]["upcoming"][0]["week_id"];
+            reused = create_plan(calendar_snap["state"]["profile"], calendar_snap["state"])["state"];
+            assert reused["week_id"] == future_id;
+            replay = client.post("/function/sync_offline_change", json={"owner": snap["owner"], "change": {
+                "kind": "plan", "key": "plan", "base": calendar_snap["state"], "value": reused
+            }}).json();
+            assert replay["data"]["result"]["status"] == "applied", str(replay);
+            # A stale client that silently drops a saved future week must be refused.
+            client.post("/function/regenerate_plan", json={"today": "2026-11-09"});
+            protected = client.post("/function/offline_snapshot", json={}).json()["data"]["result"];
+            broken = {key: value for (key, value) in protected["state"].items() if key != "upcoming"};
+            rejected = client.post("/function/sync_offline_change", json={"owner": snap["owner"], "change": {
+                "kind": "plan", "key": "plan", "base": protected["state"], "value": broken
+            }}).json();
+            assert not rejected["ok"], str(rejected);
             wrong = client.post("/function/sync_offline_change", json={"owner": "someone-else", "change": change}).json();
             assert not wrong["ok"];
         } finally { client.close(); }
