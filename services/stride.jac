@@ -31,6 +31,7 @@ node Profile {
 
     has weekly_minutes_goal: int = 150;
     has plan_json: str = "",
+        # Retired Apple Health summary; kept so existing saved profiles still load.
         health_json: str = "";
 }
 
@@ -572,45 +573,6 @@ def:protect ask_coach(
         + "\nScheduled workouts: " + (", ".join(scheduled) if scheduled else "none")
     );
     return _generate_coach_reply(question, history, context);
-}
-
-def:priv save_health_summary(
-    summary: dict[str, any], source: str = "Apple Health · 28-day summary"
-) -> dict[str, any] {
-    with MUTATION_LOCK {
-        if source
-            not in ["Apple Health · 28-day summary", "Manually entered weekly averages"] {
-            raise ValueError("Choose a valid data source.");
-        }
-        p = require_profile();
-        raw = planner_profile(p);
-        for key in [
-            "avg_daily_steps",
-            "avg_heart_rate",
-            "avg_sleep_hours",
-            "avg_workouts_per_week"
-        ] {
-            raw[key] = summary.get(key);
-        }
-        clean = validate_profile(raw);
-        selected = {
-            key: clean[key]
-            for key in [
-                "avg_daily_steps",
-                "avg_heart_rate",
-                "avg_sleep_hours",
-                "avg_workouts_per_week"
-            ]
-        };
-        selected["source"] = source;
-        p.health_json = json.dumps(selected);
-        return selected;
-    }
-}
-
-def:priv get_health_summary() -> dict[str, any] {
-    p = require_profile();
-    return json.loads(p.health_json) as dict[str, any] if p.health_json else {};
 }
 
 def movement_break(sitting_minutes: int) -> dict[str, any] {
