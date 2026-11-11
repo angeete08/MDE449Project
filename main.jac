@@ -1,12 +1,4 @@
 import from services.nutrition { daily_food, analyze_food, log_food, set_consumed }
-import from health_sync {
-    start_health_sync,
-    health_sync_status,
-    finish_health_sync,
-    receive_health_batch,
-    receive_health_log,
-    release_health_sync
-}
 import from services.stride {
     save_profile,
     get_profile,
@@ -21,8 +13,6 @@ import from services.stride {
     get_plan_state,
     set_weekly_goal,
     get_activity_summary,
-    save_health_summary,
-    get_health_summary,
     get_movement_break,
     clear_account_data,
     ask_coach,
