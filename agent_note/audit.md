@@ -1,7 +1,7 @@
 # AI coach audit register
 
 Updated: 2026-11-11
-Scope: planning and source inspection only. This is not a completed security, medical, or model-quality audit.
+Scope: Phase 1–2 implementation self-review and tests. This is not a completed security, medical, or model-quality audit. Historical planning risks below remain applicable to later phases; current controls are recorded at the end.
 
 | ID | Priority | Finding / risk | Planned control and evidence | State |
 | --- | --- | --- | --- | --- |
@@ -33,3 +33,14 @@ Scope: planning and source inspection only. This is not a completed security, me
 ## Audit process during implementation
 
 For each risk, record the affected files, reproducible scenario, observed result, fix, and re-test evidence. A control described in a plan does not close a finding. Before final handoff, inspect media authorization/deletion, server validation, history preservation, provider data handling, and generated-image claims. Label self-review as self-review; no teammate or user review has occurred in this phase.
+
+## Phase 1–2 self-review — 2026-11-11
+
+- A02/A12: UI explicitly states manual focus, no analysis, no workouts generated. No model/provider is configured or called.
+- A03/A14: selected ephemeral local prototype. Decoder checks format signatures/MIME, dimensions, encoded/decoded sizes, still images and corruption. EXIF rotation tested; fresh RGB output strips EXIF/ICC/text. No persisted photo, public URL, logs of payloads, or shared photo reader exists. No cross-user-storage claim is made; authenticated ownership remains required before persistence.
+- Generated 0.37.21 photo RPC metadata is `unknown=true`, `writes=["*"]`; inspected runtime confirms it bypasses reader caching. Recheck after compiler or media-service changes. Previews use data URLs; removal clears state rather than revoking nonexistent object URLs. Memory release uses GC, not secure erasure.
+- A08: camera starts on user action with audio disabled; accepted and stale streams stop their tracks on close/cancel/unmount; stale image replies cannot restore removed state. Fake-track and cancellation-helper tests pass. Real permission, device interruption and physical capture are still unverified.
+- A10: app's own entry/config/dependencies/runtime; no sibling imports. Clean worktree tracked files outside notes/app match its base. Original checkout left untouched by operations. No pre-run checksum baseline was captured, so do not claim a before/after checksum proof for concurrently edited original files.
+- A11: only explicit new feature/note paths staged for coach commits; generated `.jac`, dependencies, logs and private directories ignored. Original staging unchanged by this task.
+- A15 (runtime limitation): Jac 0.37.21 dev Vite binds all interfaces even with `[client.vite.server].host`; verified command contains bare `--host`. Mitigation is documented and tested `jac run --no-dev` on loopback. Bare `jac run` is usable for development with synthetic fixtures only. No shared deployment approved or delivered.
+- Real camera and mobile-device checks remain outstanding. There has been no teammate review or user testing.

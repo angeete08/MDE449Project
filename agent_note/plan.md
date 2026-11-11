@@ -1,7 +1,7 @@
 # Visual AI coach — phased implementation plan
 
 Updated: 2026-11-11
-Status: Phase 0 complete (repository inspection and planning). Product implementation has not started.
+Status: Phases 0–1 complete. Phase 2 implemented and tested for uploads/crops; physical-camera permission/capture acceptance remains pending. Phases 3–7 not started.
 
 ## Intended experience
 
@@ -54,7 +54,7 @@ Dependency order: 1 → 2 → 3; 4 can use manual selection while vision is eval
 
 Use exactly **two feature branches**, one for photo coach and one for progress canvas. Planning, shared foundations, testing, and integration stay with these features; they do not get separate branches. Phases are small commits and review checkpoints, not branch boundaries. Both branches contribute to the same isolated `feature-ai-coach/` app, with one shared configuration, data model, and media service.
 
-Proposed PR target: the existing `dev` branch. Confirm the team's actual integration target before the first push/PR and use it consistently. These are planned branch names, not branches already created or uploaded. The inspected checkout is currently `feature/calorie-calculator` with pre-existing staged/generated changes.
+Proposed PR target: the existing `dev` branch. Confirm the team's actual integration target before the first push/PR and use it consistently. `codex/photo-coach` now exists in a clean managed worktree, based on `dev` commit `2b13b0d2bad5f80df4525e8629b6d96d8bd1bf95`. The original calculator checkout/index was not switched or staged. `codex/progress-canvas` remains planned. No branch has been pushed.
 
 | Branch | Branch point | Owned code / PR scope | Merge gate |
 | --- | --- | --- | --- |
@@ -155,8 +155,8 @@ Changing a goal or schedule creates a new plan version. Completed sessions and r
 
 - Confirm final wording for “delicate” and whether integration should eventually target the dev app or another branch. Until then, use the isolated coach feature and the provisional goal label above.
 - Select an actual vision model/provider after testing; no working credentials or image inference have been verified in this phase.
-- Choose authenticated multi-user storage versus an explicitly local single-user prototype before enabling persistent photo uploads. A shared deployment requires enforced ownership, not a client-supplied user ID.
-- Select initial image formats/limits (proposed JPEG/PNG/WebP, 10 MB, bounded decoded dimensions), retention policy, plan duration, and illustration source during the relevant phase.
+- Phases 1–2 choose an explicitly local, ephemeral single-user prototype: server normalization in memory, browser preview in memory, no persisted photos or retrieval/listing API. Shared deployment/persistent photos require authenticated ownership before implementation. Use `jac run --no-dev` because Jac 0.37.21's Vite launcher overrides the configured loopback host.
+- Initial image formats/limits are JPEG/PNG/WebP, 10 MiB, 16 MP, dimensions 32–8192 px per side; output resized to 1600 px maximum and normalized to metadata-free JPEG. Plan duration and illustration source remain later-phase decisions.
 
 ## Definition of done
 
