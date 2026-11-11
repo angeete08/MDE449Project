@@ -20,7 +20,7 @@ Stride is a fitness-planning web application that creates personalized weekly wo
 ### 1. Clone and install
 
 ```bash
-git clone --branch review/coach-and-current-week https://github.com/angeete08/MDE449Project.git
+git clone --branch dev https://github.com/angeete08/MDE449Project.git
 cd MDE449Project
 jac install
 ```
@@ -198,3 +198,12 @@ The main web application and its tests use Jac; styling and configuration use CS
 ---
 
 **Scope reminder:** Stride provides general fitness planning and tracking for an academic project. It does not diagnose conditions, prescribe medical treatment, or guarantee health outcomes.
+
+## Mobile mini app
+
+Open `/mobile` for the phone layout. The same account and backend power phone and desktop. For home-screen installation, serve Stride over HTTPS; on iPhone use Safari → Share → Add to Home Screen, or on Android use Chrome → Add to home screen / Install app. After saving a device copy, the offline workspace supports local planning, feedback, activity tracking, goals, history and PDF export even when the server is unreachable. Coach and live health sync still need a connection. See [offline preparation, supported features and sync rules](docs/offline-use.md). See [mobile setup, architecture and verification](docs/mobile-mini-app.md).
+
+
+## Photo and goal studio (Phase 3)
+
+The authenticated Coach tab now also contains optional camera/upload previews, tentative body-region observations and editable goal illustrations with an Other dialogue. These temporary choices do not modify saved workouts or offline history. The studio can use local Ollama for testing or a configured HTTPS API; the existing Gemini conversation retains its separate configuration. See [coach setup, privacy and verification](coach/README.md). Use `jac run --no-dev` for photo testing on loopback. Reviewed exercises and the progress calendar remain later phases.

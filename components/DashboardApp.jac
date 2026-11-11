@@ -1,3 +1,5 @@
+import from .offline_store { clear_for_logout, erase_offline, read_offline }
+import from .MobileAccess { MobileAccess }
 import from "@jac/runtime" { Link, useNavigate, jacLogout }
 import from "@hugeicons/react" { HugeiconsIcon }
 import from "@hugeicons/core-free-icons" {
@@ -61,7 +63,7 @@ def local_today() -> str {
     return str(d.getFullYear()) + "-" + mm + "-" + dd;
 }
 
-def:pub DashboardApp() -> JsxElement {
+def:pub DashboardApp(mobile: bool = False) -> JsxElement {
     has profile: Profile | None = None;
     has plan: list[PlanDay] = [],
         logs: list[DailyLog] = [];
@@ -113,6 +115,7 @@ def:pub DashboardApp() -> JsxElement {
             await refresh();
         } except Exception {
             message = "Could not load your account. Reload or sign in again.";
+            try { if read_offline() { nav("/offline"); } } except Exception { }
         } finally {
             loading = False;
             log_date = local_today();
@@ -281,7 +284,8 @@ def:pub DashboardApp() -> JsxElement {
         busy = True;
         try {
             await clear_account_data();
-            nav("/onboarding");
+            erase_offline();
+            nav("/mobile-onboarding" if mobile else "/onboarding");
         } except Exception {
             message = "Could not delete saved data. Try again.";
         } finally {
@@ -307,21 +311,21 @@ def:pub DashboardApp() -> JsxElement {
             <main className="mx-auto max-w-2xl px-6 py-24 text-center">
                 <h1 className="text-2xl font-semibold">Welcome to Stride</h1>
                 <p role="status">{message}</p>
-                <Link to="/onboarding">
+                <Link to={"/mobile-onboarding" if mobile else "/onboarding"}>
                     <Button>Start onboarding</Button>
                 </Link>
             </main>;
     }
 
     return
-        <div className="min-h-svh bg-muted/40">
+        <div className={"min-h-svh bg-muted/40" + (" stride-mobile-version" if mobile else "")}>
             <header
                 className="sticky top-0 z-20 border-b bg-background/90 backdrop-blur"
             >
                 <div
                     className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6"
                 >
-                    <Link to="/app" className="flex items-center gap-2 font-semibold">
+                    <Link to={"/mobile" if mobile else "/app"} className="flex items-center gap-2 font-semibold">
                         <HugeiconsIcon
                             icon={DashboardSquare01Icon}
                             className="size-6 text-primary"
@@ -329,8 +333,8 @@ def:pub DashboardApp() -> JsxElement {
                         Stride
                     </Link>
                     <span className="text-sm text-muted-foreground">{p.name}</span>
-                    <div className="ml-auto flex flex-wrap gap-2">
-                        <Link to="/onboarding">
+                    <div className={"ml-auto flex flex-wrap gap-2" + (" stride-mobile-actions" if mobile else "")}>
+                        <Link to={"/mobile-onboarding" if mobile else "/onboarding"}>
                             <Button variant="outline" size="sm">
                                 <HugeiconsIcon
                                     icon={Settings01Icon}
@@ -347,8 +351,9 @@ def:pub DashboardApp() -> JsxElement {
                             variant="ghost"
                             size="sm"
                             onClick={lambda {
+                                if not clear_for_logout() { return; }
                                 jacLogout();
-                                nav("/login");
+                                nav("/mobile-login" if mobile else "/login");
                             }}
                         >
                             <HugeiconsIcon icon={Logout01Icon} className="size-4"/>
@@ -383,8 +388,9 @@ def:pub DashboardApp() -> JsxElement {
                     >
                         {message}
                     </p>}
+                <MobileAccess mobile={mobile}/>
                 <Tabs value={tab} onValueChange={lambda (v: str) { tab = v; }}>
-                    <TabsList className="flex flex-wrap h-auto">
+                    <TabsList className={"flex flex-wrap h-auto" + (" stride-mobile-tabs" if mobile else "")}>
                         <TabsTrigger value="today">Today</TabsTrigger>
                         <TabsTrigger value="coach">Coach</TabsTrigger>
                         <TabsTrigger value="plan">Plan</TabsTrigger>

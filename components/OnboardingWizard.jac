@@ -58,7 +58,7 @@ glob WEARABLES: list[dict[str, any]] = [
 
      ];
 
-def:pub OnboardingWizard() -> JsxElement {
+def:pub OnboardingWizard(mobile: bool = False) -> JsxElement {
     has step: int = 1;
     has name: str = "";
     has goal: str = "lose_weight";
@@ -149,7 +149,7 @@ def:pub OnboardingWizard() -> JsxElement {
                 wearables,
                 stamp
             );
-            nav("/app");
+            nav("/mobile" if mobile else "/app");
         } except Exception {
             error = "Could not save. Use 1–6 workout days, a calorie target of 1–10000 and enable account storage.";
         } finally {

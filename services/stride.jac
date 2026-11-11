@@ -1,6 +1,11 @@
 """Authenticated JacHammer dashboard backed by Stride's tested planner.
 Health summaries are descriptive, never daily readiness or calorie prescriptions.
 """
+import threading;
+
+# Serialize offline compare-and-apply with ordinary mutations in this server process.
+glob MUTATION_LOCK = threading.RLock();
+
 import json;
 import math;
 import os;
@@ -123,67 +128,69 @@ def:priv save_profile(
     wearables: list[str],
     local_date: str = ""
 ) -> Profile {
-    if not name.strip() or len(name.strip()) > 80 {
-        raise ValueError("Enter a name of 1 to 80 characters.");
-    }
-    if goal not in ["lose_weight", "gain_muscle", "stay_active"] {
-        raise ValueError("Choose a valid goal.");
-    }
-    if diet not in ["none", "vegetarian", "keto", "high_protein"] {
-        raise ValueError("Choose a valid diet.");
-    }
-    if any(
-        [
-            e not in ["none", "dumbbells", "gym", "resistance bands", "yoga mat"]
-            for e in equipment
-        ]
-    ) {
-        raise ValueError("Choose supported equipment.");
-    }
-    if len(health_conditions) > 500 {
-        raise ValueError("Keep health notes under 500 characters.");
-    }
-    if not store_data {
-        raise ValueError("Account plans require your consent to save data.");
-    }
-    if local_date {
-        calendar_date(local_date);
-    }
-    candidate = Profile(
-        name=name.strip(),
-        goal=goal,
-        level=level,
-        days_per_week=days_per_week,
-        equipment=equipment,
-        diet=diet,
-        calorie_target=calorie_target,
-        health_conditions=health_conditions,
-        store_data=store_data,
-        wearables=wearables
-    );
-    clean = planner_profile(candidate);
-    p = get_profile();
-    if p is None {
-        result = create_plan(clean, start_date=local_date);
-        if not result["ok"] {
-            raise ValueError(result["message"]);
+    with MUTATION_LOCK {
+        if not name.strip() or len(name.strip()) > 80 {
+            raise ValueError("Enter a name of 1 to 80 characters.");
         }
-        candidate.plan_json = json.dumps(result["state"]);
-        root ++> candidate;
-        return candidate;
+        if goal not in ["lose_weight", "gain_muscle", "stay_active"] {
+            raise ValueError("Choose a valid goal.");
+        }
+        if diet not in ["none", "vegetarian", "keto", "high_protein"] {
+            raise ValueError("Choose a valid diet.");
+        }
+        if any(
+            [
+                e not in ["none", "dumbbells", "gym", "resistance bands", "yoga mat"]
+                for e in equipment
+            ]
+        ) {
+            raise ValueError("Choose supported equipment.");
+        }
+        if len(health_conditions) > 500 {
+            raise ValueError("Keep health notes under 500 characters.");
+        }
+        if not store_data {
+            raise ValueError("Account plans require your consent to save data.");
+        }
+        if local_date {
+            calendar_date(local_date);
+        }
+        candidate = Profile(
+            name=name.strip(),
+            goal=goal,
+            level=level,
+            days_per_week=days_per_week,
+            equipment=equipment,
+            diet=diet,
+            calorie_target=calorie_target,
+            health_conditions=health_conditions,
+            store_data=store_data,
+            wearables=wearables
+        );
+        clean = planner_profile(candidate);
+        p = get_profile();
+        if p is None {
+            result = create_plan(clean, start_date=local_date);
+            if not result["ok"] {
+                raise ValueError(result["message"]);
+            }
+            candidate.plan_json = json.dumps(result["state"]);
+            root ++> candidate;
+            return candidate;
+        }
+        p.name = candidate.name;
+        p.goal = goal;
+        p.level = level;
+        p.days_per_week = days_per_week;
+        p.equipment = equipment;
+        p.diet = diet;
+        p.calorie_target = calorie_target;
+        p.health_conditions = health_conditions;
+        p.wearables = wearables;
+        p.store_data = True;
+        # Existing workouts and their ratings remain exact. New preferences apply next week.
+        return p;
     }
-    p.name = candidate.name;
-    p.goal = goal;
-    p.level = level;
-    p.days_per_week = days_per_week;
-    p.equipment = equipment;
-    p.diet = diet;
-    p.calorie_target = calorie_target;
-    p.health_conditions = health_conditions;
-    p.wearables = wearables;
-    p.store_data = True;
-    # Existing workouts and their ratings remain exact. New preferences apply next week.
-    return p;
 }
 
 def:priv get_plan_state() -> dict[str, any] {
@@ -230,12 +237,14 @@ def:priv get_plan() -> list[PlanDay] {
 }
 
 def:priv regenerate_plan(today: str = "") -> list[PlanDay] {
-    p = require_profile();
-    stamp = today if today else CalendarDate.today().isoformat();
-    calendar_date(stamp);
-    state = current_week_state(planner_profile(p), get_plan_state(), stamp);
-    p.plan_json = json.dumps(state);
-    return plan_days(state);
+    with MUTATION_LOCK {
+        p = require_profile();
+        stamp = today if today else CalendarDate.today().isoformat();
+        calendar_date(stamp);
+        state = current_week_state(planner_profile(p), get_plan_state(), stamp);
+        p.plan_json = json.dumps(state);
+        return plan_days(state);
+    }
 }
 
 def:priv preview_next_week(today: str = "") -> dict[str, any] {
@@ -245,22 +254,24 @@ def:priv preview_next_week(today: str = "") -> dict[str, any] {
 }
 
 def:priv give_feedback(day_id: str, feedback: str, today: str = "") -> list[PlanDay] {
-    if not day_id.isdigit() or int(day_id) not in range(7) {
-        raise ValueError("Choose a workout in your plan.");
+    with MUTATION_LOCK {
+        if not day_id.isdigit() or int(day_id) not in range(7) {
+            raise ValueError("Choose a workout in your plan.");
+        }
+        ratings = {"too_easy": "easy", "just_right": "right", "too_hard": "hard"};
+        if feedback not in ratings {
+            raise ValueError("Choose a valid rating.");
+        }
+        p = require_profile();
+        current = calendar_date(today if today else CalendarDate.today().isoformat());
+        plan_state = get_plan_state();
+        if calendar_date(plan_state["plan"][int(day_id)]["date"]) > current {
+            raise ValueError("Rate a workout on or after its scheduled day.");
+        }
+        state = update_feedback(plan_state, int(day_id), ratings[feedback]);
+        p.plan_json = json.dumps(state);
+        return plan_days(state);
     }
-    ratings = {"too_easy": "easy", "just_right": "right", "too_hard": "hard"};
-    if feedback not in ratings {
-        raise ValueError("Choose a valid rating.");
-    }
-    p = require_profile();
-    current = calendar_date(today if today else CalendarDate.today().isoformat());
-    plan_state = get_plan_state();
-    if calendar_date(plan_state["plan"][int(day_id)]["date"]) > current {
-        raise ValueError("Rate a workout on or after its scheduled day.");
-    }
-    state = update_feedback(plan_state, int(day_id), ratings[feedback]);
-    p.plan_json = json.dumps(state);
-    return plan_days(state);
 }
 
 def:priv get_logs() -> list[DailyLog] {
@@ -305,42 +316,46 @@ def:priv save_log(
     today: str = "",
     extra_activities: int = -1
 ) -> DailyLog {
-    require_profile();
-    current = today if today else CalendarDate.today().isoformat();
-    validate_log(date, steps, calories_burned, run_miles, active_minutes, current);
-    # Jac RPC may deliver omitted numeric defaults as strings.
-    extra_activities = int(extra_activities);
-    if not -1 <= extra_activities <= 100 {
-        raise ValueError("Enter 0–100 additional activities.");
-    }
-    for log in get_logs() {
-        if log.date == date {
-            if extra_activities >= 0 { log.extra_activities = extra_activities; }
-            log.steps = steps;
-            log.calories_burned = calories_burned;
-            log.run_miles = run_miles;
-            log.active_minutes = active_minutes;
-            return log;
+    with MUTATION_LOCK {
+        require_profile();
+        current = today if today else CalendarDate.today().isoformat();
+        validate_log(date, steps, calories_burned, run_miles, active_minutes, current);
+        # Jac RPC may deliver omitted numeric defaults as strings.
+        extra_activities = int(extra_activities);
+        if not -1 <= extra_activities <= 100 {
+            raise ValueError("Enter 0–100 additional activities.");
         }
+        for log in get_logs() {
+            if log.date == date {
+                if extra_activities >= 0 { log.extra_activities = extra_activities; }
+                log.steps = steps;
+                log.calories_burned = calories_burned;
+                log.run_miles = run_miles;
+                log.active_minutes = active_minutes;
+                return log;
+            }
+        }
+        log = DailyLog(
+            extra_activities=max(0, extra_activities),
+            date=date,
+            steps=steps,
+            calories_burned=calories_burned,
+            run_miles=run_miles,
+            active_minutes=active_minutes
+        );
+        root ++> log;
+        return log;
     }
-    log = DailyLog(
-        extra_activities=max(0, extra_activities),
-        date=date,
-        steps=steps,
-        calories_burned=calories_burned,
-        run_miles=run_miles,
-        active_minutes=active_minutes
-    );
-    root ++> log;
-    return log;
 }
 
 def:priv set_weekly_goal(minutes: int) -> int {
-    if isinstance(minutes, bool) or not 1 <= minutes <= 10080 {
-        raise ValueError("Choose a goal between 1 and 10080 minutes per week.");
+    with MUTATION_LOCK {
+        if isinstance(minutes, bool) or not 1 <= minutes <= 10080 {
+            raise ValueError("Choose a goal between 1 and 10080 minutes per week.");
+        }
+        require_profile().weekly_minutes_goal = minutes;
+        return minutes;
     }
-    require_profile().weekly_minutes_goal = minutes;
-    return minutes;
 }
 
 # Pure aggregation is shared by the endpoint and calendar-boundary tests.
@@ -562,33 +577,35 @@ def:protect ask_coach(
 def:priv save_health_summary(
     summary: dict[str, any], source: str = "Apple Health · 28-day summary"
 ) -> dict[str, any] {
-    if source
-        not in ["Apple Health · 28-day summary", "Manually entered weekly averages"] {
-        raise ValueError("Choose a valid data source.");
-    }
-    p = require_profile();
-    raw = planner_profile(p);
-    for key in [
-        "avg_daily_steps",
-        "avg_heart_rate",
-        "avg_sleep_hours",
-        "avg_workouts_per_week"
-    ] {
-        raw[key] = summary.get(key);
-    }
-    clean = validate_profile(raw);
-    selected = {
-        key: clean[key]
+    with MUTATION_LOCK {
+        if source
+            not in ["Apple Health · 28-day summary", "Manually entered weekly averages"] {
+            raise ValueError("Choose a valid data source.");
+        }
+        p = require_profile();
+        raw = planner_profile(p);
         for key in [
             "avg_daily_steps",
             "avg_heart_rate",
             "avg_sleep_hours",
             "avg_workouts_per_week"
-        ]
-    };
-    selected["source"] = source;
-    p.health_json = json.dumps(selected);
-    return selected;
+        ] {
+            raw[key] = summary.get(key);
+        }
+        clean = validate_profile(raw);
+        selected = {
+            key: clean[key]
+            for key in [
+                "avg_daily_steps",
+                "avg_heart_rate",
+                "avg_sleep_hours",
+                "avg_workouts_per_week"
+            ]
+        };
+        selected["source"] = source;
+        p.health_json = json.dumps(selected);
+        return selected;
+    }
 }
 
 def:priv get_health_summary() -> dict[str, any] {
@@ -617,12 +634,14 @@ def:priv get_movement_break(sitting_minutes: int) -> dict[str, any] {
 }
 
 def:priv clear_account_data() -> bool {
-    for item in [root-->][?:FoodEntry] { del item; }
-    for log in get_logs() {
-        del log;
+    with MUTATION_LOCK {
+        for item in [root-->][?:FoodEntry] { del item; }
+        for log in get_logs() {
+            del log;
+        }
+        for profile in [root-->][?:Profile] {
+            del profile;
+        }
+        return True;
     }
-    for profile in [root-->][?:Profile] {
-        del profile;
-    }
-    return True;
 }
