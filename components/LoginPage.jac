@@ -1,7 +1,6 @@
 import from "@jac/runtime" { Link, useNavigate, jacLogin, jacSignup, SignupResult }
 import from "@hugeicons/react" { HugeiconsIcon }
 import from "@hugeicons/core-free-icons" {
-    DashboardSquare01Icon,
     Calendar03Icon,
     SparklesIcon,
     UserGroupIcon
@@ -9,6 +8,7 @@ import from "@hugeicons/core-free-icons" {
 import from .ui.button { Button }
 import from .ui.input { Input }
 import from .ui.field { Field, FieldLabel, FieldGroup }
+import from .BrandMark { BrandMark }
 
 def:pub LoginPage(mobile: bool = False) -> JsxElement {
     has mode: str = "login";
@@ -63,26 +63,18 @@ def:pub LoginPage(mobile: bool = False) -> JsxElement {
     }
 
     return
-        <div className="grid min-h-svh lg:grid-cols-2">
+        <div className="stride-login grid min-h-svh lg:grid-cols-2">
             <div
-                className="relative hidden overflow-hidden bg-primary text-primary-foreground lg:flex lg:flex-col lg:justify-between pt-10 pb-10 pl-10 pr-10"
+                className="stride-login-story relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-between pt-10 pb-10 pl-10 pr-10"
             >
                 <div
-                    className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-primary-foreground/10 blur-3xl"
+                    className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-white/10 blur-3xl"
                 />
                 <div
-                    className="pointer-events-none absolute -bottom-32 -left-16 size-96 rounded-full bg-primary-foreground/10 blur-3xl"
+                    className="pointer-events-none absolute -bottom-32 -left-16 size-96 rounded-full bg-white/10 blur-3xl"
                 />
-                <div className="relative flex items-center gap-2.5">
-                    <div
-                        className="flex size-8 items-center justify-center rounded-lg bg-primary-foreground/15 ring-1 ring-primary-foreground/20"
-                    >
-                        <HugeiconsIcon
-                            icon={DashboardSquare01Icon}
-                            strokeWidth={2}
-                            className="size-4"
-                        />
-                    </div>
+                <div className="stride-brand relative flex items-center gap-2.5">
+                    <BrandMark compact={True}/>
                     <span className="text-base font-semibold tracking-tight">
                         Stride
                     </span>
@@ -96,7 +88,7 @@ def:pub LoginPage(mobile: bool = False) -> JsxElement {
                     <div className="flex flex-col gap-4">
                         <div className="flex items-start gap-3">
                             <div
-                                className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-foreground/15"
+                                className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/10"
                             >
                                 <HugeiconsIcon
                                     icon={Calendar03Icon}
@@ -108,14 +100,14 @@ def:pub LoginPage(mobile: bool = False) -> JsxElement {
                                 <p className="font-medium">
                                     {"A plan that adapts to you"}
                                 </p>
-                                <p className="text-sm text-primary-foreground/75">
+                                <p className="text-sm text-white/75">
                                     {"Weekly workouts tuned by how each session felt."}
                                 </p>
                             </div>
                         </div>
                         <div className="flex items-start gap-3">
                             <div
-                                className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-foreground/15"
+                                className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/10"
                             >
                                 <HugeiconsIcon
                                     icon={SparklesIcon}
@@ -125,14 +117,14 @@ def:pub LoginPage(mobile: bool = False) -> JsxElement {
                             </div>
                             <div>
                                 <p className="font-medium">{"Meals for your diet"}</p>
-                                <p className="text-sm text-primary-foreground/75">
+                                <p className="text-sm text-white/75">
                                     {"Keto, vegetarian or high-protein - with calorie estimates."}
                                 </p>
                             </div>
                         </div>
                         <div className="flex items-start gap-3">
                             <div
-                                className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-foreground/15"
+                                className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/10"
                             >
                                 <HugeiconsIcon
                                     icon={UserGroupIcon}
@@ -142,14 +134,14 @@ def:pub LoginPage(mobile: bool = False) -> JsxElement {
                             </div>
                             <div>
                                 <p className="font-medium">{"Track your activity"}</p>
-                                <p className="text-sm text-primary-foreground/75">
+                                <p className="text-sm text-white/75">
                                     {"Daily totals and a weekly goal you choose."}
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <p className="relative text-sm text-primary-foreground/80">
+                <p className="relative text-sm text-white/80">
                     {"Your profile and activity stay in your own account."}
                 </p>
             </div>
@@ -157,16 +149,8 @@ def:pub LoginPage(mobile: bool = False) -> JsxElement {
                 className="flex flex-col bg-background pt-8 pb-8 pl-6 pr-6 sm:pl-10 sm:pr-10"
             >
                 <div className="lg:hidden">
-                    <div className="flex items-center gap-2.5">
-                        <div
-                            className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm"
-                        >
-                            <HugeiconsIcon
-                                icon={DashboardSquare01Icon}
-                                strokeWidth={2}
-                                className="size-4"
-                            />
-                        </div>
+                    <div className="stride-brand flex items-center gap-2.5">
+                        <BrandMark compact={True}/>
                         <span className="text-base font-semibold tracking-tight">
                             Stride
                         </span>

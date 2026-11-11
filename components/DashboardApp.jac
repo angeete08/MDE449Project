@@ -3,7 +3,6 @@ import from .MobileAccess { MobileAccess }
 import from "@jac/runtime" { Link, useNavigate, jacLogout }
 import from "@hugeicons/react" { HugeiconsIcon }
 import from "@hugeicons/core-free-icons" {
-    DashboardSquare01Icon,
     PlusSignIcon,
     Settings01Icon,
     Logout01Icon
@@ -23,6 +22,7 @@ import from .ui.dialog {
     DialogFooter
 }
 import from .ui.progress { Progress }
+import from .BrandMark { BrandMark }
 import from ..services.stride {
     Profile,
     PlanDay,
@@ -318,19 +318,16 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
     }
 
     return
-        <div className={"min-h-svh bg-muted/40" + (" stride-mobile-version" if mobile else "")}>
+        <div className={"stride-dashboard min-h-svh bg-muted/40" + (" stride-mobile-version" if mobile else "")}>
             <header
                 className="sticky top-0 z-20 border-b bg-background/90 backdrop-blur"
             >
                 <div
-                    className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6"
+                    className={"mx-auto flex min-h-16 max-w-6xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6" + (" stride-mobile-header-row" if mobile else "")}
                 >
-                    <Link to={"/mobile" if mobile else "/app"} className="flex items-center gap-2 font-semibold">
-                        <HugeiconsIcon
-                            icon={DashboardSquare01Icon}
-                            className="size-6 text-primary"
-                        />
-                        Stride
+                    <Link to={"/mobile" if mobile else "/app"} className="stride-brand flex items-center gap-2 font-semibold">
+                        <BrandMark compact={True}/>
+                        <span>Stride</span>
                     </Link>
                     <span className="text-sm text-muted-foreground">{p.name}</span>
                     <div className={"ml-auto flex flex-wrap gap-2" + (" stride-mobile-actions" if mobile else "")}>
@@ -362,7 +359,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                     </div>
                 </div>
             </header>
-            <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
+            <main className={"mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6" + (" stride-mobile-main" if mobile else "")}>
                 <div className="flex flex-wrap items-end justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-semibold tracking-tight">
