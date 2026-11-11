@@ -392,8 +392,6 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                         <TabsTrigger value="coach">Coach</TabsTrigger>
                         <TabsTrigger value="plan">Plan</TabsTrigger>
                         <TabsTrigger value="meals">Meals</TabsTrigger>
-                        <TabsTrigger value="nutrition">Got your nutritions?</TabsTrigger>
-                        <TabsTrigger value="progress">Progress</TabsTrigger>
                         <TabsTrigger value="health">Health</TabsTrigger>
                         <TabsTrigger value="history">History</TabsTrigger>
                     </TabsList>
@@ -490,6 +488,57 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                                 </CardContent>
                             </Card>
                         </div>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>
+                                    {str(activity.get("streak", 0))
+                                        + " day activity streak"}
+                                </CardTitle>
+                                <CardDescription>
+                                    Consecutive dates with recorded activity, ending today or yesterday.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="overflow-x-auto">
+                                {if not logs {
+                                    <p>No activity logged yet.</p>
+                                } else {
+                                    <table className="w-full text-left text-sm">
+                                        <thead>
+                                            <tr>
+                                                <th className="p-3">Date</th>
+                                                <th>Steps</th>
+                                                <th>Active min</th>
+                                                <th>kcal</th>
+                                                <th>Miles</th>
+                                                <th>Edit</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {for l in logs {
+                                                <tr key={l.date} className="border-t">
+                                                    <td className="p-3">{l.date}</td>
+                                                    <td>{l.steps}</td>
+                                                    <td>{l.active_minutes}</td>
+                                                    <td>{l.calories_burned}</td>
+                                                    <td>{l.run_miles}</td>
+                                                    <td>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={lambda { edit_log(
+                                                                l.date
+                                                            ); }}
+                                                        >
+                                                            Edit totals
+                                                        </Button>
+                                                    </td>
+                                                </tr>
+                                            }}
+                                        </tbody>
+                                    </table>
+                                }}
+                            </CardContent>
+                        </Card>
                         <Card>
                             <CardHeader>
                                 <CardTitle>
@@ -736,9 +785,9 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                             }}
                         </div>
                     </TabsContent>
-                    <TabsContent value="nutrition" className="pt-2"><Nutrition key={local_today()} photos={True} day={local_today()} plan={plan} logs={logs} target={p.calorie_target}/></TabsContent>
                     <TabsContent value="meals" className="flex flex-col gap-4 pt-2">
                         <Nutrition key={local_today()} photos={False} day={local_today()} plan={plan} logs={logs} target={p.calorie_target}/>
+                        <Nutrition key={local_today() + "-photos"} photos={True} day={local_today()} plan={plan} logs={logs} target={p.calorie_target}/>
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {for m in meals {
                                 <Card key={m["name"]}>
@@ -784,59 +833,6 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                         <p className="text-sm text-muted-foreground">
                             Meal ideas are examples, not a complete daily menu. They do not add up to your user-entered calorie target. Recipe videos may use different portions or ingredients.
                         </p>
-                    </TabsContent>
-                    <TabsContent value="progress" className="flex flex-col gap-4 pt-2">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>
-                                    {str(activity.get("streak", 0))
-                                        + " day activity streak"}
-                                </CardTitle>
-                                <CardDescription>
-                                    Consecutive dates with recorded activity, ending today or yesterday.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="overflow-x-auto">
-                                {if not logs {
-                                    <p>No activity logged yet.</p>
-                                } else {
-                                    <table className="w-full text-left text-sm">
-                                        <thead>
-                                            <tr>
-                                                <th className="p-3">Date</th>
-                                                <th>Steps</th>
-                                                <th>Active min</th>
-                                                <th>kcal</th>
-                                                <th>Miles</th>
-                                                <th>Edit</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {for l in logs {
-                                                <tr key={l.date} className="border-t">
-                                                    <td className="p-3">{l.date}</td>
-                                                    <td>{l.steps}</td>
-                                                    <td>{l.active_minutes}</td>
-                                                    <td>{l.calories_burned}</td>
-                                                    <td>{l.run_miles}</td>
-                                                    <td>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={lambda { edit_log(
-                                                                l.date
-                                                            ); }}
-                                                        >
-                                                            Edit totals
-                                                        </Button>
-                                                    </td>
-                                                </tr>
-                                            }}
-                                        </tbody>
-                                    </table>
-                                } }
-                            </CardContent>
-                        </Card>
                     </TabsContent>
                     <TabsContent value="health" className="flex flex-col gap-4 pt-2">
                         <Card>

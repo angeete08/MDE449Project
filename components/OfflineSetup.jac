@@ -7,7 +7,7 @@ def:pub OfflineSetup() -> JsxElement {
     has status: str = "";
     can with entry {
         registerSW({
-            "onOfflineReady": lambda { status = "App ready offline. Save a device copy from the Offline page before disconnecting."; },
+            "onOfflineReady": lambda { status = "Offline app files are cached. Save a device copy in Offline workspace to access your account data without a connection."; },
             "onNeedRefresh": lambda { status = "An app update is ready. Close all Stride tabs and reopen after saving your drafts."; },
             "onRegisterError": lambda (err: any) { status = "Offline launch unavailable. Use HTTPS and a production build."; }
         });
