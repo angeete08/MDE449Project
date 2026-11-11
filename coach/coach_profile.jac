@@ -1,7 +1,7 @@
 """Profile contract and authoritative validation. No existing app data is read."""
 import from datetime { date }
 import from zoneinfo { ZoneInfo }
-import from coach_goals { _balance_warning }
+import from .coach_goals { _balance_warning }
 
 obj CoachProfile {
     has goal: str = "general_strength",
@@ -21,7 +21,7 @@ obj ProfileResult {
     has valid: bool = False, errors: list[str] = [], warning: str = "", baseline: str = "";
 }
 
-def:pub validate_profile(profile: CoachProfile) -> ProfileResult {
+def:protect validate_profile(profile: CoachProfile) -> ProfileResult {
     errors: list[str] = [];
     if profile.goal not in ["fat_loss", "lean_toned", "muscle", "general_strength", "other"] {
         errors.append("Choose a supported goal.");

@@ -1,4 +1,5 @@
-:root {
+@scope (.photo-coach) {
+:scope {
   font-family:Inter,ui-sans-serif,system-ui,sans-serif;
   color:#20342d;
   background:#f3f5ef;
@@ -226,7 +227,7 @@ footer strong {
 .goal-picture { margin:16px 0; }
 .goal-picture svg { display:block; width:100%; max-height:260px; }
 .goal-picture figcaption { margin-top:12px; }
-.goal-dialog { width:min(880px,calc(100% - 32px)); max-height:90dvh; overflow:auto; border:1px solid #b4c3ac; border-radius:18px; padding:26px; color:#20342d; }
+.goal-dialog { margin:auto; inset:0; width:min(880px,calc(100% - 32px)); max-height:90dvh; overflow:auto; border:1px solid #b4c3ac; border-radius:18px; padding:26px; color:#20342d; }
 .goal-dialog::backdrop { background:#142b23aa; }
 .studio-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
 .dialog-history { max-height:180px; overflow:auto; font-size:13px; overflow-wrap:anywhere; }
@@ -256,4 +257,6 @@ header{
   grid-template-columns:1fr}
 h1{
   font-size:40px}
+}
+
 }

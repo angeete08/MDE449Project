@@ -1,3 +1,4 @@
+import from ..coach.coach_ui { Coach }
 import from ..services.stride { ask_coach, coach_available }
 import from .ui.button { Button }
 import from .ui.input { Input }
@@ -101,5 +102,6 @@ def:pub ChatCoach() -> JsxElement {
             <p className="text-xs text-muted-foreground">
                 Responses use Google Gemini and may be inaccurate. Your question, recent chat history, and limited fitness preferences are sent to Google; health notes and health summaries are not. Stride does not save this conversation to your account. Avoid sharing sensitive or medical information. This is general information, not medical advice.
             </p>
+            <Coach/>
         </section>;
 }

@@ -44,3 +44,15 @@ For each risk, record the affected files, reproducible scenario, observed result
 - A11: only explicit new feature/note paths staged for coach commits; generated `.jac`, dependencies, logs and private directories ignored. Original staging unchanged by this task.
 - A15 (runtime limitation): Jac 0.37.21 dev Vite binds all interfaces even with `[client.vite.server].host`; verified command contains bare `--host`. Mitigation is documented and tested `jac run --no-dev` on loopback. Bare `jac run` is usable for development with synthetic fixtures only. No shared deployment approved or delivered.
 - Real camera and mobile-device checks remain outstanding. There has been no teammate review or user testing.
+
+## Phase 3 migration self-review — 2026-11-11
+
+- Corrected the baseline to current mobile/offline code and integrated within its authenticated Coach tab. All five new photo/goal operations require JWT authentication; no public photo endpoint is intended.
+- Local gemma3:4b originally hallucinated regions on a blank green image. Changed to a human-presence-first schema and conservative prompt; the repeat smoke abstained. This is a regression example, not evidence of broad real-person accuracy.
+- Local text qwen3:1.7b initially over-requested clarification; explicit goal mapping and an example corrected the tested request.
+- Never infer illness, fitness, body composition or an unhealthy body ratio from photos. The goal warning uses user-selected emphasis only. Pictures are abstract activity illustrations, not transformation predictions.
+- API mocks verify image format, authorization header, strict schema, failure/refusal/truncation handling and destination binding. Live external API verification remains pending.
+- Existing offline history/sync and account behavior must pass regression checks after integration. Camera hardware, real devices and a representative image evaluation remain acceptance work.
+- Local dependency environment required repair; final commands and limitations belong in test_result.md. No teammate review or user testing is claimed.
+
+Integrated browser review found Tailwind's global reset overrides native dialog centering. Added explicit scoped margin/inset to the goal dialog so it remains centered in the current app.

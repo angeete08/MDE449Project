@@ -1,6 +1,6 @@
 """User-led goal refinement and transparent, non-diagnostic balance reminders."""
 import json;
-import from coach_provider { _complete }
+import from .coach_provider { _complete }
 
 obj GoalDraft {
     has style: str = "general_strength", upper: int = 1, lower: int = 1;
@@ -36,7 +36,7 @@ def _goal_reply(data: dict[str, any]) -> GoalReply {
         warning=_balance_warning(draft.upper, draft.lower));
 }
 
-def:pub refine_goal(message: str, previous: GoalDraft, consent_id: str) -> GoalReply {
+def:protect refine_goal(message: str, previous: GoalDraft, consent_id: str) -> GoalReply {
     if not message.strip() or len(message) > 1000 or not _valid_draft(previous) { return GoalReply(status="invalid", message="Describe a goal within 1,000 characters and use valid emphasis values."); }
     try {
         schema = _goal_schema();

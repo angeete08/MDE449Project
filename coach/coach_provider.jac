@@ -36,7 +36,7 @@ def _info(config: dict[str, any]) -> ProviderInfo {
         consent_id=hashlib.sha256(identity.encode()).hexdigest());
 }
 
-def:pub provider_info() -> ProviderInfo {
+def:protect provider_info() -> ProviderInfo {
     try { return _info(_config()); }
     except Exception { return ProviderInfo(error="Model provider is not configured. Check the server settings; manual goals remain available."); }
 }

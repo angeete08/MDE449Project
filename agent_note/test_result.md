@@ -1,7 +1,7 @@
 # AI coach test results
 
 Updated: 2026-11-11
-Current phase: 1–2 implementation. Historical planning-only results follow; current evidence is appended below.
+Current phase: 3, integrated with the current mobile/offline baseline. Historical results follow; migration verification is appended below.
 
 ## Evidence collected
 
@@ -67,3 +67,34 @@ Branch `codex/photo-coach`, base `2b13b0d2bad5f80df4525e8629b6d96d8bd1bf95`; com
 Initial issues resolved: 0.37.11 scaffold syntax differs from required 0.37.21 entry-point; entry server imports changed to project-root form; browser dynamic API boundaries explicitly typed; tuple assignment syntax corrected. Browser `fill` on a range did not trigger the expected state change, so crop was verified via keyboard Home instead. HMR transient source-map warning disappeared after clean non-dev restart.
 
 Desktop screenshot: `/tmp/stride-coach-preview.jpg` (temporary artifact). Final source checks: no tracked changes outside `agent_note/` and `feature-ai-coach/` relative to the worktree base; runtime/dependency directories excluded from staging. Exact content belongs to the feature implementation commit following `4fca642` (see `git log`); no self-referential commit hash is embedded in that commit.
+
+## Phase 3 prototype evidence — 2026-11-11
+
+Before migration: 21 offline tests passed and 15 source files checked. Real Ollama 0.40.3 with qwen3:1.7b and gemma3:4b passed a goal-translation plus blank-image-abstention smoke test in 80.45 s on an 8 GB Apple Silicon machine. The first vision prompt hallucinated regions on a blank image; the revised human-presence-first schema/prompt passed the regression. Concurrent model loading and compilation caused a 90-second timeout; sequential verification succeeded.
+
+Prototype browser checks verified Other opens a dialogue, manual picture changes, balance reminder, accept, cancel retaining the selected draft, and server-validated self-reported activity baseline. These are not evidence of real-person recognition accuracy or physical-camera testing. API transport uses automated mocks; live external inference remains unverified.
+
+## Corrected baseline verification — 2026-11-11
+
+Target: /Users/zeta/Documents/EECS449_e1/MDE449Project-mobile. Branch: codex/photo-coach, merged with feature/offline-part at 83b04c9. The outer Course Compass app is unchanged.
+
+- Source check: root main.jac plus all 15 coach Jac files passed (16 total, 61.85 s).
+- Dependency installation: existing environment lacked pip; its bundled Python also fails macOS detection in pip/packaging. Jac install could not complete. Reused the already verified Pillow 12.3.0 package from the same Jac/Python runtime's coach environment for local verification. This is a machine setup limitation, not a clean-install success claim. The dependency remains declared in jac.toml for teammates.
+- Full suite and integrated browser results: pending at this entry; see subsequent entries.
+
+### Integration results after repairs
+
+- Full initial run: 49 passed, 2 failed, 4 errors. Media compilation failures arose in the process started before Pillow was available. The old absolute-date HealthKit fixture fell outside its 28-day window. Two provider mocks patched a different module instance after packaging.
+- Repaired fixture date relative to the test clock (no health-sync logic changed), patched the actual provider function module, and reran affected tests with dependencies available.
+- Affected regression run: **21 passed in 200.06 s** across dashboard_api_tests.jac, offline_tests.jac, health_sync_tests.jac, coach/phase3_tests.jac and coach/api_tests.jac. Includes anonymous denial on all five coach endpoints, authenticated validation, existing account isolation, completed-workout behavior and offline sync.
+- Final source recheck: main.jac, health_sync_tests.jac and coach/phase3_tests.jac passed (3 files, 82.91 s), in addition to the preceding 16-file check.
+- Browser: synthetic local QA account, onboarding, desktop Coach tab, custom illustration and warning, accepted preferences, self-reported baseline, image upload/normalization, real local model abstention on geometric shapes, removal clearing observations, and existing /mobile route verified. No physical camera activated. No live Google/OpenAI request sent.
+- Explicit live smoke now requires COACH_LIVE_TEST=1, so a broad test discovery cannot accidentally load a model or depend on Ollama.
+- Remaining: representative real-person image evaluation, physical-device/camera acceptance, live external API verification, and a clean dependency install on this machine's repaired Jac runtime.
+
+### Final handoff checks
+
+- Opt-in live-test guard: 1 passed in 4.63 s without loading a model.
+- Final preview rebuilt successfully at http://localhost:8410. After following the existing service-worker close/reopen update flow, the custom dialog measured 880 px wide at x=200 in a 1280 px viewport, confirming centering. Screenshot: /tmp/stride-coach-integrated.jpg.
+- Browser checks used a synthetic local QA account only; no existing user profile was edited and no physical camera was activated. Mobile route was checked, not a physical phone or native build.
+- git diff --check passed. Source changes are confined to the integrated coach, its entry/config/UI integration, documentation, and the date-stable health-sync test fixture.

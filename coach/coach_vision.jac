@@ -1,7 +1,7 @@
 """Visible-region observations only; never infer health or body composition."""
 import json;
-import from coach_media { prepare_photo }
-import from coach_provider { _complete }
+import from .coach_media { prepare_photo }
+import from .coach_provider { _complete }
 
 glob REGIONS: list[str] = ["shoulders", "arms", "chest", "back", "core", "glutes", "legs"];
 
@@ -32,7 +32,7 @@ def _observation(data: dict[str, any]) -> PhotoObservation {
         message="These are tentative visual observations. Confirm or correct your focus; this is not a fitness or medical assessment.");
 }
 
-def:pub analyze_photo(data_url: str, consent_id: str) -> PhotoObservation {
+def:protect analyze_photo(data_url: str, consent_id: str) -> PhotoObservation {
     photo = prepare_photo(data_url);
     if not photo.valid { return PhotoObservation(status="invalid", message=photo.error); }
     try {

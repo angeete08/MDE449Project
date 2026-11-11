@@ -1,13 +1,18 @@
 """Explicit local smoke test. Not part of the offline test suite; synthetic image only."""
 import time;
-import from coach_provider { provider_info }
-import from coach_goals { GoalDraft, refine_goal }
-import from coach_vision { analyze_photo }
+import os;
+import from .coach_provider { provider_info }
+import from .coach_goals { GoalDraft, refine_goal }
+import from .coach_vision { analyze_photo }
 import base64;
 import from io { BytesIO }
 import from PIL { Image }
 
 test "local goal refinement and unrelated image abstention" {
+    if os.getenv("COACH_LIVE_TEST", "") != "1" {
+        print("Live smoke not requested; set COACH_LIVE_TEST=1 to run local inference.");
+        return;
+    }
     info = provider_info();
     assert info.ready and not info.external;
     started = time.monotonic();

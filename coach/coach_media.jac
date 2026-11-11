@@ -12,7 +12,7 @@ obj PhotoResult {
         width: int = 0, height: int = 0, mime: str = "image/jpeg";
 }
 
-def:pub prepare_photo(data_url: str) -> PhotoResult {
+def:protect prepare_photo(data_url: str) -> PhotoResult {
     if len(data_url) > 13981100 { return PhotoResult(error="Image must be at most 10 MB."); }
     try {
         pieces = data_url.split(",", 1);

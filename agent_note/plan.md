@@ -1,7 +1,7 @@
 # Visual AI coach — phased implementation plan
 
 Updated: 2026-11-11
-Status: Phases 0–1 complete. Phase 2 implemented and tested for uploads/crops; physical-camera permission/capture acceptance remains pending. Phases 3–7 not started.
+Status: Phase 3 integrated into the current mobile app; see the corrected baseline section below. Physical-camera and broader vision acceptance remain pending.
 
 ## Intended experience
 
@@ -42,7 +42,7 @@ Every phase belongs to a new coach-work branch. Do not commit coach work to the 
 | 0 — Discovery and plan | These four notes, repository findings, scope, risks, acceptance matrix | Notes agree on actual status; no feature claims or source changes |
 | 1 — Isolated foundation | Own `jac.toml`, `main.jac`, styles, coach shell, typed contracts, manual body-region selection, user-selected goals | `jac install`/`jac run` work from feature folder; server rejects invalid profiles; no sibling imports or runtime writes |
 | 2 — Camera and upload | User-triggered camera capture, file upload, previews, removal, image validation, private storage abstraction | Camera-denied/unavailable paths work; streams stop on close/unmount; corrupt/oversized files rejected; text/manual flow remains available |
-| 3 — Real vision integration | Configurable server-side vision adapter, validated structured response, body-region suggestions, confirmation UI | Actual image inference verified with consented test assets; ambiguous inputs abstain; malformed replies and outages fail clearly; manual fallback never labeled AI analysis |
+| 3 — Real vision integration and goal studio | Configurable server-side vision adapter, validated structured response, body-region suggestions, confirmation UI | Actual image inference verified with consented test assets; ambiguous inputs abstain; malformed replies and outages fail clearly; manual fallback never labeled AI analysis |
 | 4 — Goals, exercises, visual steps | Curated exercise catalog; goal-specific rules; progressive milestones; illustrated exercise cards | Every exercise matches equipment/experience/region; reviewed instructions and source/license records exist; no invented model exercise IDs or unsupported appearance claims |
 | 5 — Schedule and progress canvas | Date-based calendar, workout sessions, check-in editor, text/photo history, persistence, rescheduling | Full create-plan → calendar → submit check-in → reload flow passes; completed sessions and attachments survive future-plan edits; each check-in tied to an exact session/date |
 | 6 — Coach feedback and review | Feedback based on logs and confirmed inputs; side-by-side optional photo history; next-session suggestions | Future changes only; user sees reasons; text-only participation is complete; unsupported visual progress claims excluded |
@@ -161,3 +161,11 @@ Changing a goal or schedule creates a new plan version. Completed sessions and r
 ## Definition of done
 
 The feature is complete only when camera/upload → verified real vision suggestion → user-confirmed focus/goal → illustrated exercise plan → dated calendar → text/photo check-in → persisted history works end to end. Isolated tests, browser evidence, model limitations, and privacy behavior must be recorded. Passing mocks is not evidence of live model quality; writing this plan is not implementation completion.
+
+## Corrected project baseline — 2026-11-11
+
+This section supersedes the earlier standalone-folder boundary. User identified the current project as /Users/zeta/Documents/EECS449_e1/MDE449Project-mobile, an existing worktree on feature/offline-part at 83b04c9. The outer EECS449_e1 folder is the separate Course Compass project and is not the target.
+
+Saved the prototype as 6f5898b, then reused codex/photo-coach in the corrected worktree and merged feature/offline-part. No additional feature branch was created or pushed. Jac remains pinned to 0.37.21. The prototype has become the coach/ module integrated into the authenticated desktop/mobile Coach tab; its standalone config/entry were retired. Existing Gemini conversation, offline routes and saved-history behavior are preserved.
+
+Phase 3 implementation includes visible-region observations, self-reported baseline, custom-goal dialogue, editable illustrative pictures and training-balance reminders. Local-model smoke and mocked API checks are available. Broad real-person vision quality and physical-camera acceptance remain open. Phase 4 still owns reviewed exercise prescriptions and illustrated movement steps; phases 5–7 still belong to codex/progress-canvas.

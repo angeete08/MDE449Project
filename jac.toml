@@ -15,6 +15,7 @@ radius = "medium"
 menuAccent = "bold"
 menuColor = "default"
 [dependencies]
+Pillow = ">=11.3,<13"
 litellm = "==1.106.0"
 openai = "==2.20.0"
 [dependencies.npm]
@@ -80,3 +81,6 @@ project_id = "prj_b486acd1437d4a298fb72fcd70e6fa91"
 [test]
 directory = "."
 filter = "*_tests.jac"
+
+[serve.limits]
+max_body_bytes = 14000000

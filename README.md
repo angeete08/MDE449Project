@@ -72,3 +72,7 @@ Tests cover the original planner and Apple Health relay, dashboard plan adaptati
 - `frontend.jac`, `onboarding.jac`, `accounts.jac`: earlier UI/demo implementation for reference
 
 The local JacHammer ZIP and jacpack exports remain unchanged. Updated extracted source is also mirrored into `JacHammer Version/personal-fitness-stride/` for continued prototype work.
+
+## Photo and goal studio (Phase 3)
+
+The authenticated Coach tab now also contains optional camera/upload previews, tentative body-region observations and editable goal illustrations with an Other dialogue. These temporary choices do not modify saved workouts or offline history. The studio can use local Ollama for testing or a configured HTTPS API; the existing Gemini conversation retains its separate configuration. See [coach setup, privacy and verification](coach/README.md). Use `jac run --no-dev` for photo testing on loopback. Reviewed exercises and the progress calendar remain later phases.

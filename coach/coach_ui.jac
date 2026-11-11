@@ -36,9 +36,8 @@ def:pub Coach() -> JsxElement {
         finally { busy = False; }
     }
 
-    <main>
-        <header><a className="brand" href="#">STRIDE <span> / COACH LAB</span></a><span className="badge">Phase 3 · photo & goal studio</span></header>
-        <section className="intro"><p className="eyebrow">YOUR FOCUS. YOUR PACE.</p><h1>Start with where<br/>you want to go.</h1><p>Choose a focus and a goal. Add a photo if you like.<br/>You stay in control of what comes next.</p></section>
+    <section className="photo-coach">
+                <section className="intro"><p className="eyebrow">YOUR FOCUS. YOUR PACE.</p><h2>Photo and goal studio</h2><p>Choose a focus and a goal. Add a photo if you like.<br/>You stay in control of what comes next.</p></section>
         <div className="layout">
             <section className="card"><div className="section-title"><span className="step">01</span><div><h2>Your starting point</h2><p>A photo is optional. Manual selection always works.</p></div></div><PhotoCapture onFocus={lambda (focus: str) { region = focus; message = ""; baseline = ""; }}/></section>
             <section className="card"><div className="section-title"><span className="step">02</span><div><h2>Make it yours</h2><p>These choices guide your future exercise plan.</p></div></div>
@@ -67,5 +66,5 @@ def:pub Coach() -> JsxElement {
             </section>
         </div>
         <footer><strong>Up next</strong> Reviewed exercises and a progress calendar. Photo observations and goal pictures are starting points, not medical assessments or guaranteed results.</footer>
-    </main>
+    </section>
 }

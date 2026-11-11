@@ -1,12 +1,12 @@
 import os;
 import json;
-import coach_provider;
+import sys;
 import from http { client }
 import from unittest.mock { patch, MagicMock }
-import from coach_provider { _payload, _decode, _config, _info, _complete, _send }
-import from coach_vision { _observation, _vision_schema, analyze_photo }
-import from coach_goals { GoalDraft, _goal_reply, _balance_warning, refine_goal }
-import from coach_profile { CoachProfile, validate_profile }
+import from .coach_provider { _payload, _decode, _config, _info, _complete, _send }
+import from .coach_vision { _observation, _vision_schema, analyze_photo }
+import from .coach_goals { GoalDraft, _goal_reply, _balance_warning, refine_goal }
+import from .coach_profile { CoachProfile, validate_profile }
 
 def _api() -> dict[str, any] {
     return {"provider": "openai", "base": "https://api.example.test/v1", "key": "TEST-ONLY", "vision": "vision-test", "text": "vision-test"};
@@ -69,7 +69,7 @@ test "both providers decode to the same strict observation" {
 test "changed destination blocks transmission and configured API completes" {
     config = _api();
     response = {"choices": [{"finish_reason": "stop", "message": {"content": json.dumps(_observed())}}]};
-    with patch.object(coach_provider, "_config", return_value=config), patch.object(coach_provider, "_send", return_value=response) as send {
+    with patch.object(_provider_module(), "_config", return_value=config), patch.object(_provider_module(), "_send", return_value=response) as send {
         failed = False;
         try { _complete("system", "prompt", _vision_schema(), "old-destination"); } except ValueError { failed = True; }
         assert failed;
@@ -80,7 +80,7 @@ test "changed destination blocks transmission and configured API completes" {
 }
 test "text-only local model is rejected before image transmission" {
     config = _api(); config["provider"] = "ollama";
-    with patch.object(coach_provider, "_config", return_value=config), patch.object(coach_provider, "_send", return_value={"capabilities": ["completion"]}) as send {
+    with patch.object(_provider_module(), "_config", return_value=config), patch.object(_provider_module(), "_send", return_value={"capabilities": ["completion"]}) as send {
         failed = False;
         try { _complete("system", "prompt", _vision_schema(), _info(config).consent_id, "data:image/jpeg;base64,pixels"); } except ValueError { failed = True; }
         assert failed and send.call_count == 1;
@@ -133,4 +133,10 @@ test "custom goal and self-reported baseline are server validated" {
     assert not validate_profile(profile).valid;
     profile.activity_days = 2; profile.upper_emphasis = 4;
     assert not validate_profile(profile).valid;
+}
+
+def _provider_module() -> any {
+    # Jac can load a package under a runner-specific name; patch the actual function module.
+    function: any = _complete;
+    return sys.modules[function.__module__];
 }

@@ -69,7 +69,7 @@ test "sync requests finish once and then refuse uploads" {
     started = start_health_sync("http://192.168.1.20:8000/", -240);
     assert started["ok"];
     assert started["link"].startswith("stridehealth://sync?host=http%3A%2F%2F192.168.1.20%3A8000&id=" + started["sync_id"]);
-    receive_health_batch(started["sync_id"], {"records": [sample("a", "HKQuantityTypeIdentifierStepCount", "2026-10-12T14:00:00Z", 100)]}, "apple");
+    receive_health_batch(started["sync_id"], {"records": [sample("a", "HKQuantityTypeIdentifierStepCount", (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat(), 100)]}, "apple");
     assert health_sync_status(started["sync_id"])["state"] == "receiving";
     assert finish_health_sync(started["sync_id"])["ok"];
     status = health_sync_status(started["sync_id"]);

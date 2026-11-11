@@ -1,3 +1,9 @@
+import from coach.coach_profile { CoachProfile, ProfileResult, validate_profile }
+import from coach.coach_media { PhotoResult, prepare_photo }
+import from coach.coach_provider { ProviderInfo, provider_info }
+import from coach.coach_vision { PhotoObservation, analyze_photo }
+import from coach.coach_goals { GoalDraft, GoalReply, refine_goal }
+import ".coach.styles.css";
 import from services.offline { offline_snapshot, sync_offline_change }
 import from .components.OfflineApp { OfflineApp }
 import from .components.OfflineSetup { OfflineSetup }
