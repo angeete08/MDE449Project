@@ -8,6 +8,7 @@ import ".coach.styles.css";
 import from services.offline { offline_snapshot, sync_offline_change }
 import from .components.OfflineApp { OfflineApp }
 import from .components.OfflineSetup { OfflineSetup }
+import from services.food_lookup { lookup_food }
 import from health_sync {
     start_health_sync,
     health_sync_status,

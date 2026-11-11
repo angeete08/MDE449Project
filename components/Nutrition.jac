@@ -1,4 +1,5 @@
 import from ..services.nutrition { daily_food, analyze_food, log_food, set_consumed }
+import from ..services.food_lookup { lookup_food }
 import from ..services.stride { PlanDay, DailyLog }
 import from .ui.button { Button }
 import from .ui.input { Input }
@@ -32,7 +33,12 @@ def:pub Nutrition(
         notice: str = "",
         food: str = "",
         kcal: str = "",
-        request_id: str = "";
+        request_id: str = "",
+        search: str = "",
+        matches: list[dict[str, any]] = [],
+        picked: dict[str, any] = {},
+        grams: str = "100",
+        lookup_note: str = "";
 
     async def reload() {
         rows = await daily_food(day);
@@ -157,6 +163,28 @@ def:pub Nutrition(
             working = False;
         }
     }
+    # Offline fallback: bundled USDA foods and Stride meal ideas, no photo model needed.
+    async def find_food() {
+        picked = {};
+        try {
+            matches = await lookup_food(search);
+            lookup_note = "" if len(matches) > 0 else "No match in the offline list. Try a simpler name or enter calories yourself.";
+        } except Exception {
+            matches = [];
+            lookup_note = "Enter a food name of 2 to 80 characters.";
+        }
+    }
+    def fill_from(item: dict[str, any], amount: str) {
+        picked = item;
+        grams = amount;
+        if item["kind"] == "meal" {
+            food = item["name"];
+            kcal = str(item["calories"]);
+        } elif amount.isdigit() and 0 < int(amount) <= 5000 {
+            food = item["name"] + " (" + amount + " g)";
+            kcal = str(round(item["kcal_per_100g"] * int(amount) / 100));
+        }
+    }
     async def add() {
         if not kcal.isdigit() or int(kcal) > 20000 or not food.strip() {
             notice = "Enter a food name and 0–20000 whole calories.";
@@ -172,6 +200,9 @@ def:pub Nutrition(
             request_id = "";
             food = "";
             kcal = "";
+            picked = {};
+            matches = [];
+            search = "";
             notice = "Added to today’s intake.";
         } except Exception {
             notice = "Could not save this food. Try again.";
@@ -284,6 +315,45 @@ def:pub Nutrition(
                     </div>
                     <div className="nutrition-panel">
                         <h2>Today's food log</h2>
+                        <div className="food-lookup">
+                            <label>
+                                Look up calories (works offline)
+                                <Input
+                                    maxLength="80"
+                                    value={search}
+                                    placeholder="e.g. banana, chicken breast, bean tacos"
+                                    onChange={lambda (e: any) { search = e.target.value; }}
+                                />
+                            </label>
+                            <Button variant="outline" disabled={working or len(search.strip()) < 2} onClick={find_food}>
+                                Look up
+                            </Button>
+                        </div>
+                        {lookup_note and <small>{lookup_note}</small>}
+                        {len(matches) > 0 and <div className="food-matches">
+                            {for item in matches {
+                                <button
+                                    type="button"
+                                    key={item["kind"] + item["name"]}
+                                    className={"food-match is-picked" if picked.get("name") == item["name"] else "food-match"}
+                                    onClick={lambda { fill_from(item, grams); }}
+                                >
+                                    <span>{item["name"]}</span>
+                                    <small>{(str(item["calories"]) + " kcal per serving" if item["kind"] == "meal" else str(item["kcal_per_100g"]) + " kcal per 100 g") + " · " + item["source"].split(",")[0]}</small>
+                                </button>
+                            }}
+                        </div>}
+                        {picked.get("kind") == "food" and <label className="food-grams">
+                            Portion (grams)
+                            <Input
+                                type="number"
+                                min="1"
+                                max="5000"
+                                value={grams}
+                                onChange={lambda (e: any) { fill_from(picked, e.target.value); }}
+                            />
+                        </label>}
+                        {bool(picked) and <small>Estimate from bundled data. Check the name and portion, then add it.</small>}
                         <div className="food-form">
                             <label>
                                 Meal or snack
