@@ -2,7 +2,6 @@
 import from planner { create_plan, submit_feedback, restore_plan, meal_video }
 import from .pdf_export { download_plan_pdf }
 import from .onboarding { DataSetup, clean_data_prefs, describe_data_prefs }
-import from .health_panel { AppleHealthSync }
 import from accounts { starter_meals, open_demo_account, read_demo_account, rename_demo_account, save_demo_plan, sync_demo_health, reset_demo_account, close_demo_account }
 
 def:pub FitnessApp -> JsxElement {
@@ -334,7 +333,6 @@ def:pub FitnessApp -> JsxElement {
                         <h3 id="weekly-averages">Weekly averages <span className="optional">optional</span></h3>
                         <p className="hint">Enter only the values available from your app.</p>
                         {if healthSource { <p className="data-source">{healthSource}</p> }}
-                        {if bool(dataPrefs) and dataPrefs["hub"] == "apple" { <AppleHealthSync onSynced={useHealthSummary}/> }}
                         <label>Average daily steps<input type="number" min="0" max="100000" step="1" required={False} value={avgSteps} onChange={lambda (e: ChangeEvent) { avgSteps = e.target.value; }}/></label>
                         <label>Average heart rate <span className="optional">bpm</span><input type="number" min="20" max="250" step="0.1" required={False} value={avgHeartRate} onChange={lambda (e: ChangeEvent) { avgHeartRate = e.target.value; }}/></label>
                         <label>Average sleep per night <span className="optional">hours</span><input type="number" min="0" max="24" step="0.1" required={False} value={avgSleep} onChange={lambda (e: ChangeEvent) { avgSleep = e.target.value; }}/></label>

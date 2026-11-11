@@ -300,17 +300,6 @@ test "account data is isolated and duplicate log replaces totals" {
                 "result"
             ];
             assert [m["name"] for m in meals] == [m["name"] for m in saved["meals"]];
-            health = client.post(
-                "/function/save_health_summary",
-                json={"summary": {"avg_daily_steps": 6000, "avg_sleep_hours": 7.5}}
-            );
-            assert health.status_code == 200;
-            cleared = client.post(
-                "/function/save_health_summary",
-                json={"summary": {"avg_daily_steps": 8000}}
-            ).json()["data"]["result"];
-            assert cleared["avg_sleep_hours"] is None;
-            assert cleared["source"] == "Apple Health · 28-day summary";
             client.register_user("stride-test-bob", "test-password-449");
             client.login("stride-test-bob", "test-password-449");
             bob = client.post("/function/get_profile", json={}).json();

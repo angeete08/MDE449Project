@@ -3,7 +3,7 @@ import json;
 import from planner { validate_state }
 import from datetime { date, datetime, timezone }
 import from services.stride {
-    require_profile, get_plan_state, get_logs, get_health_summary, meal_plan,
+    require_profile, get_plan_state, get_logs, meal_plan,
     save_log, set_weekly_goal, give_feedback, MUTATION_LOCK
 }
 
@@ -24,7 +24,7 @@ def:priv offline_snapshot() -> dict[str, any] {
             "saved_at": datetime.now(timezone.utc).isoformat(),
             "goal": p.weekly_minutes_goal, "state": get_plan_state(),
             "logs": [log_value(l.date) for l in get_logs()],
-            "health": get_health_summary(), "meals": meal_plan()};
+            "meals": meal_plan()};
     }
 }
 

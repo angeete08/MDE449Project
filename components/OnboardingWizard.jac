@@ -382,7 +382,7 @@ def:pub OnboardingWizard(mobile: bool = False) -> JsxElement {
                                         onCheckedChange={lambda (checked: any) { store_data = checked as bool; }}
                                     />
                                     <span className="text-sm text-muted-foreground">
-                                        Required for account plans. Save my profile, logs, feedback and imported summaries on this server. Delete them from the Health tab any time.
+                                        Required for account plans. Save my profile, logs, feedback and food entries on this server. Delete them from the History tab any time.
                                     </span>
                                 </div>
                             </Field>
@@ -414,7 +414,7 @@ def:pub OnboardingWizard(mobile: bool = False) -> JsxElement {
                                     }}
                                 </div>
                                 <p className="text-xs text-muted-foreground">
-                                    These selections do not connect an app. Apple Health uses the iPhone companion from the Health tab. Oura, Fitbit and Garmin are planned.
+                                    These selections do not connect an app. They tell the team which health apps to consider next.
                                 </p>
                             </Field>
                         </div>;
