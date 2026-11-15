@@ -12,7 +12,7 @@ def:pub ChatHistory() -> JsxElement {
         except Exception { error = "Could not delete chat history. Try again."; }
         finally { busy = False; }
     }
-    return <section className="chat-history"><h3>This week's Stride Coach conversations</h3>
+    return <section className="chat-history" data-tour="history"><h3>This week's Stride Coach conversations</h3>
         <p>{"Week of " + str(history.get("week", "")) + " · Monday–Sunday, America/Detroit. Earlier weeks are deleted on your next account visit. Up to 100 exchanges; photos are not saved."}</p>
         {error and <p role="alert">{error}</p>}
         {len(history.get("turns", [])) == 0 and <p>No saved conversations this week. Ask a question in Coach to start.</p>}

@@ -444,3 +444,29 @@
 .photo-food-review input { width: 100%; border: 1px solid var(--border); border-radius: .5rem; padding: .5rem; }
 .photo-food-review button { padding: .6rem; border: 1px solid var(--border); border-radius: .5rem; background: var(--muted); }
 .walkthrough-card { max-width: min(calc(100vw - 2rem), 38rem); }
+
+/* Unified energy totals and a tour that leaves the app interactive. */
+.today-energy h2 { font-size: 1.2rem; font-weight: 700; }
+.energy-breakdown { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; padding: .7rem 0; font-size: .85rem; }
+.completed-energy p { margin-bottom: .3rem; font-weight: 500; }
+.completed-energy > strong { display: block; border-top: 1px solid var(--border); padding-top: .35rem; }
+.exercise-energy small { display: block; font-size: .65rem; font-weight: 400; white-space: nowrap; }
+.nutrition-stats > div small { font-size: .7rem; line-height: 1.4; }
+.tour-highlight { outline: 3px solid #88ad27; outline-offset: 5px; scroll-margin-top: 8rem; }
+.tour-guide { position: fixed; bottom: max(1rem, env(safe-area-inset-bottom)); right: 1rem; z-index: 40; width: min(23rem, calc(100vw - 2rem)); max-height: 52dvh; overflow-y: auto; background: rgba(255,255,255,.97); color: #1a2818; border: 1px solid #9cb95a; border-radius: 1rem; padding: 1rem; box-shadow: 0 8px 30px #182e1738; }
+.tour-guide h2 { font-size: 1.1rem; font-weight: 750; margin: .6rem 0; }
+.tour-guide p { font-size: .84rem; line-height: 1.55; }
+.tour-guide-heading { display: flex; align-items: center; justify-content: space-between; gap: .5rem; font-size: .65rem; font-weight: 700; letter-spacing: .06em; }
+.tour-guide-heading button, .tour-show-feature { text-decoration: underline; font-size: .75rem; letter-spacing: normal; }
+.tour-guide .tour-hint { font-size: .72rem; color: #56644d; margin-top: .5rem; }
+.tour-show-feature { margin: .5rem 0; }
+.tour-guide a { display: block; font-size: .8rem; text-decoration: underline; }
+.tour-guide-navigation { display: flex; justify-content: space-between; gap: .5rem; margin-top: .5rem; }
+.tour-guide-navigation button { border: 1px solid #d3ddc6; border-radius: .6rem; padding: .4rem .8rem; font-size: .8rem; }
+.tour-guide-navigation button:last-child { background: #b1df43; }
+.tour-guide-skip { display: block; width: 100%; text-align: center; text-decoration: underline; padding-top: .6rem; font-size: .75rem; }
+.tour-guide.minimized { width: min(23rem, calc(100vw - 2rem)); padding: .65rem 1rem; }
+@media(max-width: 650px) { .tour-guide { max-height: 44dvh; } .energy-breakdown { display: grid; gap: .3rem; } }
+.tour-guide { display: flex; flex-direction: column; overflow: hidden; }
+.tour-guide-body { min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+.tour-guide-heading, .tour-guide-navigation, .tour-guide-skip { flex-shrink: 0; }

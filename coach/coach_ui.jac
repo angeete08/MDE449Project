@@ -62,7 +62,7 @@ def:pub Coach(onSaved: Callable[[], any] | None = None) -> JsxElement {
         finally { busy = False; }
     }
 
-    <section className="photo-coach">
+    <section className="photo-coach" data-tour="studio">
                 <section className="intro"><p className="eyebrow">YOUR FOCUS. YOUR PACE.</p><h2>Photo and goal studio</h2><p>Choose a focus and a goal. Add a photo if you like.<br/>You stay in control of what comes next.</p></section>
         <div className="layout">
             <section className="card"><div className="section-title"><span className="step">01</span><div><h2>Your starting point</h2><p>A photo is optional. Manual selection always works.</p></div></div><PhotoCapture onFocus={lambda (focus: str) { region = focus; message = ""; baseline = ""; preview = {}; }}/></section>

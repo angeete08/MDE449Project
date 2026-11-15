@@ -46,6 +46,8 @@ import from .ChatHistory { ChatHistory }
 import from .WorkoutChecklist { WorkoutChecklist }
 import from .ProgressCalendar { ProgressCalendar }
 import from .Walkthrough { Walkthrough }
+import from .EnergyBalance { EnergyBalance }
+import from ..workout_rules { day_energy }
 import from ..services.stride { set_exercise_completed }
 import from ..pdf_export { download_plan_pdf }
 
@@ -89,10 +91,17 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
         log_minutes: str = "0";
     nav = useNavigate();
 
+    def logged_energy(stamp: str) -> int {
+        return day_energy(plan_state, stamp, [{"date": row.date, "calories_burned": row.calories_burned} for row in logs])["logged"];
+    }
+
+    def navigate_tour(destination: str) {
+        if destination in ["today", "plan", "meals", "coach", "history"] { tab = destination; }
+    }
+
     async def refresh() {
         profile = await get_profile();
         if profile is not None {
-            show_tour = not profile.walkthrough_seen;
             results: any = await Promise.all([
                 get_plan(),
                 get_logs(),
@@ -112,6 +121,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
     async can with entry {
         try {
             await refresh();
+            if profile is not None { show_tour = not profile.walkthrough_seen; }
         } except Exception {
             message = "Could not load your account. Reload or sign in again.";
             try { if read_offline() { nav("/offline"); } } except Exception { }
@@ -321,7 +331,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
 
     return
         <div className={"stride-dashboard min-h-svh bg-muted/40" + (" stride-mobile-version" if mobile else "")}>
-            {show_tour and <Walkthrough onClose={lambda { show_tour = False; }}/>}
+            {show_tour and <Walkthrough onClose={lambda { show_tour = False; }} onNavigate={navigate_tour} activeTab={tab}/>}
             <header
                 className="sticky top-0 z-20 border-b bg-background/90 backdrop-blur"
             >
@@ -405,6 +415,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                         </Card>
                     </TabsContent>
                     <TabsContent value="today" className="flex flex-col gap-6 pt-2">
+                        <EnergyBalance day={local_today()} state={plan_state} logs={[{"date": row.date, "calories_burned": row.calories_burned} for row in logs]}/>
                         {if today is None {
                             <Card>
                                 <CardContent className="flex flex-col gap-3 pt-6">
@@ -556,7 +567,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                             </CardHeader>
                             <CardContent className="flex flex-col gap-3">
                                 {if today is not None {
-                                    <WorkoutChecklist exercises={today.exercises} completed={today.completed} locked={busy or today.date > local_today()} onToggle={lambda (exercise: int, checked: bool) { toggle_exercise((today as PlanDay).order, exercise, checked); }}/>
+                                    <WorkoutChecklist exercises={today.exercises} completed={today.completed} locked={busy or today.date > local_today()} logged_kcal={logged_energy(today.date)} onToggle={lambda (exercise: int, checked: bool) { toggle_exercise((today as PlanDay).order, exercise, checked); }}/>
                                     if today.is_rest {
                                         <p>
                                             Rest and recover. Optional gentle stretching if it feels good.
@@ -649,13 +660,13 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                             </CardContent>
                         </Card>
                     </TabsContent>
-                    <TabsContent value="plan" className="flex flex-col gap-4 pt-2">
+                    <TabsContent value="plan" data-tour="plan" className="flex flex-col gap-4 pt-2">
                         {p.health_conditions.strip() and <aside className="injury-reminder" role="note">
                             <strong>Make room for how you feel</strong>
                             <p>{"Your note: “" + p.health_conditions + "”. Adjust the effort, repetitions or pace, take breaks, or skip a movement as needed. These recommendations do not account for your injury. Stop if a movement hurts."}</p>
                             <Link to={"/mobile-onboarding" if mobile else "/onboarding"}>Edit your note</Link>
                         </aside>}
-                        <ProgressCalendar state={plan_state}/>
+                        <ProgressCalendar state={plan_state} logs={[{"date": row.date, "calories_burned": row.calories_burned} for row in logs]}/>
                         <div
                             className="flex flex-wrap items-center justify-between gap-3"
                         >
@@ -710,7 +721,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="flex flex-col gap-3">
-                                        <WorkoutChecklist exercises={d.exercises} completed={d.completed} locked={busy or d.date > local_today()} onToggle={lambda (exercise: int, checked: bool) { toggle_exercise(d.order, exercise, checked); }}/>
+                                        <WorkoutChecklist exercises={d.exercises} completed={d.completed} locked={busy or d.date > local_today()} logged_kcal={logged_energy(d.date)} onToggle={lambda (exercise: int, checked: bool) { toggle_exercise(d.order, exercise, checked); }}/>
                                         {if not d.is_rest
                                             and not d.feedback
                                             and d.date <= local_today() {
@@ -759,7 +770,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                         </div>
                     </TabsContent>
                     <TabsContent value="meals" className="flex flex-col gap-4 pt-2">
-                        <Nutrition key={local_today()} photos={True} day={local_today()} plan={plan} logs={logs} target={p.calorie_target}/>
+                        <Nutrition key={local_today()} photos={True} day={local_today()} plan={plan} logs={logs} target={p.calorie_target} state={plan_state}/>
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {for m in meals {
                                 <Card key={m["name"]}>
@@ -808,7 +819,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                     </TabsContent>
                     <TabsContent value="history" className="flex flex-col gap-4 pt-2">
                         <ChatHistory/>
-                        <ProgressCalendar state={plan_state}/>
+                        <ProgressCalendar state={plan_state} logs={[{"date": row.date, "calories_burned": row.calories_burned} for row in logs]}/>
                         <h2 className="text-lg font-semibold">Previous weeks</h2>
                         {if not plan_state.get("history", []) {
                             <p className="text-sm text-muted-foreground">

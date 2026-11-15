@@ -1,6 +1,6 @@
-import from ..workout_rules { completed_indices, completed_kcal }
+import from ..workout_rules { completed_indices, day_energy }
 
-def:pub ProgressCalendar(state: dict[str, any]) -> JsxElement {
+def:pub ProgressCalendar(state: dict[str, any], logs: list[dict[str, any]] = []) -> JsxElement {
     has selected: str = "";
     weeks: list[dict[str, any]] = [*state.get("history", []), state, *state.get("upcoming", [])];
     chosen = [w for w in weeks if w["start_date"] == (selected or state["start_date"])];
@@ -15,10 +15,13 @@ def:pub ProgressCalendar(state: dict[str, any]) -> JsxElement {
         <div className="calendar-grid">{for day in week["plan"] {
             done = completed_indices(week, day);
             count = len(day["exercises"]);
+            energy = day_energy(state, day["date"], logs);
             <article key={day["date"]} className={"calendar-day" + (" complete" if count > 0 and len(done) == count else "")}>
                 <strong>{day["day"][:3]}</strong><time>{day["date"]}</time><span>{day["title"]}</span>
                 <b>{"Rest" if day["rest"] else str(len(done)) + "/" + str(count) + " complete"}</b>
-                {not day["rest"] and <small>{"≈ " + str(completed_kcal(week, day)) + " kcal checked"}</small>}
+                <small>{"Workouts: ≈ " + str(energy["workouts"]) + " kcal"}</small>
+                <small>{"Logged activities: " + str(energy["logged"]) + " kcal"}</small>
+                <strong>{"Total: " + str(energy["total"]) + " kcal"}</strong>
                 {week["feedback"].get(str(day["index"])) and <small>{"Difficulty: " + week["feedback"][str(day["index"]) ]}</small>}
             </article>
         }}</div>

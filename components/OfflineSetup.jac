@@ -13,7 +13,7 @@ def:pub OfflineSetup() -> JsxElement {
             "onRegisterError": lambda (err: any) { status = "Offline launch unavailable. Use HTTPS and a production build."; }
         });
     }
-    return <div className="stride-offline-banner">
+    return <div className="stride-offline-banner" data-tour="offline-access">
         <Link to="/offline">Offline workspace</Link>
         <MobileAccess/>
         {status and <span role="status">{status}</span>}

@@ -6,7 +6,7 @@ import from ..services.offline { offline_snapshot, sync_offline_change }
 import from ..pdf_export { download_plan_pdf }
 import from .WorkoutChecklist { WorkoutChecklist }
 import from .ProgressCalendar { ProgressCalendar }
-import from ..workout_rules { completed_indices, change_completion }
+import from ..workout_rules { completed_indices, change_completion, day_energy }
 
 # The offline page intentionally does not require a live auth check: the user
 # explicitly opted into a readable copy on this device. Server replay always authenticates.
@@ -239,7 +239,7 @@ def:pub OfflineApp() -> JsxElement {
                 </section>
                 <section><h2>My workouts · stored on this device</h2>
                     {doc.snapshot.injury_note and <aside className="injury-reminder"><strong>Your movement reminder</strong><p>{doc.snapshot.injury_note + " · Adjust effort, take breaks or skip movements as needed. This plan does not interpret injuries. Stop if a movement hurts."}</p></aside>}
-                    <ProgressCalendar state={working_state}/>
+                    <ProgressCalendar state={working_state} logs={working_logs}/>
                     <button disabled={busy} onClick={lambda {
                         try { queue({"kind": "plan", "key": "plan", "base": doc.snapshot.state, "value": offline_week(working_state)}); }
                         except Exception { message = "Could not generate a local week."; }
@@ -247,7 +247,7 @@ def:pub OfflineApp() -> JsxElement {
                     <button onClick={lambda { try { download_plan_pdf(working_state); } except Exception { message = "Could not export the saved PDF."; } }}>Download saved plan PDF</button>
                     {working_state.plan.map(lambda (day: any) { return <article key={day.date}>
                         <h3>{day.day + " · " + day.date + " · " + day.title}</h3>
-                        <WorkoutChecklist exercises={day.exercises} completed={completed_indices(working_state, day)} locked={busy or day.date > today_stamp()} onToggle={lambda (exercise: int, checked: bool) { toggle_exercise(int(day.index), exercise, checked); }}/>
+                        <WorkoutChecklist exercises={day.exercises} completed={completed_indices(working_state, day)} locked={busy or day.date > today_stamp()} logged_kcal={day_energy(working_state, str(day.date), working_logs)["logged"]} onToggle={lambda (exercise: int, checked: bool) { toggle_exercise(int(day.index), exercise, checked); }}/>
                         <p>{"Saved rating: " + (working_state.feedback[str(day.index)] or "not logged")}</p>
                         {not day.rest and day.date <= today_stamp() and not working_state.feedback[str(day.index)] and <div className="offline-actions">
                             <button disabled={busy} onClick={lambda { rate(day, "easy"); }}>Too easy · draft</button>

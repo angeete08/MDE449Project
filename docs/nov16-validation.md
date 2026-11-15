@@ -1,3 +1,5 @@
+> **Updated energy/tour revision:** see [energy and interactive-tour validation](energy-tour-validation.md). It supersedes the earlier 7/14 kcal examples and five-page modal tour below.
+
 # Local launch-review validation
 
 Review checkout: `launch/11_14/code/`. Base dev: `c603369`. Local branch: `launch/nov16-review`. No milestone changes have been pushed to dev.

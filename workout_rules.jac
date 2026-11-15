@@ -1,16 +1,27 @@
 """Portable completion and illustrative energy estimates; never calorie targets."""
 
+def exercise_minutes(exercise: dict[str, any]) -> float {
+    if exercise.get("duration") { return float(exercise["duration"]); }
+    # App planning assumption, not a published per-exercise measurement:
+    # 2.5 minutes per ten-rep set, including recovery/setup in the block.
+    return float(exercise.get("sets", 2)) * (1.5 + float(exercise.get("reps", 10)) * 0.1);
+}
+
+def exercise_met(exercise: dict[str, any]) -> float {
+    name = str(exercise.get("name", ""));
+    # 2024 Adult Compendium categories: 02101, 17190, 02052,
+    # 02024, 02056 and 02054. Categories are matched to our exercise catalog.
+    if name == "Gentle mobility" { return 2.3; }
+    if exercise.get("duration") { return 3.8; }
+    if name in ["Goblet squat", "Dumbbell Romanian deadlift"] { return 5.0; }
+    if name in ["Dead bug", "Bird dog", "Glute bridge"] { return 2.8; }
+    if name in ["Chair squat", "Incline push-up", "Reverse lunge", "Wall push-up", "Calf raise"] { return 3.0; }
+    return 3.5;
+}
+
 def exercise_kcal(exercise: dict[str, any]) -> int {
-    # 2024 Adult Compendium: resistance 3.5 MET, moderate walking 3.8,
-    # mild stretching 2.3. Reference mass 70 kg; not a personal measurement.
-    duration = float(exercise.get("duration", 0));
-    met = 2.3 if exercise.get("name") == "Gentle mobility" else 3.8;
-    if not duration {
-        sets = float(exercise.get("sets", 2));
-        duration = sets * float(exercise.get("reps", 10)) * 3 / 60 + max(0.0, sets - 1.0) * 0.75;
-        met = 3.5;
-    }
-    return max(1, int(met * 70 * duration / 60 + 0.5));
+    # Standard MET oxygen-equivalent formula; reference mass 70 kg.
+    return max(1, int(exercise_met(exercise) * 3.5 * 70 / 200 * exercise_minutes(exercise) + 0.5));
 }
 
 def completed_indices(week: dict[str, any], day: dict[str, any]) -> list[int] {
@@ -21,6 +32,17 @@ def completed_indices(week: dict[str, any], day: dict[str, any]) -> list[int] {
 
 def completed_kcal(week: dict[str, any], day: dict[str, any]) -> int {
     return sum([exercise_kcal(e) for (i, e) in enumerate(day["exercises"]) if i in completed_indices(week, day)]);
+}
+
+def day_energy(state: dict[str, any], stamp: str, logs: list[dict[str, any]]) -> dict[str, int] {
+    workouts = 0;
+    for week in state.get("history", []) + [state] + state.get("upcoming", []) {
+        for day in week.get("plan", []) {
+            if day["date"] == stamp { workouts += completed_kcal(week, day); }
+        }
+    }
+    logged = sum([int(row.get("calories_burned", 0)) for row in logs if row["date"] == stamp]);
+    return {"workouts": workouts, "logged": logged, "total": workouts + logged};
 }
 
 def change_completion(week: dict[str, any], index: int, exercise: int, checked: bool, today: str) -> dict[str, any] {
