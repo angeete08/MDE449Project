@@ -1,4 +1,4 @@
-import from .PhotoFoodReview { PhotoFoodReview }
+import from .MealPhotoResult { MealPhotoResult }
 import from ..services.nutrition { daily_food, analyze_food, log_food, set_consumed }
 import from ..services.food_lookup { lookup_food }
 import from ..services.stride { PlanDay, DailyLog }
@@ -80,7 +80,6 @@ def:pub Nutrition(
             done += log.extra_activities or 0;
         }
     }
-    levels = ["Very low", "Low", "Moderate", "High", "Very high"];
 
     picker_disabled = working or not ready or len(analyzed) >= 10;
 
@@ -217,6 +216,7 @@ def:pub Nutrition(
     return
         <section className="nutrition" data-tour="meals">
             {if photos {
+                <div className={"meal-photo-layout has-single-result" if len(analyzed) == 1 else "meal-photo-layout"}>
                 <div className="nutrition-panel">
                     <h2>Meal photo estimates</h2>
                     <p>
@@ -252,7 +252,21 @@ def:pub Nutrition(
                         Analyze photos
                     </Button>
                 </div>
+                {len(analyzed) == 1 and <MealPhotoResult day={day} row={analyzed[0]} onSaved={reload}/>}
+                {len(analyzed) > 1 and <div className="meal-photo-results" aria-label="Meal photo analysis results">
+                    {for row in analyzed {
+                        <details className="meal-photo-result" key={row["token"]}>
+                            <summary>
+                                <span>{row["title"]}</span>
+                                <small>{str(row["calories"]) + " kcal · " + ("In intake" if row["consumed"] else "Review estimate")}</small>
+                            </summary>
+                            <MealPhotoResult day={day} row={row} onSaved={reload} show_title={False}/>
+                        </details>
+                    }}
+                </div>}
+                </div>
             } }
+            {notice and <p role="status">{notice}</p>}
                 <div className="nutrition">
                     <div className="nutrition-panel">
                         <h2>Daily calorie tracker</h2>
@@ -367,50 +381,7 @@ def:pub Nutrition(
                         }}
                     </div>
                 </div>
-            {notice and <p role="status">{notice}</p>}
-            {photos
-                and <div className="nutrition">
-                    {for row in analyzed {
-                        <article className="nutrition-panel" key={row["token"]}>
-                            <h2>{row["title"]}</h2>
-                            <p>{row["analysis"]["description"]}</p>
-                            <strong>
-                                {levels[row["analysis"]["level"] - 1]
-                                    + " nutritional value"}
-                            </strong>
-                            <div className="nutrition-scale" aria-hidden="true">
-                                {for n in [1, 2, 3, 4, 5] {
-                                    <span
-                                        key={n}
-                                        className={"selected"
-                                            if n == row["analysis"]["level"]
-                                            else ""}
-                                    ></span>
-                                }}
-                            </div>
-                            <div className="scale-labels">
-                                <small>Very low</small>
-                                <small>Very high</small>
-                            </div>
-                            {for (label, field) in [
-                                ["Processing", "processing"],
-                                ["Fiber", "fiber"],
-                                ["Protein", "protein"],
-                                ["Fat type", "fat"]
-                            ] {
-                                <div className="food-row" key={field}>
-                                    <b>{label}</b>
-                                    <span>{row["analysis"][field]}</span>
-                                </div>
-                            }}
-                            <p>
-                                {"Estimated portion · "
-                                    + str(row["calories"])
-                                    + " kcal"}
-                            </p>
-                            <PhotoFoodReview day={day} row={row} onSaved={reload}/>
-                        </article>
-                    }}
-                </div>}
+
+
         </section>;
 }

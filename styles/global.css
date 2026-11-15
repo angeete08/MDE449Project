@@ -332,6 +332,17 @@
 .health-sync .quiet { border: 1px solid var(--border); border-radius: .5rem; padding: .5rem .75rem; width: fit-content; font-size: .875rem; cursor: pointer; }
 
 .nutrition { display: grid; gap: 1rem; min-width: 0; }
+.meal-photo-layout { display: grid; gap: 1rem; min-width: 0; align-items: start; }
+.meal-photo-layout > * { min-width: 0; }
+.meal-photo-results { display: grid; gap: .75rem; }
+.meal-photo-result { border: 1px solid var(--border); border-radius: 1.25rem; background: var(--card); overflow: hidden; }
+.meal-photo-result > summary { cursor: pointer; padding: 1rem; font-weight: 700; overflow-wrap: anywhere; }
+.meal-photo-result > summary small { display: block; margin-top: .35rem; color: var(--muted-foreground); font-weight: 400; }
+.meal-photo-result > summary:focus-visible { outline: 2px solid var(--primary); outline-offset: -4px; }
+.meal-photo-result > .nutrition-panel { border: 0; border-top: 1px solid var(--border); border-radius: 0; }
+@media (min-width: 960px) {
+  .meal-photo-layout.has-single-result { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); }
+}
 .nutrition-panel { padding: clamp(1rem, 3vw, 2rem); border: 1px solid var(--border); border-radius: 1.25rem; background: var(--card); display: grid; gap: .75rem; }
 .nutrition-panel h2 { font-size: 1.25rem; font-weight: 700; }
 .nutrition-panel p, .nutrition-panel small { color: var(--muted-foreground); }
