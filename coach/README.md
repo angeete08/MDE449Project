@@ -1,12 +1,12 @@
 # Photo and goal coach
 
-Integrated into the existing Stride Coach tab in both desktop and mobile dashboards. This folder is a module, not a separate app: run `jac install` and `jac run --no-dev` from the parent `MDE449Project-mobile` folder with Jac 0.37.21. Sign in, complete onboarding and open Coach. Existing Gemini chat remains available above the photo studio.
+Integrated into the existing Stride Coach tab in both desktop and mobile dashboards. This folder is a module, not a separate app: run `jac install` and `jac run --no-dev` from the project root with Jac 0.37.21. Sign in, complete onboarding and open Coach. Existing Gemini chat remains available above the photo studio.
 
 ## Delivered through Phase 3
 
-Optional camera/upload, sanitized preview, crop/restore/remove, tentative visible-region/framing/pose observations, user-confirmed focus, self-reported activity baseline, goal examples, and an Other dialogue with iterative model-assisted or manual picture refinement. SVG illustrations show training emphasis, not predicted bodies. A two-level upper/lower emphasis difference triggers a transparent planning reminder, not a medical risk score. Reviewed exercises and the progress calendar remain later phases.
+Optional camera/upload, sanitized preview, crop/restore/remove, tentative visible-region/framing/pose observations, user-confirmed focus, self-reported activity baseline, goal examples, and an Other dialogue with iterative model-assisted or manual picture refinement. SVG illustrations show training emphasis, not predicted bodies. A two-level upper/lower emphasis difference triggers a transparent planning reminder, not a medical risk score. The local launch-review milestone adds catalog-based exercise preview, explicit future-week saving, completion checkboxes and a saved progress calendar; see `../docs/nov16-review.md`.
 
-All five photo/goal endpoints require authentication. Photos and drafts remain ephemeral; nothing is added to the account graph, existing workout history, offline queue or service-worker cache. Model requests happen only on explicit actions. API mode discloses its destination and requires a checkbox before photo or goal-text submission. Removal invalidates the UI result but cannot undo an already-sent request. Provider retention policies apply.
+All photo/goal endpoints require authentication. Photos and drafts remain ephemeral and are excluded from the account graph, offline queue and service-worker cache. Only explicitly confirmed routine preferences/exercises are saved as a future workout week. Model requests happen only on explicit actions. API mode discloses its destination and requires a checkbox before photo or goal-text submission. Removal invalidates the UI result but cannot undo an already-sent request. Provider retention policies apply.
 
 Image limits: JPEG/PNG/WebP, 10 MiB, 16 MP, dimensions 32–8192; normalized to metadata-free JPEG at most 1600 px per side. Neither photos nor generated observations establish body fat, fitness, injury or healthy body proportions.
 
@@ -66,6 +66,6 @@ Live local smoke testing covers goal translation and abstention on a blank image
 - coach_profile.jac: server validation; coach_ui.jac: temporary planning preferences.
 - main.jac at app root: endpoint registration; components/ChatCoach.jac: integration.
 
-CSS is scoped to .photo-coach. Keep persisted plan/calendar work on the later codex/progress-canvas branch and preserve completed workouts.
+CSS is scoped to .photo-coach. The confirmed routine and calendar are integrated into saved plan state; preserve completed workouts and exercises.
 
 References: [Ollama vision](https://docs.ollama.com/capabilities/vision), [structured output](https://docs.ollama.com/capabilities/structured-outputs), [OpenAI image inputs](https://developers.openai.com/api/docs/guides/images-vision?api-mode=chat), [OpenAI structured output](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=chat), [CDC adult activity guidance](https://www.cdc.gov/physical-activity-basics/guidelines/adults.html). The emphasis threshold is an app heuristic, not a CDC medical rule.

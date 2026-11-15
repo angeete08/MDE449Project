@@ -13,7 +13,6 @@ import from .ui.badge { Badge }
 import from .ui.progress { Progress }
 import from .ui.select { Select, SelectTrigger, SelectValue, SelectContent, SelectItem }
 import from ..lib.utils { cn }
-import from .MobileAccess { MobileAccess }
 import from .BrandMark { BrandMark }
 import from ..services.stride { save_profile, get_profile }
 
@@ -88,6 +87,9 @@ def:pub OnboardingWizard(mobile: bool = False) -> JsxElement {
             current = current + [value];
         }
         if list_ref == "equipment" {
+            if value == "none" { current = ["none"]; }
+            else { current = [v for v in current if v != "none"]; }
+            if not current { current = ["none"]; }
             equipment = current;
         } else {
             wearables = current;
@@ -102,7 +104,7 @@ def:pub OnboardingWizard(mobile: bool = False) -> JsxElement {
                 goal = p.goal;
                 level = p.level;
                 days_per_week = str(p.days_per_week);
-                equipment = p.equipment;
+                equipment = [v for v in p.equipment if v != "none"] if len(p.equipment) > 1 else p.equipment;
                 diet = p.diet;
                 calorie_target = str(p.calorie_target);
                 health_conditions = p.health_conditions;
@@ -182,7 +184,6 @@ def:pub OnboardingWizard(mobile: bool = False) -> JsxElement {
 
     return
         <div className="stride-onboarding min-h-svh bg-muted/40">
-            <MobileAccess/>
             <div className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-10">
                 <div className="stride-brand flex items-center gap-2.5">
                     <BrandMark compact={True}/>
@@ -292,6 +293,7 @@ def:pub OnboardingWizard(mobile: bool = False) -> JsxElement {
                                         <button
                                             key={eq}
                                             type="button"
+                                            aria-pressed={eq in equipment}
                                             onClick={lambda (e: MouseEvent) { toggle(
                                                 "equipment", eq
                                             ); }}
@@ -339,6 +341,14 @@ def:pub OnboardingWizard(mobile: bool = False) -> JsxElement {
                                 <FieldLabel htmlFor="calories">
                                     Daily calorie target (kcal)
                                 </FieldLabel>
+                                <div className="flex flex-wrap gap-2" aria-label="Calorie target shortcuts">
+                                    {for amount in [1000, 1200, 1500, 2000, 2500, 3000] {
+                                        <button type="button" key={amount} aria-pressed={calorie_target == str(amount)}
+                                            className={"target-shortcut" + (" selected" if calorie_target == str(amount) else "")}
+                                            onClick={lambda { calorie_target = str(amount); }}>{str(amount)}</button>
+                                    }}
+                                </div>
+                                <p className="text-xs text-muted-foreground">Shortcuts only, not recommended targets. Choose the target that is right for you, or enter your own.</p>
                                 <Input
                                     id="calories"
                                     type="number"

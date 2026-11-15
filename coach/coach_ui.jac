@@ -1,8 +1,11 @@
 import from .coach_profile { CoachProfile, ProfileResult, validate_profile }
 import from .capture_ui { PhotoCapture }
 import from .goal_ui { GoalStudio }
+import from .coach_routine { preview_coach_routine, save_coach_routine }
+import from ..components.ProgressCalendar { ProgressCalendar }
 
-def:pub Coach() -> JsxElement {
+def:pub Coach(onSaved: Callable[[], any] | None = None) -> JsxElement {
+    has preview: dict[str, any] = {};
     has goal: str = "general_strength", region: str = "full_body",
         experience: str = "beginner", equipment: list[str] = [],
         weekdays: list[int] = [0, 2, 4], minutes: int = 30,
@@ -31,23 +34,46 @@ def:pub Coach() -> JsxElement {
             errors = result.errors;
             warning = result.warning;
             baseline = result.baseline;
-            if result.valid { message = "Preferences checked. Your confirmed focus and goal are ready for exercise planning. Nothing is saved after reload."; }
+            preview = {};
+            if result.valid {
+                preview = await preview_coach_routine(preferences());
+                message = "Review these exercises and dates, then choose Save next week. Your existing workouts have not changed.";
+            }
         } except Exception { errors = ["Could not reach the local coach server. Please try again."]; }
         finally { busy = False; }
     }
 
-    <section className="photo-coach">
+    def preferences() -> CoachProfile {
+        return CoachProfile(goal=goal, region=region, experience=experience, equipment=equipment,
+            weekdays=weekdays, minutes=minutes, start_date=startDate, timezone=timezone,
+            constraints=constraints, activity_days=activityDays, custom_goal=customGoal,
+            custom_style=customStyle, upper_emphasis=upper, lower_emphasis=lower);
+    }
+
+    async def save() {
+        if busy or len(preview) == 0 { return; }
+        busy = True;
+        try {
+            saved = await save_coach_routine(preferences(), str(preview["base"]));
+            message = "Saved the week of " + str(saved["start_date"]) + ". Open Plan to see it in the calendar. When its week arrives, use Open / generate this week to start checking exercises.";
+            preview = {};
+            if onSaved is not None { await onSaved(); }
+        } except Exception { errors = ["Could not save. Your plan may have changed or those dates already have a saved week. Generate a new preview or choose a later start date."]; }
+        finally { busy = False; }
+    }
+
+    <section className="photo-coach" data-tour="studio">
                 <section className="intro"><p className="eyebrow">YOUR FOCUS. YOUR PACE.</p><h2>Photo and goal studio</h2><p>Choose a focus and a goal. Add a photo if you like.<br/>You stay in control of what comes next.</p></section>
         <div className="layout">
-            <section className="card"><div className="section-title"><span className="step">01</span><div><h2>Your starting point</h2><p>A photo is optional. Manual selection always works.</p></div></div><PhotoCapture onFocus={lambda (focus: str) { region = focus; message = ""; baseline = ""; }}/></section>
-            <section className="card"><div className="section-title"><span className="step">02</span><div><h2>Make it yours</h2><p>These choices guide your future exercise plan.</p></div></div>
-                <form onSubmit={confirm} onChange={lambda (e: any) { message = ""; errors = []; warning = ""; baseline = ""; }}>
+            <section className="card"><div className="section-title"><span className="step">01</span><div><h2>Your starting point</h2><p>A photo is optional. Manual selection always works.</p></div></div><PhotoCapture onFocus={lambda (focus: str) { region = focus; message = ""; baseline = ""; preview = {}; }}/></section>
+            <section className="card"><div className="section-title"><span className="step">02</span><div><h2>Make it yours</h2><p>Confirm your choices to preview and save a future workout week.</p></div></div>
+                <form onSubmit={confirm} onChange={lambda (e: any) { message = ""; errors = []; warning = ""; baseline = ""; preview = {}; }}>
                     <fieldset disabled={busy}><legend>Focus and goal</legend>
                         <label>Body region<select value={region} onChange={lambda (e: ChangeEvent) { region = e.target.value; }}>
                             <option value="full_body">Full body</option><option value="shoulders">Shoulders</option><option value="arms">Arms</option><option value="chest">Chest</option><option value="back">Back</option><option value="core">Core</option><option value="glutes">Glutes</option><option value="legs">Legs</option><option value="unknown">Unsure / multiple regions</option>
                         </select></label>
                         <label>Your goal<select value={goal} onChange={lambda (e: ChangeEvent) { goal = e.target.value; }}><option value="general_strength">General strength & activity</option><option value="fat_loss">Fat-loss support</option><option value="lean_toned">Lean / toned</option><option value="muscle">Muscle building</option><option value="other">Other · customize with pictures</option></select></label>
-                        <GoalStudio goal={goal} onUse={lambda (style: str, description: str, upperValue: int, lowerValue: int) { customStyle = style; customGoal = description; upper = upperValue; lower = lowerValue; message = ""; baseline = ""; warning = ""; }}/>
+                        <GoalStudio goal={goal} onUse={lambda (style: str, description: str, upperValue: int, lowerValue: int) { customStyle = style; customGoal = description; upper = upperValue; lower = lowerValue; preview = {}; message = ""; baseline = ""; warning = ""; }}/>
                         <p className="hint">You choose the goal. A photo does not measure body fat or health, and a focus region does not imply localized fat loss.</p>
                         <label>Experience<select value={experience} onChange={lambda (e: ChangeEvent) { experience = e.target.value; }}><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="experienced">Experienced</option></select></label>
                     </fieldset>
@@ -58,13 +84,22 @@ def:pub Coach() -> JsxElement {
                         <p className="field-title">Available days</p><div className="checks">{[<label key={idx}><input type="checkbox" checked={idx in weekdays} onChange={lambda (e: ChangeEvent) { weekdays = [x for x in weekdays if x != idx] if idx in weekdays else weekdays + [idx]; }}/>{day}</label> for (idx, day) in enumerate(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])]}</div>
                         <div className="two"><label>Minutes per session<input type="number" min="10" max="120" step="1" required value={minutes} onChange={lambda (e: ChangeEvent) { minutes = int(e.target.value); }}/></label><label>Start date<input type="date" required value={startDate} onChange={lambda (e: ChangeEvent) { startDate = e.target.value; }}/></label></div>
                         <label>Timezone<input required value={timezone} onChange={lambda (e: ChangeEvent) { timezone = e.target.value; }} placeholder="America/Detroit"/></label>
-                        <label>Movement preferences or constraints <span className="hint">(optional)</span><textarea maxLength={1000} value={constraints} onChange={lambda (e: ChangeEvent) { constraints = e.target.value; }} placeholder="What would you like your future plan to account for?"/></label>
+                        <label>Personal movement reminder <span className="hint">(optional)</span><textarea maxLength={1000} value={constraints} onChange={lambda (e: ChangeEvent) { constraints = e.target.value; }} placeholder="Optional reminder for you; does not medically adapt exercise selection."/></label>
                     </fieldset>
                     <div role="alert">{[<p className="error" key={error}>{error}</p> for error in errors]}</div><p role="status">{baseline}</p>{if warning { <aside className="balance-warning" role="status">{warning}</aside> }}<p className="success" role="status">{message}</p>
-                    <button className="primary" type="submit" disabled={busy}>{"Checking…" if busy else "Confirm preferences"}</button>
+                    <button className="primary" type="submit" disabled={busy}>{"Preparing…" if busy else "Confirm preferences & generate preview"}</button>
                 </form>
+                {len(preview) > 0 and <section className="routine-preview"><h3>{"Proposed week of " + str(preview["week"]["start_date"])}</h3><p>{preview["note"]}</p>
+                    <ProgressCalendar state={{**preview["week"], "history": []}}/>
+                    {for day in preview["week"]["plan"] {
+                        if not day["rest"] { <article key={day["date"]}><strong>{day["day"] + " · " + day["title"]}</strong>
+                            {for exercise in day["exercises"] { <p key={exercise["name"]}>{exercise["name"] + " · " + (str(exercise["duration"]) + " min" if exercise.get("duration") else str(exercise["sets"]) + " × " + str(exercise["reps"]))}</p> }}
+                        </article>}
+                    }}
+                    <button type="button" className="primary" disabled={busy} onClick={save}>Save next week</button>
+                </section>}
             </section>
         </div>
-        <footer><strong>Up next</strong> Reviewed exercises and a progress calendar. Photo observations and goal pictures are starting points, not medical assessments or guaranteed results.</footer>
+        <footer>How to use the studio: optionally add a photo → confirm or edit your focus → choose preferences → generate and review → save a future week. Photos stay temporary; only the confirmed routine is saved. Exercise selection uses Stride's catalog, not a medical interpretation of your photo or notes.</footer>
     </section>
 }

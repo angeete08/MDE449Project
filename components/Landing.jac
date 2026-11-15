@@ -1,4 +1,3 @@
-import from .MobileAccess { MobileAccess }
 import from "@jac/runtime" { Link }
 import from "@hugeicons/react" { HugeiconsIcon }
 import from "@hugeicons/core-free-icons" {
@@ -142,7 +141,6 @@ def:pub Landing() -> JsxElement {
                     </div>
                 </div>
             </section>
-            <MobileAccess/>
             <section className="mx-auto max-w-6xl pt-8 pb-16 pl-6 pr-6">
                 <div className="grid gap-4 md:grid-cols-2">
                     {for f in FEATURES {

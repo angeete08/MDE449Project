@@ -1,6 +1,7 @@
 """Explicit, account-bound offline snapshots and conditional draft replay."""
 import json;
 import from planner { validate_state }
+import from workout_rules { completed_indices }
 import from datetime { date, datetime, timezone }
 import from services.stride {
     require_profile, get_plan_state, get_logs, meal_plan,
@@ -24,7 +25,7 @@ def:priv offline_snapshot() -> dict[str, any] {
             "saved_at": datetime.now(timezone.utc).isoformat(),
             "goal": p.weekly_minutes_goal, "state": get_plan_state(),
             "logs": [log_value(l.date) for l in get_logs()],
-            "meals": meal_plan()};
+            "meals": meal_plan(), "injury_note": p.health_conditions};
     }
 }
 
@@ -75,6 +76,11 @@ def:priv sync_offline_change(owner: str, change: dict[str, any]) -> dict[str, an
                 matches = [w for w in weeks if w["week_id"] == old["week_id"]];
                 if len(matches) != 1 { raise ValueError("Offline plan must preserve existing weeks."); }
                 saved = matches[0];
+                for old_day in old["plan"] {
+                    if completed_indices(old, old_day) and saved["plan"][old_day["index"]] != old_day {
+                        raise ValueError("Completed exercises must stay unchanged.");
+                    }
+                }
                 for (key, rating) in old["feedback"].items() {
                     if saved["feedback"].get(key) != rating or saved["plan"][int(key)] != old["plan"][int(key)] {
                         raise ValueError("Completed workouts must stay unchanged.");
@@ -82,6 +88,11 @@ def:priv sync_offline_change(owner: str, change: dict[str, any]) -> dict[str, an
                 }
             }
             for week in weeks {
+                for day in week["plan"] {
+                    if completed_indices(week, day) and day["date"] > date.today().isoformat() {
+                        raise ValueError("Cannot complete future exercises.");
+                    }
+                }
                 for key in week["feedback"] {
                     if week["plan"][int(key)]["date"] > date.today().isoformat() {
                         raise ValueError("Cannot rate future workouts.");

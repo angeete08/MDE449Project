@@ -1,3 +1,5 @@
+> Historical November 11 snapshot. See [November 16 review](nov16-review.md) for the implemented completion, chat, routine and walkthrough changes.
+
 # November 11 feature integration
 
 The shared integration combines `review/coach-and-current-week`, `feat/calorie-tracker-nutrition-analyzer`, `feature-visial-coach` (including `feature/mobile-mini-app` and `feature/offline-part`), and the original `feature/mobile-app` history. Merge commits preserve the original feature commits.

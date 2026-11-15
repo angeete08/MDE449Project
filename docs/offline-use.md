@@ -4,7 +4,7 @@
 
 1. Deploy a production build with Jac 0.37.21 over a stable HTTPS origin (localhost is suitable for development). Run `jac install`, then `jac run --no-dev`. Development/HMR mode is not an offline deployment.
 2. Sign in and finish your profile. Open **Offline workspace** at `/offline`.
-3. Wait for the message that offline app files are cached, enable the device-storage checkbox, and choose **Save my account for offline use**. The cached app files do not include personal account data; the checkbox explicitly permits a readable local copy of workouts and activity logs.
+3. Wait for the message that offline app files are cached, enable the device-storage checkbox, and choose **Save my account for offline use**. The cached app files do not include personal account data; the checkbox explicitly permits a readable local copy of workouts, activity logs and your optional injury reminder.
 4. Install to the home screen. The manifest now launches `/offline`; an existing installation may need reinstalling to adopt the new launch URL.
 5. Export a device backup. The file contains personal fitness data; keep it somewhere appropriate.
 
@@ -12,11 +12,11 @@ After this preparation the laptop can be asleep, switched off, or on another net
 
 ## Works locally
 
-- View workouts and exercise sets/reps/durations.
+- View workouts and exercise sets/reps/durations; check individual exercises and see illustrative energy totals. Checkboxes are independent from difficulty ratings.
 - Rate workouts and adapt later unlogged workouts of the same type. Completed workouts remain unchanged. Future workouts cannot be rated.
 - Archive the current week and generate subsequent weeks using the same portable Jac schedule rules as the server. Previously selected meal ideas are retained.
 - Enter or replace daily activity totals; change the weekly minutes goal; calculate weekly progress and active-day streaks.
-- View saved meal ideas and archived plans.
+- View saved meal ideas, current/archived/future progress calendars and archived plans. Confirmed studio routines already saved online are included. Chat history and new studio generation still require the server.
 - Generate current or archived plan PDFs.
 - Get the optional three-minute movement-break suggestion from entered sitting time.
 - Export and restore a JSON device backup containing the snapshot and local edits.

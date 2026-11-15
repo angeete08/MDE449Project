@@ -12,7 +12,11 @@ import os;
 import litellm;
 import from litellm.types.utils { ModelResponse }
 import from datetime { date, timedelta, date as CalendarDate }
+import from datetime { datetime }
+import from zoneinfo { ZoneInfo }
+import from chat_rules { rolling_chat }
 import from planner { validate_profile, create_plan, update_feedback, meal_video, current_week_state, preview_week_state }
+import from workout_rules { completed_indices, completed_kcal, change_completion }
 
 node Profile {
     has name: str = "Athlete",
@@ -30,6 +34,8 @@ node Profile {
         wearables: list[str] = [];
 
     has weekly_minutes_goal: int = 150;
+    has walkthrough_seen: bool = False,
+        chat_week: str = "", chat_json: str = "[]";
     has plan_json: str = "",
         # Retired Apple Health summary; kept so existing saved profiles still load.
         health_json: str = "";
@@ -50,6 +56,7 @@ obj PlanDay {
         order: int = 0;
 
     has feedback: str = "";
+    has completed: list[int] = [];
 }
 
 node FoodEntry {
@@ -105,6 +112,16 @@ def planner_profile(p: Profile) -> dict[str, any] {
 
 def:priv get_profile() -> Profile | None {
     profiles = [root-->][?:Profile];
+    if profiles {
+        p = profiles[0];
+        # Prune on authenticated account access, including login/dashboard refresh.
+        current = datetime.now(ZoneInfo("America/Detroit")).date();
+        retained = rolling_chat(p.chat_week, p.chat_json, current);
+        if p.chat_week != retained["week"] {
+            p.chat_week = retained["week"];
+            p.chat_json = retained["payload"];
+        }
+    }
     return profiles[0] if profiles else None;
 }
 
@@ -150,6 +167,8 @@ def:priv save_profile(
         if len(health_conditions) > 500 {
             raise ValueError("Keep health notes under 500 characters.");
         }
+        equipment = [e for e in equipment if e != "none"] if len(equipment) > 1 else equipment;
+        if not equipment { equipment = ["none"]; }
         if not store_data {
             raise ValueError("Account plans require your consent to save data.");
         }
@@ -227,6 +246,7 @@ def plan_days(state: dict[str, any]) -> list[PlanDay] {
                 order=item["index"],
                 minutes=minutes,
                 feedback=state["feedback"].get(str(item["index"]), "")
+                , completed=completed_indices(state, item), calories=completed_kcal(state, item)
             )
         );
     }
@@ -269,10 +289,30 @@ def:priv give_feedback(day_id: str, feedback: str, today: str = "") -> list[Plan
         if calendar_date(plan_state["plan"][int(day_id)]["date"]) > current {
             raise ValueError("Rate a workout on or after its scheduled day.");
         }
+        plan_state["completed"] = {str(d["index"]): completed_indices(plan_state, d) for d in plan_state["plan"]};
         state = update_feedback(plan_state, int(day_id), ratings[feedback]);
         p.plan_json = json.dumps(state);
         return plan_days(state);
     }
+}
+
+def:priv set_exercise_completed(week_id: str, day: int, exercise: int, checked: bool, today: str) -> list[PlanDay] {
+    with MUTATION_LOCK {
+        p = require_profile();
+        state = get_plan_state();
+        if state["week_id"] != week_id { raise ValueError("Your week changed. Reload before editing."); }
+        calendar_date(today);
+        # Dates supplied by the UI may differ by a timezone day, not arbitrary weeks.
+        if abs((calendar_date(today) - CalendarDate.today()).days) > 1 { raise ValueError("Check your device date."); }
+        state = change_completion(state, day, exercise, checked, today);
+        p.plan_json = json.dumps(state);
+        return plan_days(state);
+    }
+}
+
+def:priv finish_walkthrough() -> bool {
+    require_profile().walkthrough_seen = True;
+    return True;
 }
 
 def:priv get_logs() -> list[DailyLog] {

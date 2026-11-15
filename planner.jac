@@ -5,6 +5,8 @@ import from datetime { date, timedelta }
 import from uuid { uuid4, UUID }
 
 import from planning_rules { validate_profile, generate_week, meal_catalog }
+import from workout_rules { completed_indices }
+import from routine_rules { routine_week }
 
 def meal_ideas(diet: str, calories: int) -> list[dict[str, any]] {
     target = max(250, min(700, calories // 4));
@@ -134,6 +136,17 @@ def validate_week(state: dict[str, any], migration_date: str = "") -> dict[str, 
         clean["starting_offsets"] = offsets(state.get("starting_offsets", {}));
         clean["legacy_dates"] = state["legacy_dates"];
     }
+    if "routine" in state {
+        if not isinstance(state["routine"], dict) { raise ValueError("Invalid saved routine."); }
+        settings = {key: state["routine"].get(key) for key in ["weekdays", "region", "minutes"]};
+        for key in ["goal_note", "constraints"] {
+            value = state["routine"].get(key, "");
+            if not isinstance(value, str) or len(value) > 1000 { raise ValueError("Invalid routine note."); }
+            if value { settings[key] = value; }
+        }
+        clean["plan"] = date_plan(routine_week(profile, settings, level["strength"], level["cardio"]), clean["start_date"]);
+        clean["routine"] = settings;
+    }
     feedback = state.get("feedback", {});
     plan = state.get("plan", []);
     if not isinstance(feedback, dict) or not isinstance(plan, list) or len(plan) != 7 { raise ValueError("Invalid saved week."); }
@@ -147,8 +160,8 @@ def validate_week(state: dict[str, any], migration_date: str = "") -> dict[str, 
             if not isinstance(stored, dict) or stored.get("name") != exercise["name"] { raise ValueError("Invalid saved exercise."); }
             metric = "duration" if "duration" in exercise else "reps";
             value = stored.get(metric);
-            low = (5 if j == 1 else 10) if metric == "duration" else 6;
-            high = (5 if j == 1 else 40) if metric == "duration" else 16;
+            low = (5 if j == 1 or "routine" in clean else 10) if metric == "duration" else 6;
+            high = (5 if j == 1 else (123 if "routine" in clean else 40)) if metric == "duration" else 16;
             if not isinstance(value, int) or isinstance(value, bool) or not low <= value <= high { raise ValueError("Invalid saved exercise amount."); }
             if "sets" in exercise and stored.get("sets") != exercise["sets"] { raise ValueError("Invalid saved sets."); }
             exercise[metric] = value;
@@ -160,6 +173,22 @@ def validate_week(state: dict[str, any], migration_date: str = "") -> dict[str, 
     saved_meals = state.get("meals", []);
     clean["meals"] = meal_ideas(profile["diet"], profile["calories"]) if legacy and not saved_meals else validate_meals(profile["diet"], saved_meals);
     clean["feedback"] = copy.deepcopy(feedback);
+    if "completed" in state {
+        done = state["completed"];
+        if not isinstance(done, dict) { raise ValueError("Invalid exercise completions."); }
+        for (key, values) in done.items() {
+            if key not in [str(i) for i in range(7)] or not isinstance(values, list) {
+                raise ValueError("Invalid exercise completion day.");
+            }
+            for value in values {
+                if not isinstance(value, int) or isinstance(value, bool) or value not in range(len(clean["plan"][int(key)]["exercises"])) {
+                    raise ValueError("Invalid exercise completion.");
+                }
+            }
+            if len(values) != len(set(values)) { raise ValueError("Duplicate exercise completion."); }
+        }
+        clean["completed"] = copy.deepcopy(done);
+    }
     clean["memory_note"] = memory_note(clean);
     del clean["history"];
     return clean;
@@ -249,9 +278,10 @@ def update_feedback(state: dict[str, any], index: int, rating: str) -> dict[str,
     clean["offsets"][kind] = max(-4, min(4, before + delta));
     if before != clean["offsets"][kind] {
         updated = date_plan(generate_week(clean["profile"], clean["offsets"]["strength"], clean["offsets"]["cardio"]), clean["start_date"]);
+        if "routine" in clean { updated = date_plan(routine_week(clean["profile"], clean["routine"], clean["offsets"]["strength"], clean["offsets"]["cardio"]), clean["start_date"]); }
         for i in range(index + 1, 7) {
             same_kind = (updated[i]["title"] == "Cardio & mobility") == (kind == "cardio");
-            if not updated[i]["rest"] and same_kind and str(i) not in clean["feedback"] { clean["plan"][i] = updated[i]; }
+            if not updated[i]["rest"] and same_kind and str(i) not in clean["feedback"] and not completed_indices(clean, clean["plan"][i]) { clean["plan"][i] = updated[i]; }
         }
     }
     clean["feedback"][key] = rating;

@@ -383,3 +383,90 @@
 .food-match small { color: var(--muted-foreground, #5f6f68); }
 .food-match.is-picked { border-color: #11966b; box-shadow: inset 0 0 0 1px #11966b; }
 .food-grams { display: grid; gap: 4px; max-width: 160px; margin: 8px 0; font-size: 13px; }
+
+/* Launch milestone: compact global access, completion, calendar and tour. */
+.stride-offline-banner { align-items: center; position: relative; z-index: 30; }
+.stride-offline-banner > span { flex-basis: 100%; font-size: .75rem; color: var(--muted-foreground); }
+.stride-phone-menu { margin-left: auto; font-size: .8rem; }
+.stride-phone-menu summary { cursor: pointer; font-weight: 600; }
+.stride-phone-menu details { position: relative; }
+.stride-phone-popover { position: absolute; top: calc(100% + .6rem); right: 0; width: min(22rem, calc(100vw - 2rem)); padding: 1rem; border: 1px solid var(--border); border-radius: 1rem; background: var(--card); color: var(--foreground); box-shadow: 0 12px 30px #17241724; z-index: 50; }
+.stride-phone-popover h3 { margin: .8rem 0 .3rem; font-weight: 700; }
+.stride-phone-popover p { margin-top: .5rem; }
+.target-shortcut { border: 1px solid var(--border); border-radius: 999px; padding: .45rem .9rem; background: var(--card); }
+.target-shortcut.selected { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+.injury-reminder { border: 1px solid #d8a243; border-left: 5px solid #bf801e; border-radius: .75rem; background: #fff8df; color: #5b4218; padding: .8rem 1rem; font-size: .875rem; }
+.injury-reminder strong { display: block; font-size: .95rem; }
+.injury-reminder a { text-decoration: underline; }
+.exercise-check-row { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; padding: .65rem 0; border-bottom: 1px solid var(--border); font-size: .875rem; }
+.exercise-check-row label { flex: 1 1 12rem; display: flex; align-items: center; gap: .65rem; cursor: pointer; }
+.exercise-check-row input { width: 1.2rem; height: 1.2rem; accent-color: #79a21b; flex-shrink: 0; }
+.exercise-check-row small { display: block; color: var(--muted-foreground); }
+.exercise-check-row a { font-size: .75rem; text-decoration: underline; }
+.exercise-energy { white-space: nowrap; font-weight: 600; }
+.completed-energy { background: var(--muted); border-radius: .6rem; padding: .65rem; margin-top: .6rem; font-weight: 700; font-size: .875rem; }
+.estimate-explainer { margin-top: .5rem; font-size: .75rem; color: var(--muted-foreground); }
+.estimate-explainer summary { cursor: pointer; }
+.progress-calendar, .chat-history { background: var(--card); padding: 1rem; border: 1px solid var(--border); border-radius: 1rem; min-width: 0; }
+.progress-calendar h3, .chat-history h3 { font-weight: 700; font-size: 1.05rem; }
+.progress-calendar > p, .chat-history > p { font-size: .8rem; color: var(--muted-foreground); margin: .5rem 0 .8rem; }
+.calendar-heading { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: space-between; align-items: center; }
+.calendar-heading label { font-size: .8rem; }
+.calendar-heading select { margin-left: .5rem; padding: .35rem; max-width: 100%; border: 1px solid var(--border); border-radius: .4rem; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .4rem; }
+.calendar-day { display: flex; flex-direction: column; gap: .3rem; border: 1px solid var(--border); border-radius: .6rem; padding: .65rem .45rem; font-size: .75rem; overflow-wrap: anywhere; }
+.calendar-day time { font-size: .65rem; color: var(--muted-foreground); }
+.calendar-day.complete { border-color: #84aa2a; background: #eff8dd; color: #254311; }
+.chat-history details { padding: .7rem 0; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.chat-history summary { cursor: pointer; font-weight: 600; }
+.chat-history time { font-size: .7rem; color: var(--muted-foreground); }
+.chat-history button, .quick-tour-button { padding: .45rem .7rem; border: 1px solid var(--border); border-radius: .5rem; font-size: .8rem; margin-top: .3rem; }
+.walkthrough-backdrop { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; background: #15220eb3; overflow-y: auto; }
+.walkthrough-card { width: min(100%, 38rem); max-height: calc(100dvh - 2rem); overflow-y: auto; background: var(--card); color: var(--foreground); border-radius: 1.5rem; padding: clamp(1.2rem, 4vw, 2.5rem); box-shadow: 0 25px 80px #0005; }
+.walkthrough-step { font-size: .75rem; font-weight: 700; letter-spacing: .12em; color: #557218; }
+.walkthrough-card h2 { font-size: 1.8rem; font-weight: 700; margin: 1rem 0; line-height: 1.2; }
+.walkthrough-card > p { line-height: 1.7; }
+.walkthrough-navigation { display: flex; gap: .75rem; justify-content: space-between; margin-top: 1.6rem; }
+.walkthrough-navigation button { padding: .7rem 1.2rem; border: 1px solid var(--border); border-radius: .75rem; }
+.walkthrough-navigation button:last-child { background: var(--primary); color: var(--primary-foreground); }
+.walkthrough-skip { width: 100%; text-align: center; text-decoration: underline; padding: .8rem; margin-top: .7rem; }
+.routine-preview { margin-top: 1rem; padding: 1rem; border: 1px solid #92ae57; border-radius: .75rem; }
+.routine-preview article { padding: .5rem 0; }
+@media (max-width: 650px) {
+ .calendar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+ .calendar-day:last-child { grid-column: span 2; }
+ .stride-offline-banner { gap: .4rem; padding: .5rem .75rem; font-size: .75rem; }
+ .stride-phone-menu { font-size: .7rem; }
+ .walkthrough-card h2 { font-size: 1.5rem; }
+}
+.photo-food-review { display: grid; gap: .6rem; padding-top: .6rem; }
+.photo-food-review label { display: grid; gap: .25rem; font-size: .85rem; }
+.photo-food-review input { width: 100%; border: 1px solid var(--border); border-radius: .5rem; padding: .5rem; }
+.photo-food-review button { padding: .6rem; border: 1px solid var(--border); border-radius: .5rem; background: var(--muted); }
+.walkthrough-card { max-width: min(calc(100vw - 2rem), 38rem); }
+
+/* Unified energy totals and a tour that leaves the app interactive. */
+.today-energy h2 { font-size: 1.2rem; font-weight: 700; }
+.energy-breakdown { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; padding: .7rem 0; font-size: .85rem; }
+.completed-energy p { margin-bottom: .3rem; font-weight: 500; }
+.completed-energy > strong { display: block; border-top: 1px solid var(--border); padding-top: .35rem; }
+.exercise-energy small { display: block; font-size: .65rem; font-weight: 400; white-space: nowrap; }
+.nutrition-stats > div small { font-size: .7rem; line-height: 1.4; }
+.tour-highlight { outline: 3px solid #88ad27; outline-offset: 5px; scroll-margin-top: 8rem; }
+.tour-guide { position: fixed; bottom: max(1rem, env(safe-area-inset-bottom)); right: 1rem; z-index: 40; width: min(23rem, calc(100vw - 2rem)); max-height: 52dvh; overflow-y: auto; background: rgba(255,255,255,.97); color: #1a2818; border: 1px solid #9cb95a; border-radius: 1rem; padding: 1rem; box-shadow: 0 8px 30px #182e1738; }
+.tour-guide h2 { font-size: 1.1rem; font-weight: 750; margin: .6rem 0; }
+.tour-guide p { font-size: .84rem; line-height: 1.55; }
+.tour-guide-heading { display: flex; align-items: center; justify-content: space-between; gap: .5rem; font-size: .65rem; font-weight: 700; letter-spacing: .06em; }
+.tour-guide-heading button, .tour-show-feature { text-decoration: underline; font-size: .75rem; letter-spacing: normal; }
+.tour-guide .tour-hint { font-size: .72rem; color: #56644d; margin-top: .5rem; }
+.tour-show-feature { margin: .5rem 0; }
+.tour-guide a { display: block; font-size: .8rem; text-decoration: underline; }
+.tour-guide-navigation { display: flex; justify-content: space-between; gap: .5rem; margin-top: .5rem; }
+.tour-guide-navigation button { border: 1px solid #d3ddc6; border-radius: .6rem; padding: .4rem .8rem; font-size: .8rem; }
+.tour-guide-navigation button:last-child { background: #b1df43; }
+.tour-guide-skip { display: block; width: 100%; text-align: center; text-decoration: underline; padding-top: .6rem; font-size: .75rem; }
+.tour-guide.minimized { width: min(23rem, calc(100vw - 2rem)); padding: .65rem 1rem; }
+@media(max-width: 650px) { .tour-guide { max-height: 44dvh; } .energy-breakdown { display: grid; gap: .3rem; } }
+.tour-guide { display: flex; flex-direction: column; overflow: hidden; }
+.tour-guide-body { min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+.tour-guide-heading, .tour-guide-navigation, .tour-guide-skip { flex-shrink: 0; }

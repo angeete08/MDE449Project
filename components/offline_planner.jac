@@ -1,5 +1,7 @@
 import from "react" { createElement }
 import from ..planning_rules { generate_week, meal_catalog }
+import from ..workout_rules { completed_indices }
+import from ..routine_rules { routine_week }
 
 def:pub shift_day(stamp: str, days: int) -> str {
     d: any = new(Date, stamp + "T12:00:00Z");
@@ -36,7 +38,9 @@ def:pub offline_week(previous: any) -> any {
     state.end_date = shift_day(state.start_date, 6);
     state.starting_offsets = JSON.parse(JSON.stringify(state.offsets));
     state.feedback = {};
+    state.completed = {};
     state.plan = generate_week(state.profile, state.offsets.strength, state.offsets.cardio);
+    if state.routine { state.plan = routine_week(state.profile, state.routine, state.offsets.strength, state.offsets.cardio); }
     for item in state.plan { item.date = shift_day(state.start_date, item.index); }
     # Keep the existing selected meal ideas; all are already valid for this diet.
     return state;
@@ -44,6 +48,7 @@ def:pub offline_week(previous: any) -> any {
 
 def:pub offline_feedback(previous: any, index: int, rating: str) -> any {
     state: any = JSON.parse(JSON.stringify(previous));
+    state.completed = {str(day.index): completed_indices(previous, day) for day in previous.plan};
     if index < 0 or index > 6 or rating not in ["easy", "right", "hard"] {
         raise ValueError("Invalid workout rating.");
     }
@@ -55,9 +60,10 @@ def:pub offline_feedback(previous: any, index: int, rating: str) -> any {
     before = state.offsets[kind];
     state.offsets[kind] = max(-4, min(4, state.offsets[kind] + delta));
     updated: any = generate_week(state.profile, state.offsets.strength, state.offsets.cardio);
+    if state.routine { updated = routine_week(state.profile, state.routine, state.offsets.strength, state.offsets.cardio); }
     for i in range(index + 1, 7) {
         same = (updated[i]["title"] == "Cardio & mobility") == (kind == "cardio");
-        if before != state.offsets[kind] and not updated[i]["rest"] and same and not state.feedback[str(i)] {
+        if before != state.offsets[kind] and not updated[i]["rest"] and same and not state.feedback[str(i)] and not completed_indices(state, state.plan[i]) {
             updated[i]["date"] = state.plan[i].date;
             state.plan[i] = updated[i];
         }

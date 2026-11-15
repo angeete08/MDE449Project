@@ -1,8 +1,10 @@
+import from .PhotoFoodReview { PhotoFoodReview }
 import from ..services.nutrition { daily_food, analyze_food, log_food, set_consumed }
 import from ..services.food_lookup { lookup_food }
 import from ..services.stride { PlanDay, DailyLog }
 import from .ui.button { Button }
 import from .ui.input { Input }
+import from ..workout_rules { day_energy }
 
 async def meal_image(file: any) -> str {
     browser: any = window;
@@ -23,7 +25,7 @@ async def meal_image(file: any) -> str {
 }
 
 def:pub Nutrition(
-    photos: bool, day: str, plan: list[PlanDay], logs: list[DailyLog], target: int
+    photos: bool, day: str, plan: list[PlanDay], logs: list[DailyLog], target: int, state: dict[str, any]
 ) -> JsxElement {
     has rows: list[dict[str, any]] = [],
         files: list[any] = [],
@@ -66,19 +68,18 @@ def:pub Nutrition(
         intake += row["calories"];
     }
     done = 0;
-    burned = 0;
+    energy = day_energy(state, day, [{"date": row.date, "calories_burned": row.calories_burned} for row in logs]);
+    burned = energy["total"];
     for workout in plan {
-        if workout.date == day and workout.feedback and not workout.is_rest {
-            done += 1;
+        if workout.date == day and not workout.is_rest {
+            done += 1 if len(workout.completed) == len(workout.exercises) else 0;
         }
     }
     for log in logs {
         if log.date == day {
             done += log.extra_activities or 0;
-            burned = log.calories_burned;
         }
     }
-    net = intake - burned;
     levels = ["Very low", "Low", "Moderate", "High", "Very high"];
 
     picker_disabled = working or not ready or len(analyzed) >= 10;
@@ -214,10 +215,10 @@ def:pub Nutrition(
         return <p role="status">{notice or "Loading today’s food log…"}</p>;
     }
     return
-        <section className="nutrition">
+        <section className="nutrition" data-tour="meals">
             {if photos {
                 <div className="nutrition-panel">
-                    <h2>Got your nutritions?</h2>
+                    <h2>Meal photo estimates</h2>
                     <p>
                         Choose a meal or snack photo to estimate its nutrients and calories with Gemini.
                     </p>
@@ -282,36 +283,9 @@ def:pub Nutrition(
                                 <span aria-hidden="true">🔥</span>
                                 <strong>{burned}</strong>
                                 <span>Total Calories Burned</span>
+                                <small>{"Workouts: ≈ " + str(energy["workouts"]) + " · Logged: " + str(energy["logged"]) + " kcal"}</small>
                             </div>
                         </div>
-                    </div>
-                    <div className="nutrition-panel">
-                        <div className="scale-labels">
-                            <h2>Today's Energy Balance</h2>
-                            <small>{day}</small>
-                        </div>
-                        <p>
-                            <i>Calories in, Calories out</i>
-                        </p>
-                        <div className="energy-flow">
-                            <div>
-                                <strong>{intake}</strong>
-                                Energy (In)
-                            </div>
-                            <span>→</span>
-                            <div>
-                                <strong>{burned}</strong>
-                                Energy (Out)
-                            </div>
-                            <span>→</span>
-                            <div>
-                                <strong>{("+" if net > 0 else "") + str(net)}</strong>
-                                Net Value
-                            </div>
-                        </div>
-                        <small>
-                            All values in kcal. Energy out uses your logged calories burned.
-                        </small>
                     </div>
                     <div className="nutrition-panel">
                         <h2>Today's food log</h2>
@@ -434,15 +408,7 @@ def:pub Nutrition(
                                     + str(row["calories"])
                                     + " kcal"}
                             </p>
-                            <Button
-                                variant="outline"
-                                disabled={working}
-                                onClick={lambda { toggle(row); }}
-                            >
-                                {"Remove from today’s intake"
-                                    if row["consumed"]
-                                    else "Add to today’s intake"}
-                            </Button>
+                            <PhotoFoodReview day={day} row={row} onSaved={reload}/>
                         </article>
                     }}
                 </div>}

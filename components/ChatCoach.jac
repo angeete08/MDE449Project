@@ -1,9 +1,18 @@
 import from ..coach.coach_ui { Coach }
 import from ..services.stride { ask_coach, coach_available }
+import from ..services.chat { get_chat_history, send_saved_coach }
 import from .ui.button { Button }
 import from .ui.input { Input }
 
-def:pub ChatCoach() -> JsxElement {
+def chat_messages(history: dict[str, any]) -> list[dict[str, str]] {
+    result: list[dict[str, str]] = [];
+    for turn in history.get("turns", []) {
+        result = [*result, {"role": "user", "content": turn["question"]}, {"role": "assistant", "content": turn["answer"]}];
+    }
+    return result;
+}
+
+def:pub ChatCoach(onPlanSaved: Callable[[], any] | None = None) -> JsxElement {
     has messages: list[dict[str, str]] = [
             {
                 "role": "assistant",
@@ -13,13 +22,15 @@ def:pub ChatCoach() -> JsxElement {
         draft: str = "",
         error: str = "",
         sending: bool = False,
-        configured: bool = True;
+        configured: bool = True, request_id: str = "", retry_question: str = "", loaded: bool = False;
 
     async can with entry {
         try {
             configured = await coach_available();
+            messages = chat_messages(await get_chat_history());
+            loaded = True;
         } except Exception {
-            configured = True;
+            error = "Could not load saved chat. Reopen Coach before sending.";
         }
     }
 
@@ -29,15 +40,19 @@ def:pub ChatCoach() -> JsxElement {
             return;
         }
 
-        previous = messages[-12:];
-        pending = [*messages, {"role": "user", "content": question}];
-        messages = pending;
-        draft = "";
+        if not loaded { return; }
+        if not request_id or retry_question != question {
+            browser: any = window;
+            request_id = str(browser.crypto.randomUUID());
+            retry_question = question;
+        }
         error = "";
         sending = True;
         try {
-            answer = await ask_coach(question, previous);
-            messages = [*pending, {"role": "assistant", "content": answer}];
+            messages = chat_messages(await send_saved_coach(question, request_id));
+            draft = "";
+            request_id = "";
+            retry_question = "";
         } except Exception {
             error = "Stride Coach could not get a reply from Gemini. Try again in a minute; if it keeps failing, check the API key, quota and internet connection.";
         } finally {
@@ -89,19 +104,19 @@ def:pub ChatCoach() -> JsxElement {
                     maxLength="1200"
                     aria-label="Ask Stride Coach"
                     placeholder="Ask about your plan or fitness…"
-                    disabled={sending or not configured}
+                    disabled={sending or not configured or not loaded}
                     onChange={lambda (e: ChangeEvent) { draft = e.target.value; }}
                 />
                 <Button
-                    disabled={sending or not configured or not draft.strip()}
+                    disabled={sending or not configured or not loaded or not draft.strip()}
                     onClick={send_message}
                 >
                     Send
                 </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-                Responses use Google Gemini and may be inaccurate. Your question, recent chat history, and limited fitness preferences are sent to Google; health notes and health summaries are not. Stride does not save this conversation to your account. Avoid sharing sensitive or medical information. This is general information, not medical advice.
+                Chat uses Google Gemini and requires internet. Your question, recent conversation and limited fitness preferences are sent to Google; injury notes are excluded. Conversations are saved to your account for the current Monday–Sunday week (America/Detroit), visible and deletable in History. Earlier weeks are deleted on your next account visit. Photos are not included. Responses may be inaccurate; avoid sensitive information. The separate Photo and goal studio uses its own displayed provider.
             </p>
-            <Coach/>
+            <Coach onSaved={onPlanSaved}/>
         </section>;
 }
