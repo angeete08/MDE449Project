@@ -65,13 +65,11 @@ Do not run two installers simultaneously.
 
 | Dashboard section | What it does                                                                                                                                                                  |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Today**         | Shows today's scheduled workout and manually logged activity; lets you set a weekly active-minutes goal and request an optional movement break based on entered sitting time. |
+| **Today**         | Shows your workout, today's activity, weekly activity goal, activity streak, recent activity logs, and an optional movement break based on entered sitting time. |
 | **Coach**         | Uses Google Gemini to answer general fitness questions and questions about your saved fitness preferences and scheduled workouts.                                             |
 | **Plan**          | Shows a seven-day workout schedule, exercise details, tutorial searches, difficulty feedback, a next-week preview, and a downloadable PDF.                                    |
-| **Meals** | Tracks intake against your daily target, completed activities, logged calories burned and signed energy balance. Includes meal ideas and manual food logging. |
-| **Got your nutritions?** | Drop or choose up to ten food photos per day, review Gemini’s nutrient and portion estimates, and add selected foods to Meals. |
-| **Progress**      | Lets you add or edit daily steps, calories burned, running distance, and active minutes; shows weekly totals and activity streaks.                                            |
-| **History**       | Displays saved previous weeks, including workouts, exercise amounts, and recorded feedback. **Your saved data** deletes your saved Stride data.                               |
+| **Meals** | Tracks intake, manual food logs, food-photo estimates and meal ideas. |
+| **History** | Saved previous weeks and the Your saved data deletion control. |
 
 ### Workout planning and weekly navigation
 

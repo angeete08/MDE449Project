@@ -7,7 +7,7 @@ The shared integration combines `review/coach-and-current-week`, `feat/calorie-t
 ## Online and offline behavior
 
 - `/app` is the desktop dashboard; `/mobile` uses the same account and features in the phone layout.
-- Meals includes daily intake, manual food logging, activity counts and energy balance. The nutrition tab accepts meal photos for Gemini estimates. These account operations require the server; photo analysis also needs a Gemini key and network access.
+- Today includes the activity streak and recent activity log alongside today's activity and weekly goal. Meals combines daily intake, manual food logging, activity counts, energy balance, meal ideas and optional meal-photo estimates. These account operations require the server; photo analysis also needs a Gemini key and network access.
 - Coach contains conversational history/reply improvements and the optional photo/goal studio. Reviewed exercise selection and its progress calendar remain unfinished. Live model output and physical camera capture were not revalidated during integration.
 - `/offline` retains local workouts, feedback, activity, goals, history, selected meal ideas, next-week creation and PDF export after explicitly saving a device copy. It does not run AI or record the new nutrition food log offline. Sync drafts explicitly after reconnecting.
 - Online current-week navigation and read-only next-week previews remain intact. Offline next-week creation restores an already-saved future week instead of replacing it. Sync rejects drafts that would lose existing weeks or change completed workouts.

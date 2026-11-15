@@ -4,7 +4,7 @@
 
 1. Deploy a production build with Jac 0.37.21 over a stable HTTPS origin (localhost is suitable for development). Run `jac install`, then `jac run --no-dev`. Development/HMR mode is not an offline deployment.
 2. Sign in and finish your profile. Open **Offline workspace** at `/offline`.
-3. Wait for **App ready offline**, enable the device-storage checkbox, and choose **Save my account for offline use**. The checkbox explicitly permits a readable local copy of workouts, logs and health summaries.
+3. Wait for the message that offline app files are cached, enable the device-storage checkbox, and choose **Save my account for offline use**. The cached app files do not include personal account data; the checkbox explicitly permits a readable local copy of workouts, logs and health summaries.
 4. Install to the home screen. The manifest now launches `/offline`; an existing installation may need reinstalling to adopt the new launch URL.
 5. Export a device backup. The file contains personal fitness data; keep it somewhere appropriate.
 
