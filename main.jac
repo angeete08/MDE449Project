@@ -8,14 +8,6 @@ import ".coach.styles.css";
 import from services.offline { offline_snapshot, sync_offline_change }
 import from .components.OfflineApp { OfflineApp }
 import from .components.OfflineSetup { OfflineSetup }
-import from health_sync {
-    start_health_sync,
-    health_sync_status,
-    finish_health_sync,
-    receive_health_batch,
-    receive_health_log,
-    release_health_sync
-}
 import from services.stride {
     save_profile,
     get_profile,
@@ -30,8 +22,6 @@ import from services.stride {
     get_plan_state,
     set_weekly_goal,
     get_activity_summary,
-    save_health_summary,
-    get_health_summary,
     get_movement_break,
     clear_account_data,
     ask_coach,
