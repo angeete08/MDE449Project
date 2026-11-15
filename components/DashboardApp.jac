@@ -770,8 +770,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                         </div>
                     </TabsContent>
                     <TabsContent value="meals" className="flex flex-col gap-4 pt-2">
-                        <Nutrition key={local_today()} photos={False} day={local_today()} plan={plan} logs={logs} target={p.calorie_target}/>
-                        <Nutrition key={local_today() + "-photos"} photos={True} day={local_today()} plan={plan} logs={logs} target={p.calorie_target}/>
+                        <Nutrition key={local_today()} photos={True} day={local_today()} plan={plan} logs={logs} target={p.calorie_target}/>
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {for m in meals {
                                 <Card key={m["name"]}>

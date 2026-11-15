@@ -375,3 +375,11 @@
 .stride-offline input { width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: .35rem; padding: .6rem; font-size: 16px; }
 .offline-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
 .offline-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .5rem; }
+
+.food-lookup { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px; }
+.food-lookup label { flex: 1; display: grid; gap: 4px; font-size: 13px; }
+.food-matches { display: grid; gap: 6px; margin: 8px 0; }
+.food-match { display: grid; gap: 2px; text-align: left; padding: 8px 10px; border: 1px solid var(--border, #d9e2dc); border-radius: 8px; background: transparent; cursor: pointer; }
+.food-match small { color: var(--muted-foreground, #5f6f68); }
+.food-match.is-picked { border-color: #11966b; box-shadow: inset 0 0 0 1px #11966b; }
+.food-grams { display: grid; gap: 4px; max-width: 160px; margin: 8px 0; font-size: 13px; }
