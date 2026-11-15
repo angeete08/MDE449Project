@@ -386,37 +386,7 @@ def:pub OnboardingWizard(mobile: bool = False) -> JsxElement {
                                     </span>
                                 </div>
                             </Field>
-                            <Field>
-                                <FieldLabel>
-                                    {"Health app interests (optional)"}
-                                </FieldLabel>
-                                <div className="flex flex-wrap gap-2">
-                                    {for w in WEARABLES {
-                                        <button
-                                            key={w["id"]}
-                                            type="button"
-                                            onClick={lambda (e: MouseEvent) { toggle(
-                                                "wearables", w["id"]
-                                            ); }}
-                                            className={cn(
-                                                "flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm shadow-sm transition-colors",
-                                                w["id"] in wearables
-                                                    and "border-primary bg-primary text-primary-foreground",
-                                            )}
-                                        >
-                                            <HugeiconsIcon
-                                                icon={CheckmarkCircle02Icon}
-                                                strokeWidth={2}
-                                                className="size-4"
-                                            />
-                                            {w["label"]}
-                                        </button>
-                                    }}
-                                </div>
-                                <p className="text-xs text-muted-foreground">
-                                    These selections do not connect an app. They tell the team which health apps to consider next.
-                                </p>
-                            </Field>
+
                         </div>;
                     }   }
                 </div>

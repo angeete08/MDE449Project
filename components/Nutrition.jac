@@ -317,7 +317,7 @@ def:pub Nutrition(
                         <h2>Today's food log</h2>
                         <div className="food-lookup">
                             <label>
-                                Look up calories (no cloud needed)
+                                Look up calories (no cloud needed; server required)
                                 <Input
                                     maxLength="80"
                                     value={search}

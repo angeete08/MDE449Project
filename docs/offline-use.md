@@ -4,7 +4,7 @@
 
 1. Deploy a production build with Jac 0.37.21 over a stable HTTPS origin (localhost is suitable for development). Run `jac install`, then `jac run --no-dev`. Development/HMR mode is not an offline deployment.
 2. Sign in and finish your profile. Open **Offline workspace** at `/offline`.
-3. Wait for the message that offline app files are cached, enable the device-storage checkbox, and choose **Save my account for offline use**. The cached app files do not include personal account data; the checkbox explicitly permits a readable local copy of workouts, logs and health summaries.
+3. Wait for the message that offline app files are cached, enable the device-storage checkbox, and choose **Save my account for offline use**. The cached app files do not include personal account data; the checkbox explicitly permits a readable local copy of workouts and activity logs.
 4. Install to the home screen. The manifest now launches `/offline`; an existing installation may need reinstalling to adopt the new launch URL.
 5. Export a device backup. The file contains personal fitness data; keep it somewhere appropriate.
 
@@ -16,7 +16,7 @@ After this preparation the laptop can be asleep, switched off, or on another net
 - Rate workouts and adapt later unlogged workouts of the same type. Completed workouts remain unchanged. Future workouts cannot be rated.
 - Archive the current week and generate subsequent weeks using the same portable Jac schedule rules as the server. Previously selected meal ideas are retained.
 - Enter or replace daily activity totals; change the weekly minutes goal; calculate weekly progress and active-day streaks.
-- View saved meals, health summary and archived plans.
+- View saved meal ideas and archived plans.
 - Generate current or archived plan PDFs.
 - Get the optional three-minute movement-break suggestion from entered sitting time.
 - Export and restore a JSON device backup containing the snapshot and local edits.
@@ -25,7 +25,7 @@ The local working view includes unsynced changes immediately. They are listed as
 
 ## Needs a connection
 
-Initial account setup and download, sign-in, editing profile/preferences, Gemini Coach answers, external recipe/workout videos, live Apple Health sync, and exchanging changes with other devices. There is no on-device AI model or direct browser access to HealthKit. Offline health values are saved summaries, not live measurements.
+Initial account setup and download, sign-in, editing profile/preferences, Gemini Coach answers, external recipe/workout videos, and exchanging changes with other devices. There is no on-device AI model. Health/HealthKit integration has been retired.
 
 ## Reconnecting
 
@@ -39,7 +39,7 @@ Retries recognize already-applied values. Acknowledged changes are saved into th
 - Anyone using this browser can read the saved copy. **Erase device copy** removes it and unsynced drafts. Logging out removes it too, with confirmation if drafts are pending. Clearing server data through the dashboard also clears that browser's copy. Copies on other offline devices cannot be remotely erased while disconnected.
 - Storage can fill or be evicted. Private browsing, clearing site data, removing an app, or changing the deployment origin may lose access to the copy. Export backups; do not treat browser storage as a guaranteed permanent backup.
 - Restoring a backup replaces local state, not server data. Sync still requires the original account.
-- A generated Workbox worker caches only public JS/CSS/fonts and the anonymous app shell. It does not cache API responses, credentials, or health endpoints. Personal snapshots are stored only by the explicit save action.
+- A generated Workbox worker caches only public JS/CSS/fonts and the anonymous app shell. It does not cache API responses or credentials. Personal snapshots are stored only by the explicit save action.
 - Updates wait rather than forcibly reloading an open editing session. When an update is ready, save drafts, close all Stride tabs/windows, and reopen while connected.
 
 ## Implementation

@@ -185,7 +185,7 @@ def:pub OfflineApp() -> JsxElement {
             <Link to="/mobile">Live dashboard / sign in</Link>
         </header>
         <p role="status" aria-live="polite">{message}</p>
-        <label><input type="checkbox" checked={consent} onChange={lambda (e: any) { consent = e.target.checked; }}/>Allow an offline copy on this device. Anyone using this browser can read my saved workouts, activity and health summary.</label>
+        <label><input type="checkbox" checked={consent} onChange={lambda (e: any) { consent = e.target.checked; }}/>Allow an offline copy on this device. Anyone using this browser can read my saved workouts and activity.</label>
         <div className="offline-actions">
             <button disabled={busy or not online or (not doc and not consent)} onClick={save_copy}>{"Refresh device copy" if doc else "Save my account for offline use"}</button>
             {doc and <button disabled={busy or not online} onClick={sync}>Sync drafts</button>}
@@ -251,7 +251,7 @@ def:pub OfflineApp() -> JsxElement {
                     <button onClick={lambda { show_break = sitting.isdigit() and 60 <= int(sitting) <= 1440; message = "A break is suggested at 60–1440 minutes of entered sitting time."; }}>Check break</button>
                     {show_break and <p>1 minute: stand or change position comfortably. 1 minute: gentle shoulder rolls. 1 minute: easy walking or seated ankle circles. Skip movements that feel uncomfortable.</p>}
                 </section>
-                <p>Sign-in, profile changes, AI Coach, videos and live Apple Health sync need a connection. Your local workouts, meals, logs, goals, history, next-week planning and PDF export do not. No automatic background syncing occurs.</p>
+                <p>Sign-in, profile changes, AI Coach and videos need a connection. Your saved workouts, meal ideas, activity logs, goals, history, next-week planning and PDF export work locally. Food logging requires the server. No automatic background syncing occurs.</p>
             </>
         }
     </main>;

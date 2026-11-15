@@ -6,7 +6,7 @@
 
 An online, installable Progressive Web App is the best fit for the requested lightweight iPhone/Android app. It reuses Stride's Jac/React UI, authentication and server APIs. A native React Native implementation would require replacing the DOM/Radix UI; a WeChat Mini Program introduces a different platform without meeting the requested general phone scope.
 
-Apple Health continues to use the existing Swift companion. This web app does not read HealthKit directly. Offline editing, background sync, push notifications and Android health integration are not implemented. Loading and saving require a reachable server. No service worker caches personal account or health responses.
+Health/HealthKit and the Swift companion have been retired. This web app does not read HealthKit directly. Offline editing, background sync, push notifications and Android health integration are not implemented. Loading and saving require a reachable server. No service worker caches personal account or health responses.
 
 ## Branch and reused work
 

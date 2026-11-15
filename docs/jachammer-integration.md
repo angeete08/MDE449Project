@@ -1,3 +1,5 @@
+> Historical integration record. Health/HealthKit has since been retired; see README.md for current launch capabilities.
+
 # JacHammer integration, October 25, 2026
 
 ## Scope agreed with the team
