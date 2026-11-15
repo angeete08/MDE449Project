@@ -1,5 +1,4 @@
 import from .offline_store { clear_for_logout, erase_offline, read_offline }
-import from .MobileAccess { MobileAccess }
 import from "@jac/runtime" { Link, useNavigate, jacLogout }
 import from "@hugeicons/react" { HugeiconsIcon }
 import from "@hugeicons/core-free-icons" {
@@ -43,6 +42,11 @@ import from ..services.stride {
 }
 import from .Nutrition { Nutrition }
 import from .ChatCoach { ChatCoach }
+import from .ChatHistory { ChatHistory }
+import from .WorkoutChecklist { WorkoutChecklist }
+import from .ProgressCalendar { ProgressCalendar }
+import from .Walkthrough { Walkthrough }
+import from ..services.stride { set_exercise_completed }
 import from ..pdf_export { download_plan_pdf }
 
 # All date comparisons and week totals use this browser-local calendar date.
@@ -70,6 +74,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
     has loading: bool = True,
         busy: bool = False,
         log_open: bool = False;
+    has show_tour: bool = False;
     has tab: str = "today",
         message: str = "",
         goal: str = "150",
@@ -87,6 +92,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
     async def refresh() {
         profile = await get_profile();
         if profile is not None {
+            show_tour = not profile.walkthrough_seen;
             results: any = await Promise.all([
                 get_plan(),
                 get_logs(),
@@ -113,6 +119,17 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
             loading = False;
             log_date = local_today();
         }
+    }
+
+    async def toggle_exercise(day: int, exercise: int, checked: bool) {
+        if busy { return; }
+        busy = True;
+        try {
+            plan = await set_exercise_completed(str(plan_state["week_id"]), day, exercise, checked, local_today());
+            plan_state = await get_plan_state();
+            message = "Exercise completion saved. Estimated calories updated.";
+        } except Exception { message = "Could not save completion. Reload if your workout week changed."; }
+        finally { busy = False; }
     }
 
     async def handle_feedback(day_id: str, rating: str) {
@@ -304,6 +321,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
 
     return
         <div className={"stride-dashboard min-h-svh bg-muted/40" + (" stride-mobile-version" if mobile else "")}>
+            {show_tour and <Walkthrough onClose={lambda { show_tour = False; }}/>}
             <header
                 className="sticky top-0 z-20 border-b bg-background/90 backdrop-blur"
             >
@@ -315,6 +333,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                         <span>Stride</span>
                     </Link>
                     <span className="text-sm text-muted-foreground">{p.name}</span>
+                    <button type="button" className="quick-tour-button" onClick={lambda { show_tour = True; }}>Quick tour</button>
                     <div className={"ml-auto flex flex-wrap gap-2" + (" stride-mobile-actions" if mobile else "")}>
                         <Link to={"/mobile-onboarding" if mobile else "/onboarding"}>
                             <Button variant="outline" size="sm">
@@ -370,7 +389,6 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                     >
                         {message}
                     </p>}
-                <MobileAccess mobile={mobile}/>
                 <Tabs value={tab} onValueChange={lambda (v: str) { tab = v; }}>
                     <TabsList className={"flex flex-wrap h-auto" + (" stride-mobile-tabs" if mobile else "")}>
                         <TabsTrigger value="today">Today</TabsTrigger>
@@ -382,7 +400,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                     <TabsContent value="coach" className="pt-2">
                         <Card>
                             <CardContent className="pt-6">
-                                <ChatCoach/>
+                                <ChatCoach onPlanSaved={refresh}/>
                             </CardContent>
                         </Card>
                     </TabsContent>
@@ -538,29 +556,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                             </CardHeader>
                             <CardContent className="flex flex-col gap-3">
                                 {if today is not None {
-                                    for e in today.exercises {
-                                        <a
-                                            key={e["name"]}
-                                            className="text-sm text-primary underline"
-                                            href={"https://www.youtube.com/results?search_query="
-                                                + encodeURIComponent(
-                                                    e["name"] + " exercise tutorial"
-                                                )}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            {e["name"]
-                                                + " · "
-                                                + (
-                                                    str(e.get("duration")) + " min"
-                                                        if e.get("duration")
-                                                        else str(e["sets"])
-                                                            + " × "
-                                                            + str(e["reps"])
-                                                )
-                                                + " ↗"}
-                                        </a>
-                                    }
+                                    <WorkoutChecklist exercises={today.exercises} completed={today.completed} locked={busy or today.date > local_today()} onToggle={lambda (exercise: int, checked: bool) { toggle_exercise((today as PlanDay).order, exercise, checked); }}/>
                                     if today.is_rest {
                                         <p>
                                             Rest and recover. Optional gentle stretching if it feels good.
@@ -654,6 +650,12 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                         </Card>
                     </TabsContent>
                     <TabsContent value="plan" className="flex flex-col gap-4 pt-2">
+                        {p.health_conditions.strip() and <aside className="injury-reminder" role="note">
+                            <strong>Make room for how you feel</strong>
+                            <p>{"Your note: “" + p.health_conditions + "”. Adjust the effort, repetitions or pace, take breaks, or skip a movement as needed. These recommendations do not account for your injury. Stop if a movement hurts."}</p>
+                            <Link to={"/mobile-onboarding" if mobile else "/onboarding"}>Edit your note</Link>
+                        </aside>}
+                        <ProgressCalendar state={plan_state}/>
                         <div
                             className="flex flex-wrap items-center justify-between gap-3"
                         >
@@ -697,8 +699,8 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                                                 {"Rest"
                                                     if d.is_rest
                                                     else (
-                                                        "Logged"
-                                                            if d.feedback
+                                                        "Complete"
+                                                            if len(d.completed) == len(d.exercises)
                                                             else "Workout"
                                                     )}
                                             </Badge>
@@ -708,20 +710,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="flex flex-col gap-3">
-                                        {for (i, e) in enumerate(d.exercises) {
-                                            <a
-                                                key={e["name"]}
-                                                className="text-sm text-primary underline"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                href={"https://www.youtube.com/results?search_query="
-                                                    + encodeURIComponent(
-                                                        e["name"] + " exercise tutorial"
-                                                    )}
-                                            >
-                                                {d.details[i] + " ↗"}
-                                            </a>
-                                        }}
+                                        <WorkoutChecklist exercises={d.exercises} completed={d.completed} locked={busy or d.date > local_today()} onToggle={lambda (exercise: int, checked: bool) { toggle_exercise(d.order, exercise, checked); }}/>
                                         {if not d.is_rest
                                             and not d.feedback
                                             and d.date <= local_today() {
@@ -818,6 +807,8 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                         </p>
                     </TabsContent>
                     <TabsContent value="history" className="flex flex-col gap-4 pt-2">
+                        <ChatHistory/>
+                        <ProgressCalendar state={plan_state}/>
                         <h2 className="text-lg font-semibold">Previous weeks</h2>
                         {if not plan_state.get("history", []) {
                             <p className="text-sm text-muted-foreground">
@@ -960,7 +951,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                         </Field>
                         <Field>
                             <FieldLabel htmlFor="log-calories">
-                                Calories burned (0–20000)
+                                Additional activity kcal (0–20000; exclude checked workouts)
                             </FieldLabel>
                             <Input
                                 id="log-calories"

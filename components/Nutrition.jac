@@ -1,3 +1,4 @@
+import from .PhotoFoodReview { PhotoFoodReview }
 import from ..services.nutrition { daily_food, analyze_food, log_food, set_consumed }
 import from ..services.food_lookup { lookup_food }
 import from ..services.stride { PlanDay, DailyLog }
@@ -68,14 +69,15 @@ def:pub Nutrition(
     done = 0;
     burned = 0;
     for workout in plan {
-        if workout.date == day and workout.feedback and not workout.is_rest {
-            done += 1;
+        if workout.date == day and not workout.is_rest {
+            done += 1 if len(workout.completed) == len(workout.exercises) else 0;
+            burned += workout.calories;
         }
     }
     for log in logs {
         if log.date == day {
             done += log.extra_activities or 0;
-            burned = log.calories_burned;
+            burned += log.calories_burned;
         }
     }
     net = intake - burned;
@@ -217,7 +219,7 @@ def:pub Nutrition(
         <section className="nutrition">
             {if photos {
                 <div className="nutrition-panel">
-                    <h2>Got your nutritions?</h2>
+                    <h2>Meal photo estimates</h2>
                     <p>
                         Choose a meal or snack photo to estimate its nutrients and calories with Gemini.
                     </p>
@@ -310,7 +312,7 @@ def:pub Nutrition(
                             </div>
                         </div>
                         <small>
-                            All values in kcal. Energy out uses your logged calories burned.
+                            All values in kcal. Energy out combines checked workout estimates and separately logged additional activity. Do not enter checked workouts again in your activity energy total.
                         </small>
                     </div>
                     <div className="nutrition-panel">
@@ -434,15 +436,7 @@ def:pub Nutrition(
                                     + str(row["calories"])
                                     + " kcal"}
                             </p>
-                            <Button
-                                variant="outline"
-                                disabled={working}
-                                onClick={lambda { toggle(row); }}
-                            >
-                                {"Remove from today’s intake"
-                                    if row["consumed"]
-                                    else "Add to today’s intake"}
-                            </Button>
+                            <PhotoFoodReview day={day} row={row} onSaved={reload}/>
                         </article>
                     }}
                 </div>}

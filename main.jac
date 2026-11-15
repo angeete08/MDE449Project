@@ -1,4 +1,4 @@
-import from services.nutrition { daily_food, analyze_food, log_food, set_consumed }
+import from services.nutrition { daily_food, analyze_food, log_food, set_consumed, review_food }
 import from coach.coach_profile { CoachProfile, ProfileResult, validate_profile }
 import from coach.coach_media { PhotoResult, prepare_photo }
 import from coach.coach_provider { ProviderInfo, provider_info }
@@ -9,6 +9,8 @@ import from services.offline { offline_snapshot, sync_offline_change }
 import from .components.OfflineApp { OfflineApp }
 import from .components.OfflineSetup { OfflineSetup }
 import from services.food_lookup { lookup_food }
+import from services.chat { get_chat_history, delete_chat_history, send_saved_coach }
+import from coach.coach_routine { preview_coach_routine, save_coach_routine }
 import from services.stride {
     save_profile,
     get_profile,
@@ -27,6 +29,8 @@ import from services.stride {
     clear_account_data,
     ask_coach,
     coach_available,
+    set_exercise_completed,
+    finish_walkthrough,
     Profile,
     PlanDay,
     DailyLog,

@@ -1,3 +1,5 @@
+> **Local November 16 review build:** see [milestone behavior](docs/nov16-review.md) and [validation](docs/nov16-validation.md). Changes in this checkout are pending user review before any push to dev.
+
 # Stride — Personalized Fitness Trainer
 
 **University of Michigan · EECS 449 · Group 10 · Team CHARS**  
@@ -91,7 +93,7 @@ Important limitations:
 - The Coach does **not** edit your plan, activity logs, or profile.
 - It is informational, not a medical professional or a substitute for individualized medical advice.
 - Its workout context comes from the **currently saved plan**, which may be for an earlier week until you open/generate the current week.
-- Recent conversation history is sent with new questions, but chat messages are not saved to your Stride account.
+- Successful chat exchanges are saved to your account for the current Monday–Sunday week (America/Detroit), shown and deletable in History. Earlier weeks are deleted on your next authenticated account visit. The newest six exchanges are supplied as bounded model context; photos are not included.
 - Questions, recent chat history, and limited fitness preferences are sent to Google for response generation. Stored health notes are not included automatically. Avoid putting sensitive medical information in chat messages.
 
 ### Meals and activity tracking
@@ -171,4 +173,4 @@ Open `/mobile` for the phone layout. The same account and backend power phone an
 
 ## Photo and goal studio (Phase 3)
 
-The authenticated Coach tab now also contains optional camera/upload previews, tentative body-region observations and editable goal illustrations with an Other dialogue. These temporary choices do not modify saved workouts or offline history. The studio can use local Ollama for testing or a configured HTTPS API; the existing Gemini conversation retains its separate configuration. See [coach setup, privacy and verification](coach/README.md). Use `jac run --no-dev` for photo testing on loopback. Reviewed exercises and the progress calendar remain later phases.
+The authenticated Coach tab now also contains optional camera/upload previews, tentative body-region observations and editable goal illustrations with an Other dialogue. Photo drafts stay temporary. Confirmed preferences can generate exercises from Stride's existing catalog; review the preview and explicitly save a future week. Existing saved weeks are never overwritten. The studio can use local Ollama for testing or a configured HTTPS API; the existing Gemini conversation retains its separate configuration. See [coach setup, privacy and verification](coach/README.md). Use `jac run --no-dev` for photo testing on loopback. The local review build adds exercise checkboxes, disclosed calorie estimates, and progress calendars for current, archived and saved future weeks.

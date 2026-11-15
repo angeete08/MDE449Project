@@ -2,7 +2,24 @@ import base64;
 import hashlib;
 import json;
 import litellm;
-import from services.stride { FoodEntry, calendar_date, coach_api_key, require_profile }
+import from services.stride { FoodEntry, calendar_date, coach_api_key, require_profile, MUTATION_LOCK }
+
+def:priv review_food(day: str, token: str, title: str, calories: int, consumed: bool) -> bool {
+    if not isinstance(title, str) or not title.strip() or len(title.strip()) > 100 or not isinstance(calories, int) or isinstance(calories, bool) or not 0 <= calories <= 20000 or not isinstance(consumed, bool) {
+        raise ValueError("Enter a food name and whole calories from 0 to 20000.");
+    }
+    with MUTATION_LOCK {
+        for item in entries(day) {
+            if item.token == token {
+                item.title = title.strip();
+                item.calories = calories;
+                item.consumed = consumed;
+                return True;
+            }
+        }
+        raise ValueError("Food entry unavailable.");
+    }
+}
 
 def entries(day: str) -> list[FoodEntry] {
     require_profile();

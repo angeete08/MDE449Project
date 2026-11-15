@@ -1,5 +1,6 @@
 import from "virtual:pwa-register" { registerSW }
 import from "@jac/runtime" { Link }
+import from .MobileAccess { MobileAccess }
 
 # Only public application assets and the anonymous /offline shell are cached.
 # Authenticated POST responses are never intercepted by Workbox.
@@ -14,6 +15,7 @@ def:pub OfflineSetup() -> JsxElement {
     }
     return <div className="stride-offline-banner">
         <Link to="/offline">Offline workspace</Link>
+        <MobileAccess/>
         {status and <span role="status">{status}</span>}
     </div>;
 }
