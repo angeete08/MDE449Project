@@ -1,5 +1,6 @@
 import copy;
 import from planner { make_state, generate_week, create_plan, update_feedback, restore_plan, meal_ideas }
+import from planning_rules { meal_catalog }
 
 def profile(goal: str = "muscle", days: int = 3, equipment: str = "bodyweight", diet: str = "vegetarian", experience: str = "beginner") -> dict[str, any] {
     return {"goal": goal, "days": days, "equipment": equipment, "diet": diet, "experience": experience, "calories": 2000};
@@ -9,13 +10,14 @@ test "all profile combinations" {
     count = 0;
     for goal in ["active", "lose", "muscle"] {
         for experience in ["beginner", "intermediate", "advanced"] {
-            for days in range(1, 7) {
+            for days in range(1, 8) {
                 for equipment in ["bodyweight", "dumbbells", "gym"] {
-                    for diet in ["none", "vegetarian", "keto", "protein"] {
+                    for diet in ["none", "vegetarian", "vegan", "keto", "protein", "halal", "kosher"] {
                         state = make_state(profile(goal, days, equipment, diet, experience));
                         assert len(state["plan"]) == 7;
                         assert len([day for day in state["plan"] if not day["rest"]]) == days;
-                        assert state["plan"][6]["rest"];
+                        # Sunday rests, except in a seven-day week, where it is the light cardio session.
+                        assert state["plan"][6]["rest"] if days < 7 else state["plan"][6]["title"] == "Cardio & mobility";
                         assert len(state["meals"]) == 3;
                         for day in state["plan"] {
                             for exercise in day["exercises"] {
@@ -32,7 +34,32 @@ test "all profile combinations" {
             }
         }
     }
-    assert count == 648;
+    assert count == 1323;
+}
+
+test "new diets only suggest meals that fit them" {
+    animal = ["chicken", "turkey", "salmon", "tuna", "shrimp", "egg", "yogurt", "cheese", "milk", "butter", "feta"];
+    never = ["pork", "bacon", "ham", "wine", "beer", "rum"];
+    for (diet, banned) in [("vegan", animal + never), ("halal", never), ("kosher", never + ["shrimp", "prawn", "shellfish", "crab", "lobster"])] {
+        meals = meal_catalog(diet);
+        assert len(meals) >= 6;
+        for meal in meals {
+            text = (meal["name"] + " " + meal["detail"]).lower().replace("oat milk", "oat-drink").replace("peanut butter", "peanut spread");
+            for word in banned { assert word not in text , diet + ": " + meal["name"] + " has " + word; }
+            if diet == "kosher" and ("chicken" in text or "turkey" in text) {
+                for dairy in ["yogurt", "cheese", "milk", "butter", "feta"] { assert dairy not in text.replace("no dairy", "") , meal["name"]; }
+            }
+        }
+        for calories in [1200, 2000, 3000] { assert len(meal_ideas(diet, calories)) == 3; }
+    }
+}
+
+test "seven training days keep Sunday light" {
+    for goal in ["active", "lose", "muscle"] {
+        week = generate_week(profile(goal, 7, "dumbbells", "vegan"));
+        assert all([not day["rest"] for day in week]);
+        assert week[6]["title"] == "Cardio & mobility";
+    }
 }
 
 test "feedback preserves past and logged workouts" {
@@ -49,7 +76,7 @@ test "feedback preserves past and logged workouts" {
 }
 
 test "invalid inputs are rejected" {
-    for (key, value) in [("days", 0), ("days", 7), ("days", 2.5), ("calories", -1), ("calories", True), ("diet", "invalid")] {
+    for (key, value) in [("days", 0), ("days", 8), ("days", 2.5), ("calories", -1), ("calories", True), ("diet", "invalid")] {
         p = profile(); p[key] = value;
         assert not create_plan(p)["ok"];
     }

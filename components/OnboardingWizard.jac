@@ -39,8 +39,11 @@ glob LEVELS: list[str] = ["beginner", "intermediate", "advanced"];
 glob DIETS: list[dict[str, any]] = [
          {"id": "none", "label": "No restriction"},
          {"id": "vegetarian", "label": "Vegetarian"},
+         {"id": "vegan", "label": "Vegan"},
          {"id": "keto", "label": "Keto"},
          {"id": "high_protein", "label": "High protein"},
+         {"id": "halal", "label": "Halal"},
+         {"id": "kosher", "label": "Kosher"},
 
      ];
 glob EQUIPMENT: list[str] = [
@@ -154,7 +157,7 @@ def:pub OnboardingWizard(mobile: bool = False) -> JsxElement {
             );
             nav("/mobile" if mobile else "/app");
         } except Exception {
-            error = "Could not save. Use 1–6 workout days, a calorie target of 1–10000 and enable account storage.";
+            error = "Could not save. Use 1–7 workout days, a calorie target of 1–10000 and enable account storage.";
         } finally {
             saving = False;
         }
@@ -269,7 +272,7 @@ def:pub OnboardingWizard(mobile: bool = False) -> JsxElement {
                                     How often do you want to train?
                                 </h1>
                                 <p className="text-sm text-muted-foreground">
-                                    We schedule the rest of the week as recovery days.
+                                    We schedule the rest of the week as recovery days. With 7 days, Sunday is a light walk-and-mobility session.
                                 </p>
                             </div>
                             <Field>
@@ -278,7 +281,7 @@ def:pub OnboardingWizard(mobile: bool = False) -> JsxElement {
                                     id="days"
                                     type="number"
                                     min="1"
-                                    max="6"
+                                    max="7"
                                     value={days_per_week}
                                     onChange={lambda (e: ChangeEvent) { days_per_week = e.target.value; }}
                                     className="h-10"

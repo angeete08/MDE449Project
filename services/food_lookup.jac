@@ -21,7 +21,7 @@ def food_table -> list[dict[str, any]] {
 
 def meal_table -> list[dict[str, any]] {
     meals: dict[str, dict[str, any]] = {};
-    for diet in ["none", "vegetarian", "keto", "protein"] {
+    for diet in ["none", "vegetarian", "vegan", "keto", "protein", "halal", "kosher"] {
         for meal in meal_catalog(diet) { meals[meal["name"].lower()] = meal; }
     }
     return list(meals.values());

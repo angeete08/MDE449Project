@@ -1,10 +1,10 @@
 """Portable planning rules shared by the server and offline browser."""
 def validate_profile(p: dict[str, any]) -> dict[str, any] {
-    choices = {"goal": ["active", "muscle", "lose"], "experience": ["beginner", "intermediate", "advanced"], "equipment": ["bodyweight", "dumbbells", "gym"], "diet": ["none", "vegetarian", "keto", "protein"]};
+    choices = {"goal": ["active", "muscle", "lose"], "experience": ["beginner", "intermediate", "advanced"], "equipment": ["bodyweight", "dumbbells", "gym"], "diet": ["none", "vegetarian", "vegan", "keto", "protein", "halal", "kosher"]};
     for (key, allowed) in choices.items() {
         if p.get(key) not in allowed { raise ValueError("Please choose a valid " + key + "."); }
     }
-    for (key, low, high) in [("days", 1, 6), ("calories", 1, 10000)] {
+    for (key, low, high) in [("days", 1, 7), ("calories", 1, 10000)] {
         value = p.get(key);
         if not isinstance(value, int) or isinstance(value, bool) or value < low or value > high {
             raise ValueError("Enter a whole-number " + key + " value between " + str(low) + " and " + str(high) + ".");
@@ -23,7 +23,7 @@ def validate_profile(p: dict[str, any]) -> dict[str, any] {
 
 def generate_week(p: dict[str, any], strength_offset: int = 0, cardio_offset: int = 0) -> list[dict[str, any]] {
     validate_profile(p);
-    schedule = {1: [0], 2: [0, 3], 3: [0, 2, 4], 4: [0, 1, 3, 5], 5: [0, 1, 2, 4, 5], 6: [0, 1, 2, 3, 4, 5]};
+    schedule = {1: [0], 2: [0, 3], 3: [0, 2, 4], 4: [0, 1, 3, 5], 5: [0, 1, 2, 4, 5], 6: [0, 1, 2, 3, 4, 5], 7: [0, 1, 2, 3, 4, 5, 6]};
     slots = schedule[p["days"]];
     lifts = {
         "bodyweight": [["Chair squat", "Incline push-up", "Glute bridge", "Bird dog"], ["Reverse lunge", "Wall push-up", "Calf raise", "Dead bug"]],
@@ -39,6 +39,8 @@ def generate_week(p: dict[str, any], strength_offset: int = 0, cardio_offset: in
         }
         n = slots.index(i);
         cardio = (n % 2 == 1) if p["goal"] == "lose" else ((n % 3 == 1) if p["goal"] == "active" else (n % 4 == 3));
+        # A seven-day week has no rest day, so Sunday is always the light walk-and-mobility session.
+        if n == 6 { cardio = True; }
         reps = max(6, min(16, 10 + strength_offset));
         duration = max(10, min(40, 20 + cardio_offset * 2));
         exercises: list[dict[str, any]] = [];
@@ -65,6 +67,14 @@ def meal_catalog(diet: str) -> list[dict[str, any]] {
             ("Edamame soba salad", 450, "Edamame, soba noodles, cabbage and sesame dressing; one bowl."),
             ("Bean and vegetable tacos", 510, "Beans, vegetables, cheese and three small tortillas.")
         ],
+        "vegan": [
+            ("Chickpea quinoa salad", 520, "Chickpeas, quinoa, vegetables and olive oil; one bowl."),
+            ("Tofu vegetable stir-fry", 560, "Tofu, brown rice and vegetables; one plate."),
+            ("Lentil grain bowl", 480, "Lentils, farro, greens and roasted vegetables; one bowl."),
+            ("Black bean sweet potato bowl", 510, "Black beans, sweet potato, corn and salsa; one bowl."),
+            ("Edamame soba salad", 450, "Edamame, soba noodles, cabbage and sesame dressing; one bowl."),
+            ("Peanut butter overnight oats", 430, "Oats, oat milk, banana and peanut butter; one jar.")
+        ],
         "keto": [
             ("Spinach egg skillet", 390, "Eggs, spinach, mushrooms and olive oil; one skillet."),
             ("Spinach and egg skillet", 390, "Two eggs, spinach, avocado and olive oil; one plate."),
@@ -82,6 +92,22 @@ def meal_catalog(diet: str) -> list[dict[str, any]] {
             ("Tuna white bean salad", 430, "Tuna, white beans, greens and lemon olive oil; one bowl."),
             ("Salmon quinoa bowl", 560, "Salmon, quinoa, roasted vegetables and herbs; one bowl."),
             ("Egg cottage cheese toast", 390, "Eggs, cottage cheese and whole-grain toast; one plate.")
+        ],
+        "halal": [
+            ("Chicken rice bowl", 580, "Halal-certified chicken breast, rice, beans and vegetables; one bowl."),
+            ("Salmon sweet potato plate", 590, "Salmon, sweet potato and a green vegetable; one plate."),
+            ("Tuna white bean salad", 430, "Tuna, white beans, greens and lemon olive oil; one bowl."),
+            ("Lentil grain bowl", 480, "Lentils, farro, greens and roasted vegetables; one bowl."),
+            ("Chickpea quinoa salad", 520, "Chickpeas, quinoa, vegetables and olive oil; one bowl."),
+            ("Greek yogurt oat bowl", 410, "Yogurt, oats, berries and chia; one bowl.")
+        ],
+        "kosher": [
+            ("Chicken rice bowl", 580, "Kosher chicken breast, rice, beans and vegetables, with no dairy; one bowl."),
+            ("Chicken avocado salad", 510, "Kosher chicken, greens, avocado and olive oil, with no dairy; one bowl."),
+            ("Salmon quinoa bowl", 560, "Salmon, quinoa, roasted vegetables and herbs; one bowl."),
+            ("Tuna white bean salad", 430, "Tuna, white beans, greens and lemon olive oil; one bowl."),
+            ("Lentil grain bowl", 480, "Lentils, farro, greens and roasted vegetables; one bowl."),
+            ("Greek yogurt oat bowl", 410, "Yogurt, oats, berries and chia; one bowl.")
         ],
         "none": [
             ("Peanut butter overnight oats", 430, "Oats, milk, banana and peanut butter; one jar."),
