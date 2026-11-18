@@ -153,7 +153,7 @@ def:priv save_profile(
         if goal not in ["lose_weight", "gain_muscle", "stay_active"] {
             raise ValueError("Choose a valid goal.");
         }
-        if diet not in ["none", "vegetarian", "keto", "high_protein"] {
+        if diet not in ["none", "vegetarian", "vegan", "keto", "high_protein", "halal", "kosher"] {
             raise ValueError("Choose a valid diet.");
         }
         if any(

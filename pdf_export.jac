@@ -10,7 +10,7 @@ def:pub build_plan_pdf(state: dict[str, any]) -> any {
     accent = "#d9f17c";
     goal = {"active": "Stay active", "muscle": "Gain muscle", "lose": "Lose weight"}[profile["goal"]];
     equipment = {"bodyweight": "Bodyweight", "dumbbells": "Dumbbells", "gym": "Full gym"}[profile["equipment"]];
-    diet = {"none": "No restriction", "vegetarian": "Vegetarian", "keto": "Keto", "protein": "High protein"}[profile["diet"]];
+    diet = {"none": "No restriction", "vegetarian": "Vegetarian", "vegan": "Vegan", "keto": "Keto", "protein": "High protein", "halal": "Halal", "kosher": "Kosher"}[profile["diet"]];
     experience = {"beginner": "Beginner", "intermediate": "Intermediate", "advanced": "Advanced"}[profile["experience"]];
     ratings = {"easy": "Too easy", "right": "Just right", "hard": "Too hard"};
 

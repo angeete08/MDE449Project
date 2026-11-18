@@ -384,7 +384,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                                 + " workouts per week · "
                                 + str(p.calorie_target)
                                 + " kcal daily target · "
-                                + p.diet.replace("_", " ")}
+                                + ("no diet restriction" if p.diet == "none" else p.diet.replace("_", " ") + " diet")}
                         </p>
                     </div>
                     <Badge variant="secondary">
@@ -814,7 +814,7 @@ def:pub DashboardApp(mobile: bool = False) -> JsxElement {
                             }}
                         </div>
                         <p className="text-sm text-muted-foreground">
-                            Meal ideas are examples, not a complete daily menu. They do not add up to your user-entered calorie target. Recipe videos may use different portions or ingredients.
+                            Meal ideas are examples, not a complete daily menu. They do not add up to your user-entered calorie target. Recipe videos may use different portions or ingredients.{" " + ("Halal and kosher ideas avoid restricted ingredients, but whether a meal is halal or kosher depends on certified ingredients and preparation." if p.diet in ["halal", "kosher"] else "")}
                         </p>
                     </TabsContent>
                     <TabsContent value="history" className="flex flex-col gap-4 pt-2">
